@@ -4,14 +4,12 @@ inventory = []
 equipped = ['None', 'None', 'None']
 # Options that the player can make at this time
 valid = []
-worldType = 'overworld'
 
-def verify(action):
-    for potential in valid:
-        if (action == potential):
-            return action
-        else:
-            return 'invalid'
+def verify(quote, action):
+    print('Your options:')
+    for i in valid:
+        print(i)
+    action = input(quote)
 
 print('You wake up in the middle of the woods.')
 print('You do not recognize any of your surroudings, though a bronze shortsword nearby catches your eye. [shortsword]')
@@ -21,7 +19,3 @@ valid.append('onward')
 print('Your options:')
 for i in valid:
     print(i)
-action = input('What do you do? ')
-verify(action)
-if (action == 'invalid'):
-    input('That command is invalid. Try again. ')
