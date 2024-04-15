@@ -18,10 +18,9 @@ def verify(question):
                 print(chosen)
 
 print('You wake up in the middle of the woods.')
-print('You do not recognize any of your surroudings, though a bronze shortsword nearby catches your eye. [shortsword]')
-valid.append('shortsword')
-print('You feel that you have almost no other options other than to just venture onwards. [onward]')
-valid.append('onward')
+print('You do not recognize any of your surroudings, though a silver dagger nearby catches your eye. [dagger]')
+valid.append('dagger')
+print('The vast forest in front of you beckons you... [onward]')
 print('Your options:')
 for i in valid:
     print(i)
