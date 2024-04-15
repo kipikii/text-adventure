@@ -5,11 +5,17 @@ equipped = ['None', 'None', 'None']
 # Options that the player can make at this time
 valid = []
 
-def verify(quote, action):
-    print('Your options:')
-    for i in valid:
-        print(i)
-    action = input(quote)
+def action():
+    pass
+
+def verify(question):
+    correct = False
+    while (correct == False):
+        chosen = input(question)
+        for i in valid:
+            if (chosen == i):
+                correct = True
+                print(chosen)
 
 print('You wake up in the middle of the woods.')
 print('You do not recognize any of your surroudings, though a bronze shortsword nearby catches your eye. [shortsword]')
