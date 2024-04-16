@@ -1,0 +1,2 @@
+- create roguelike-events
+- create functioning combat system

@@ -5,9 +5,6 @@ equipped = ['None', 'None', 'None']
 # Options that the player can make at this time
 valid = []
 
-def action():
-    pass
-
 def verify(question):
     correct = False
     while (correct == False):
