@@ -1,10 +1,6 @@
-weaponstr = {
-    "dagger": 1,
-    "broadsword": 2
+weaponStats = {
+    # stats go [str, dex]
+    "dagger": [1, 1],
+    "broadsword": [3, 0],
+    "shortsword": [2, 1]
 }
-
-weapondex = {
-    "dagger": 1,
-    "broadsword": 0
-}
-
