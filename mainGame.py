@@ -10,4 +10,4 @@ spells = []
 # Passives that permanently affect the player
 blessings = []
 
-forest()
+forestOpening()
