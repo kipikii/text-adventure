@@ -1,3 +1,4 @@
 - create a way to easily make events
 - make equippable items
 - make gainable spells
+- add passives
