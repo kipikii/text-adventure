@@ -20,7 +20,7 @@ playerDEX = 5
 playerDEF = 0
 playerCharm = None
 
-valid = ["attack", "skill", "item", "run"]
+valid = ["attack", "skill", "item"]
 
 def verify(question):
     while (True):
