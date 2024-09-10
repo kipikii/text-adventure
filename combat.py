@@ -19,9 +19,16 @@ inventory = {
     "throwing knife": 2
 }
 
+skills = {
+    # "skill": mana cost
+    "double cut": 2
+}
+
 # player's placeholder stats
-playerHP = 10
-playerMaxHP = playerHP
+playerMaxHP = 10
+playerHP = playerMaxHP
+playerMaxMana = 5
+playerMana = playerMaxMana
 playerSTR = 2
 playerDEX = 1
 playerDEF = 0
@@ -29,7 +36,9 @@ playerCharm = None
 
 battlevalid = ["attack", "skill", "item", "a", "s", "i"]
 
-skills = [ ]
+skills = {
+    "double cut": 5
+    }
 
 def verify(question:str=None, allowed:list=None):
     while (True):
@@ -66,29 +75,28 @@ def doCombat(enemyName:str=None):
         enemySTR = 99
         enemyDEX = 99
         enemyDEF = 99
-        print("whoops, no enemy name . guess you're gonna fight god now.")
+        print("whoops, no enemy name. here's a god fight")
     else:
         enemyHP = stats[0]
         enemySTR = stats[1]
         enemyDEX = stats[2]
         enemyDEF = stats[3]
 
-    global inventory, playerHP, playerSTR, playerDEX, playerDEF, playerCharm
+    global inventory, skills, playerHP, playerSTR, playerDEX, playerDEF, playerCharm
 
     print("a " + enemyName + " appeared")
     # run routine while both sides are alive
     while (playerHP > 0 and enemyHP > 0):
-        print("[Your HP: " + str(playerHP) + " / " + str(playerMaxHP) + "]")
+        print("[Your HP: " + str(playerHP) + " / " + str(playerMaxHP) + "] [Your mana: " + str(playerMana)+ " / " + str(playerMaxMana) + "]")
         chosen = verify("what would you like to do? [attack, skill, item] ", battlevalid)
 
         # code for attacking
         if (chosen == "attack" or chosen == "a"):
             # get the percentage chance for the player to hit
             if (enemyDEX == 3):
-                hitChance = round(log(((playerDEX + 1) * (2.999999 / (enemyDEX + 1.0000001)))) * 40) + 10
+                hitChance = round(log(((playerDEX + 1) * (2.999999 / (enemyDEX + 1.0000001)))) * 40) + 20
             else:
-                hitChance = round(log(((playerDEX + 1) * (3 / (enemyDEX + 1.0000001)))) * 40) + 10
-            print(hitChance)
+                hitChance = round(log(((playerDEX + 1) * (3 / (enemyDEX + 1.0000001)))) * 40) + 20
             if (hitChance < 30):
                 hitChance = 30
             if (hitChance >= randint(1,100)):
@@ -100,10 +108,40 @@ def doCombat(enemyName:str=None):
                     print("you attacked the " + enemyName + " for 0 damage")
             else:
                 print("your attack missed")
+        
         # code for using skills
         elif (chosen == "skill" or chosen == "s"):
-            print("i'm definitely going to add skills")
-
+            print(" ")
+            print("your skills:")
+            for each in list(skills.keys()):
+                print(each + ": " + str(skills[each]))
+            allowed = list(skills.keys()) + ["back"]
+            chosen = verify("choose an skill to use, or type back to go back: ", allowed)
+            if (chosen == "back"):
+                continue
+# double cut
+            if (chosen == "double cut"):
+                if playerMana >= skills["double cut"]:
+                    if (enemyDEX == 3):
+                        hitChance = round(log(((playerDEX + 1) * (2.999999 / (enemyDEX + 1.0000001)))) * 40) + 20
+                    else:
+                        hitChance = round(log(((playerDEX + 1) * (3 / (enemyDEX + 1.0000001)))) * 40) + 20
+                    if (hitChance < 30):
+                        hitChance = 30
+                    if (hitChance >= randint(1,100)):
+                        for each in range(2):
+                            damage = round((playerSTR - enemyDEF) * (randint(90, 110)/100))
+                            if (damage >= 0):
+                                print("you attacked the " + enemyName + " for " + str(damage) + " damage")
+                                enemyHP -= damage
+                            else:
+                                print("you attacked the " + enemyName + " for 0 damage")
+                    else:
+                        print("your attack missed")
+                        break
+                else:
+                    print("insufficent mana")
+                    continue
         # code for using items
         elif (chosen == "item" or chosen == "i"):
             print(" ")
@@ -114,12 +152,12 @@ def doCombat(enemyName:str=None):
             for each in invKeys:
                 print(each + ": " + str(invValues[index]))
                 index += 1
-            index = None
             print(" ")
             allowed = invKeys + ["back"]
             chosen = verify("choose an item to use, or type back to go back: ", allowed)
             if (chosen == "back"):
                 continue
+#small potion of healing
             if (chosen == "small potion of healing"):
                 healAmount = randint(5, 10)
                 playerHP += healAmount
@@ -128,7 +166,7 @@ def doCombat(enemyName:str=None):
                 print("the small potion revitalizes you, healing you for " + str(healAmount) + " [" + str(playerHP) + "/" + str(playerMaxHP) + "]")
                 healAmount = None
                 changeInventory(chosen, -1)
-                
+#throwing knife
             elif (chosen == "throwing knife"):
                 damage = playerDEX + playerSTR
                 if (damage < 0):
@@ -146,7 +184,6 @@ def doCombat(enemyName:str=None):
                 hitChance = round(log(((enemyDEX + 1) * (2.999999 / (enemyDEX + 1.0000001)))) * 40) + 30
             else:
                 hitChance = round(log(((enemyDEX + 1) * (3 / (enemyDEX + 1.0000001)))) * 40) + 30
-            print(hitChance)
             if (hitChance >= randint(1,100)):
                 damage = round((enemySTR - playerDEF) * (randint(90, 110)/100))
                 if (damage >= 0):
