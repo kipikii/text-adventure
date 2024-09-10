@@ -15,24 +15,27 @@ monsters = {
 
 inventory = {
     # "item": quantity
-    "small potion of healing": 3,
+    "small potion of healing": 1,
     "throwing knife": 2
 }
 
 # player's placeholder stats
-playerHP = 15
+playerHP = 10
 playerMaxHP = playerHP
 playerSTR = 2
 playerDEX = 1
 playerDEF = 0
 playerCharm = None
 
-battlevalid = ["attack", "skill", "item", "a", "s", "i", None]
+battlevalid = ["attack", "skill", "item", "a", "s", "i"]
 
 skills = [ ]
 
-def verify(question, allowed):
+def verify(question:str=None, allowed:list=None):
     while (True):
+        if (allowed == None):
+            print("no given list for verify, returned statement")
+            return
         if (question == None):
             chosen = input("what will you do? ")
         else:
@@ -41,11 +44,34 @@ def verify(question, allowed):
             if (chosen == i):
                 return chosen
 
-def doCombat(enemyName):
-    enemyHP = stats[0]
-    enemySTR = stats[1]
-    enemyDEX = stats[2]
-    enemyDEF = stats[3]
+def changeInventory(item:str=None, change:int=None):
+    if (item == None):
+        print("not item given to changeInventory, returned statement")
+        return
+    if (change == None):
+        print("no change given to changeInventory, returned statement")
+        return
+    global inventory
+    if (item in list(inventory.keys())):
+        inventory[item] = (inventory.get(item)) + change
+    else:
+        inventory[item] = change
+    if (inventory[item] <= 0):
+        inventory.pop(item)
+
+def doCombat(enemyName:str=None):
+    if (enemyName == None):
+        enemyName = "god"
+        enemyHP = 9999
+        enemySTR = 99
+        enemyDEX = 99
+        enemyDEF = 99
+        print("whoops, no enemy name . guess you're gonna fight god now.")
+    else:
+        enemyHP = stats[0]
+        enemySTR = stats[1]
+        enemyDEX = stats[2]
+        enemyDEF = stats[3]
 
     global inventory, playerHP, playerSTR, playerDEX, playerDEF, playerCharm
 
@@ -56,12 +82,12 @@ def doCombat(enemyName):
         chosen = verify("what would you like to do? [attack, skill, item] ", battlevalid)
 
         # code for attacking
-        if (chosen == "attack" or chosen == "a" or chosen == None):
+        if (chosen == "attack" or chosen == "a"):
             # get the percentage chance for the player to hit
             if (enemyDEX == 3):
-                hitChance = round(log((playerDEX * (2.999999 / (enemyDEX + .0000001)))) * 40)
+                hitChance = round(log(((playerDEX + 1) * (2.999999 / (enemyDEX + 1.0000001)))) * 40) + 10
             else:
-                hitChance = round(log((playerDEX * (3 / (enemyDEX + .0000001)))) * 40)
+                hitChance = round(log(((playerDEX + 1) * (3 / (enemyDEX + 1.0000001)))) * 40) + 10
             print(hitChance)
             if (hitChance < 30):
                 hitChance = 30
@@ -74,7 +100,6 @@ def doCombat(enemyName):
                     print("you attacked the " + enemyName + " for 0 damage")
             else:
                 print("your attack missed")
-
         # code for using skills
         elif (chosen == "skill" or chosen == "s"):
             print("i'm definitely going to add skills")
@@ -91,8 +116,10 @@ def doCombat(enemyName):
                 index += 1
             index = None
             print(" ")
-            chosen = verify("choose an item to use: ", invKeys)
-            print("you used a " + chosen)
+            allowed = invKeys + ["back"]
+            chosen = verify("choose an item to use, or type back to go back: ", allowed)
+            if (chosen == "back"):
+                continue
             if (chosen == "small potion of healing"):
                 healAmount = randint(5, 10)
                 playerHP += healAmount
@@ -100,9 +127,7 @@ def doCombat(enemyName):
                     playerHP = playerMaxHP
                 print("the small potion revitalizes you, healing you for " + str(healAmount) + " [" + str(playerHP) + "/" + str(playerMaxHP) + "]")
                 healAmount = None
-                inventory.update({"small potion of healing": (inventory["small potion of healing"] - 1)})
-                if (inventory["small potion of healing"] <= 0):
-                    inventory.pop("small potion of healing")
+                changeInventory(chosen, -1)
                 
             elif (chosen == "throwing knife"):
                 damage = playerDEX + playerSTR
@@ -111,18 +136,16 @@ def doCombat(enemyName):
                 print("you chuck the throwing knife at the " + enemyName + ", dealing " + str(damage) + " damage")
                 enemyHP -= damage
                 damage = None
-                inventory.update({"throwing knife": (inventory["throwing knife"] - 1)})
-                if (inventory["throwing knife"] <= 0):
-                    inventory.pop("throwing knife")
+                changeInventory(chosen, -1)
 
         # if the enemy is alive, have them attack
         if (enemyHP > 0):
             print(" ")
             print("the " + enemyName + " attacks")
             if (playerDEX == 3):
-                hitChance = round(log((enemyDEX * (2.999999 / (enemyDEX + .0000001)))) * 40) + 30
+                hitChance = round(log(((enemyDEX + 1) * (2.999999 / (enemyDEX + 1.0000001)))) * 40) + 30
             else:
-                hitChance = round(log((enemyDEX * (3 / (enemyDEX + .0000001)))) * 40) + 30
+                hitChance = round(log(((enemyDEX + 1) * (3 / (enemyDEX + 1.0000001)))) * 40) + 30
             print(hitChance)
             if (hitChance >= randint(1,100)):
                 damage = round((enemySTR - playerDEF) * (randint(90, 110)/100))
@@ -147,9 +170,13 @@ while (True):
     enemyName, stats = choice(list(monsters.items()))
     doCombat(enemyName)
     print(" ")
+    print("you became slightly stronger")
     playerHP += 1
     playerMaxHP += 1
     playerSTR += 1
     playerDEX += 1
     playerDEF += 1
     print("as you defeat the beast, another creature leaps out at you")
+    if (playerMaxHP >= 100):
+        print("pick on someone your own size!")
+        doCombat()
