@@ -8,7 +8,7 @@ monsters = {
     # dex should be >= 0
     "wolf": [7, 2, 2, 0],
     "rat": [3, 1, 0, 0],
-    "imp": [25, 2, 10, -3],
+    "imp": [25, 2, 5, -3],
     #"giant spider": [30, 3, 6, 3],
     #"baslisk": [40, 7, 0, 5]
 }
@@ -29,6 +29,8 @@ playerCharm = None
 
 battlevalid = ["attack", "skill", "item", "a", "s", "i", None]
 
+skills = [ ]
+
 def verify(question, allowed):
     while (True):
         if (question == None):
@@ -39,12 +41,13 @@ def verify(question, allowed):
             if (chosen == i):
                 return chosen
 
-def doCombat(playerHP, playerSTR, playerDEX, playerDEF, playerCharm, enemyName):
+def doCombat(enemyName):
     enemyHP = stats[0]
     enemySTR = stats[1]
     enemyDEX = stats[2]
     enemyDEF = stats[3]
-    global inventory
+
+    global inventory, playerHP, playerSTR, playerDEX, playerDEF, playerCharm
 
     print("a " + enemyName + " appeared")
     # run routine while both sides are alive
@@ -55,7 +58,13 @@ def doCombat(playerHP, playerSTR, playerDEX, playerDEF, playerCharm, enemyName):
         # code for attacking
         if (chosen == "attack" or chosen == "a" or chosen == None):
             # get the percentage chance for the player to hit
-            hitChance = round(log((playerDEX * (3 / enemyDEX))) * 40) + 30
+            if (enemyDEX == 3):
+                hitChance = round(log((playerDEX * (2.999999 / (enemyDEX + .0000001)))) * 40)
+            else:
+                hitChance = round(log((playerDEX * (3 / (enemyDEX + .0000001)))) * 40)
+            print(hitChance)
+            if (hitChance < 30):
+                hitChance = 30
             if (hitChance >= randint(1,100)):
                 damage = round((playerSTR - enemyDEF) * (randint(90, 110)/100))
                 if (damage >= 0):
@@ -91,19 +100,30 @@ def doCombat(playerHP, playerSTR, playerDEX, playerDEF, playerCharm, enemyName):
                     playerHP = playerMaxHP
                 print("the small potion revitalizes you, healing you for " + str(healAmount) + " [" + str(playerHP) + "/" + str(playerMaxHP) + "]")
                 healAmount = None
+                inventory.update({"small potion of healing": (inventory["small potion of healing"] - 1)})
+                if (inventory["small potion of healing"] <= 0):
+                    inventory.pop("small potion of healing")
+                
             elif (chosen == "throwing knife"):
                 damage = playerDEX + playerSTR
                 if (damage < 0):
                     damage = 0
-                print("you chuck the throwing knife at the " + str(enemyName) + ", dealing " + str(damage) + " damage")
+                print("you chuck the throwing knife at the " + enemyName + ", dealing " + str(damage) + " damage")
                 enemyHP -= damage
                 damage = None
+                inventory.update({"throwing knife": (inventory["throwing knife"] - 1)})
+                if (inventory["throwing knife"] <= 0):
+                    inventory.pop("throwing knife")
 
         # if the enemy is alive, have them attack
         if (enemyHP > 0):
             print(" ")
             print("the " + enemyName + " attacks")
-            hitChance = round(log((enemyDEX / (playerDEX / 3))) * 40)
+            if (playerDEX == 3):
+                hitChance = round(log((enemyDEX * (2.999999 / (enemyDEX + .0000001)))) * 40) + 30
+            else:
+                hitChance = round(log((enemyDEX * (3 / (enemyDEX + .0000001)))) * 40) + 30
+            print(hitChance)
             if (hitChance >= randint(1,100)):
                 damage = round((enemySTR - playerDEF) * (randint(90, 110)/100))
                 if (damage >= 0):
@@ -117,7 +137,6 @@ def doCombat(playerHP, playerSTR, playerDEX, playerDEF, playerCharm, enemyName):
     # figure out who's alive at the end of the fight
     if (enemyHP <= 0):
         print("the " + enemyName + " has been slain")
-        return playerHP
     else:
         print("you were slain...")
         quit()
@@ -126,9 +145,8 @@ def doCombat(playerHP, playerSTR, playerDEX, playerDEF, playerCharm, enemyName):
 while (True):
     # get a random enemy's name and stats from the "monsters" dictionary
     enemyName, stats = choice(list(monsters.items()))
-    playerHP= doCombat(playerHP, playerSTR, playerDEX, playerDEF, playerCharm, enemyName)
+    doCombat(enemyName)
     print(" ")
-    print("you became slightly stronger")
     playerHP += 1
     playerMaxHP += 1
     playerSTR += 1
