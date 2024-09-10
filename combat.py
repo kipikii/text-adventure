@@ -1,52 +1,63 @@
 from random import *
 from time import *
+from math import *
 
 # list of monsters you can fight
 monsters = {
     # stats go [hp, str, dex, def]
-    "wolf": [10, 2, 3, 0],
+    # dex should be >= 0
+    "wolf": [7, 2, 2, 0],
     "rat": [3, 1, 0, 0],
-    "god": [999, 99, 99, 99]
+    "imp": [25, 2, 10, -3],
+    #"giant spider": [30, 3, 6, 3],
+    #"baslisk": [40, 7, 0, 5]
 }
 
 inventory = {
     # "item": quantity
-    "weak potion of healing": 3,
+    "small potion of healing": 3,
     "throwing knife": 2
 }
 
+# player's placeholder stats
 playerHP = 15
 playerMaxHP = playerHP
-playerSTR = 5
-playerDEX = 2
+playerSTR = 2
+playerDEX = 1
 playerDEF = 0
 playerCharm = None
 
-valid = ["attack", "skill", "item", "a", "s", "i"]
+battlevalid = ["attack", "skill", "item", "a", "s", "i", None]
 
-def verify(question):
+def verify(question, allowed):
     while (True):
         if (question == None):
             chosen = input("what will you do? ")
         else:
             chosen = input(question)
-        for i in valid:
+        for i in allowed:
             if (chosen == i):
                 return chosen
 
-def doCombat(playerHP, playerSTR, playerDEX, playerDEF, playerCharm, enemyName, enemyHP, enemySTR, enemyDEX, enemyDEF):
-    print("a " + enemyName + " appeared!")
+def doCombat(playerHP, playerSTR, playerDEX, playerDEF, playerCharm, enemyName):
+    enemyHP = stats[0]
+    enemySTR = stats[1]
+    enemyDEX = stats[2]
+    enemyDEF = stats[3]
+    global inventory
+
+    print("a " + enemyName + " appeared")
     # run routine while both sides are alive
     while (playerHP > 0 and enemyHP > 0):
         print("[Your HP: " + str(playerHP) + " / " + str(playerMaxHP) + "]")
-        chosen = verify("what would you like to do? [attack, skill, item] ")
+        chosen = verify("what would you like to do? [attack, skill, item] ", battlevalid)
 
         # code for attacking
-        if (chosen == "attack" or chosen == "a"):
+        if (chosen == "attack" or chosen == "a" or chosen == None):
             # get the percentage chance for the player to hit
-            hitChance = round(playerDEX / (enemyDEX + 1) * 100) + 10
+            hitChance = round(log((playerDEX * (3 / enemyDEX))) * 40) + 30
             if (hitChance >= randint(1,100)):
-                damage = round((playerSTR - enemyDEF) * (randint(80, 120)/100))
+                damage = round((playerSTR - enemyDEF) * (randint(90, 110)/100))
                 if (damage >= 0):
                     print("you attacked the " + enemyName + " for " + str(damage) + " damage")
                     enemyHP -= damage
@@ -61,15 +72,40 @@ def doCombat(playerHP, playerSTR, playerDEX, playerDEF, playerCharm, enemyName, 
 
         # code for using items
         elif (chosen == "item" or chosen == "i"):
-            print("inventory here or smth")
+            print(" ")
+            print("your inventory:")
+            invKeys = list(inventory.keys())
+            invValues = list(inventory.values())
+            index = 0
+            for each in invKeys:
+                print(each + ": " + str(invValues[index]))
+                index += 1
+            index = None
+            print(" ")
+            chosen = verify("choose an item to use: ", invKeys)
+            print("you used a " + chosen)
+            if (chosen == "small potion of healing"):
+                healAmount = randint(5, 10)
+                playerHP += healAmount
+                if (playerHP > playerMaxHP):
+                    playerHP = playerMaxHP
+                print("the small potion revitalizes you, healing you for " + str(healAmount) + " [" + str(playerHP) + "/" + str(playerMaxHP) + "]")
+                healAmount = None
+            elif (chosen == "throwing knife"):
+                damage = playerDEX + playerSTR
+                if (damage < 0):
+                    damage = 0
+                print("you chuck the throwing knife at the " + str(enemyName) + ", dealing " + str(damage) + " damage")
+                enemyHP -= damage
+                damage = None
 
         # if the enemy is alive, have them attack
         if (enemyHP > 0):
             print(" ")
             print("the " + enemyName + " attacks")
-            hitChance = round(enemyDEX / (playerDEX + 1) * 100) + 10
+            hitChance = round(log((enemyDEX / (playerDEX / 3))) * 40)
             if (hitChance >= randint(1,100)):
-                damage = round((enemySTR - playerDEF) * (randint(80, 120)/100))
+                damage = round((enemySTR - playerDEF) * (randint(90, 110)/100))
                 if (damage >= 0):
                     print("you took " + str(damage) + " damage")
                     playerHP -= damage
@@ -77,7 +113,6 @@ def doCombat(playerHP, playerSTR, playerDEX, playerDEF, playerCharm, enemyName, 
                     print("you took 0 damage")
             else:
                 print("but its attack missed")
-        if (enemyHP > 0):
             print(" ")
     # figure out who's alive at the end of the fight
     if (enemyHP <= 0):
@@ -91,10 +126,12 @@ def doCombat(playerHP, playerSTR, playerDEX, playerDEF, playerCharm, enemyName, 
 while (True):
     # get a random enemy's name and stats from the "monsters" dictionary
     enemyName, stats = choice(list(monsters.items()))
-    enemyHP = stats[0]
-    enemySTR = stats[1]
-    enemyDEX = stats[2]
-    enemyDEF = stats[3]
-    playerHP = doCombat(playerHP, playerSTR, playerDEX, playerDEF, playerCharm, enemyName, enemyHP, enemySTR, enemyDEX, enemyDEF)
+    playerHP= doCombat(playerHP, playerSTR, playerDEX, playerDEF, playerCharm, enemyName)
     print(" ")
+    print("you became slightly stronger")
+    playerHP += 1
+    playerMaxHP += 1
+    playerSTR += 1
+    playerDEX += 1
+    playerDEF += 1
     print("as you defeat the beast, another creature leaps out at you")
