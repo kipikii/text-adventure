@@ -9,14 +9,11 @@ monsters = {
     "wolf": [7, 2, 2, 0],
     "rat": [3, 1, 0, 0],
     "imp": [25, 2, 5, -3],
-    #"giant spider": [30, 3, 6, 3],
-    #"baslisk": [40, 7, 0, 5]
 }
 
 inventory = {
     # "item": quantity
-    "small healing potion": 1,
-    "throwing knife": 2
+    "small healing potion": 1
 }
 
 skills = {
@@ -49,12 +46,9 @@ def verify(question:str=None, allowed:list=None):
             if (chosen == i):
                 return chosen
 
-def changeInventory(item:str=None, change:int=None):
+def changeInventory(item:str=None, change:int=-1):
     if (item == None):
         print("not item given to changeInventory, returned statement")
-        return
-    if (change == None):
-        print("no change given to changeInventory, returned statement")
         return
     global inventory
     if (item in list(inventory.keys())):
@@ -131,14 +125,14 @@ def doCombat(enemyName:str=None):
             if (chosen == "back"):
                 print(" ")
                 continue
-# double cut, attack twice
             else:
                 if (checkMana(chosen) == False):
                     print("insufficent mana")
                     continue
                 playerMana -= skills[chosen]
+# double cut, attack twice
                 if (chosen == "double cut"):
-                    if (hitCalc(playerDEX + 5, enemyDEX)):
+                    if (hitCalc(playerDEX + 2, enemyDEX)):
                         for each in range(2):
                             damage = round((playerSTR * (randint(100, 150)/100)) - enemyDEF)
                             if (damage >= 0):
@@ -148,6 +142,9 @@ def doCombat(enemyName:str=None):
                                 print("you attacked the " + enemyName + " for 0 damage")
                     else:
                         print("your attack missed")
+                else:
+                    print("whoops, forgot to code that skill")
+                    continue
         # code for using items
         elif (chosen == "item" or chosen == "i"):
             print(" ")
@@ -166,12 +163,12 @@ def doCombat(enemyName:str=None):
                 continue
 #small healing potion
             if (chosen == "small healing potion"):
-                healAmount = randint(5, 10)
+                healAmount = randint(5, 15) / 100
+                healAmount = ceil(healAmount * playerMaxHP)
                 playerHP += healAmount
                 if (playerHP > playerMaxHP):
                     playerHP = playerMaxHP
                 print("drinking the potion revitalizes you, healing you for " + str(healAmount) + " [" + str(playerHP) + "/" + str(playerMaxHP) + "]")
-                healAmount = None
                 changeInventory(chosen, -1)
 #throwing knife
             elif (chosen == "throwing knife"):
@@ -182,6 +179,18 @@ def doCombat(enemyName:str=None):
                 enemyHP -= damage
                 damage = None
                 changeInventory(chosen, -1)
+#small mana potion
+            elif (chosen == "small mana potion"):
+                healAmount = randint(5, 15) / 100
+                healAmount = ceil(healAmount * playerMaxMana)
+                if (playerMana > playerMaxMana):
+                    playerMana = playerMaxMana
+                print("drinking the potion gives you energy, regenerating " + str(healAmount) + " [" + str(playerMana) + "/" + str(playerMaxMana) + "]")
+                healAmount = None
+                changeInventory(chosen, -1)
+            else:
+                print("whoops, forgot to code that skill")
+                continue
 
         # if the enemy is alive, have them attack
         if (enemyHP > 0):
@@ -218,7 +227,18 @@ while (True):
     playerSTR += 1
     playerDEX += 1
     playerDEF += 1
+    if (randint(1,5) == 1):
+        itemToAdd = choice(["throwing knife", "small healing potion", "small mana potion"])
+        print("you found the " + enemyName + " was carrying a " + itemToAdd)
+        print("you added the " + itemToAdd +" to your bag")
+        changeInventory(itemToAdd, 1)
+        print(" ")
+    if (playerMaxHP > 20):
+        monsters["giant spider"] = [30, 3, 6, 3]
+        monsters["baslisk"] = [40, 7, 0, 5]
     print("as you defeat the beast, another creature leaps out at you")
-    if (playerMaxHP >= 100):
+    if (playerMaxHP >= 100 and randint(1,4) == 1):
         print("pick on someone your own size!")
         doCombat()
+        print("oh wow you actually killed it. good job i guess.")
+        quit()  
