@@ -31,8 +31,6 @@ playerDEX = 1
 playerDEF = 0
 playerCharm = None
 
-battlevalid = ["attack", "skill", "item", "a", "s", "i"]
-
 def verify(question:str=None, allowed:list=None):
     while (True):
         if (allowed == None):
@@ -48,7 +46,7 @@ def verify(question:str=None, allowed:list=None):
 
 def changeInventory(item:str=None, change:int=-1):
     if (item == None):
-        print("not item given to changeInventory, returned statement")
+        print("no item given to changeInventory, returned statement")
         return
     global inventory
     if (item in list(inventory.keys())):
@@ -83,10 +81,10 @@ def hitCalc(attackerDEX:int=0, victimDEX:int=0):
 def doCombat(enemyName:str=None):
     if (enemyName == None):
         enemyName = "god"
-        enemyHP = 9999
-        enemySTR = 99
-        enemyDEX = 99
-        enemyDEF = 99
+        enemyHP = 1500
+        enemySTR = 100
+        enemyDEX = 100
+        enemyDEF = 100
         print("whoops, no enemy name. here's a god fight")
     else:
         enemyHP = stats[0]
@@ -100,7 +98,7 @@ def doCombat(enemyName:str=None):
     # run routine while both sides are alive
     while (playerHP > 0 and enemyHP > 0):
         print("[Your HP: " + str(playerHP) + " / " + str(playerMaxHP) + "] [Your mana: " + str(playerMana)+ " / " + str(playerMaxMana) + "]")
-        chosen = verify("what would you like to do? [attack, skill, item] ", battlevalid)
+        chosen = verify("what would you like to do? [attack, skill, item] ", ["attack", "skill", "item", "a", "s", "i"])
 
         # code for attacking
         if (chosen == "attack" or chosen == "a"):
