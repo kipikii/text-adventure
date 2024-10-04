@@ -94,6 +94,8 @@ def doCombat(enemyName:str=None):
 
     global inventory, skills, playerHP, playerMana, playerSTR, playerDEX, playerDEF, playerCharm
 
+    status = []
+
     print("a " + enemyName + " appeared")
     # run routine while both sides are alive
     while (playerHP > 0 and enemyHP > 0):
