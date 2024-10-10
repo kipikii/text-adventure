@@ -1,10 +1,9 @@
 from random import *
-from time import *
 from math import *
 
 # list of monsters you can fight
 monsters = {
-    # stats go [hp, str, dex, def]
+    # stats go [hp, str, dex, def, skills]
     # dex should be >= 0
     "wolf": [7, 2, 2, 0],
     "rat": [3, 1, 0, 0],
@@ -18,7 +17,7 @@ inventory = {
 
 skills = {
     # "skill": mana cost
-    "double cut": 2
+    "doublecut": 2
 }
 
 # player's placeholder stats
@@ -69,8 +68,8 @@ def checkMana(skill:str=None):
 def hitCalc(attackerDEX:int=0, victimDEX:int=0):
     if (victimDEX == 3):
         hitChance = round(log(((attackerDEX + 1) * (2.999999 / (victimDEX + 1.0000001)))) * 40) + 20
-    else:
-        hitChance = round(log(((attackerDEX + 1) * (3 / (victimDEX + 1.0000001)))) * 40) + 20
+    else:   
+        hitChance = round(log((attackerDEX + 1) * (3 / (victimDEX + 1.0000001))) * 40) + 20
     if (hitChance < 30):
         hitChance = 30
     if (hitChance >= randint(1,100)):
@@ -131,7 +130,7 @@ def doCombat(enemyName:str=None):
                     continue
                 playerMana -= skills[chosen]
 # double cut, attack twice
-                if (chosen == "double cut"):
+                if (chosen == "doublecut"):
                     if (hitCalc(playerDEX + 2, enemyDEX)):
                         for each in range(2):
                             damage = round((playerSTR * (randint(100, 150)/100)) - enemyDEF)
