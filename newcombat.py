@@ -118,7 +118,7 @@ monsters = {
     "dummy" : Monster("dummy", 100, 10, 10, 10, 10, ["attack"])
 }
 
-player = Player(100, 10, 10, 10, 10, 10)
+player = Player(10, 5, 3, 3, 0, 0)
 
 enemy = monsters["dummy"]
 castSpell(spells["attack"], enemy, player)
