@@ -1,4 +1,10 @@
 - create a way to easily make events
 - make equippable items
-- make gainable spells
 - add passives
+- add forks in the road (sts style)
+
+"you wake up in some sort of ancient ruins. as you turn around, a large statue depicting some sort of deity looms over you, and a large pool of water resting at its feet, with a discarded weapon resting in the water. what is the weapon? [choose a weapon]"
+"as you take the [weapon] into your hands, the water ripples beneath it. as you stare into it, someone stares back. who is it? [choose a class]"
+
+if the player has played before:
+    "you feel your predecessors smiling upon you, whispering blessings upon you. what is the blessing? [choose a passive]"
