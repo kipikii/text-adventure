@@ -26,7 +26,7 @@ class Spell:
         self.selfEffect = selfEffect
 
 class Equipment:
-    def __init__(self, slot: str, BonusHP: int, BonusMP: int, BonusSTR: int, BonusDEX: int, BonusDEF: int, BonusAGI: int, onTurnStart: str, onAttack: str, onHit: str, onHurt: str, onStatusGain: str, onApplyStatus: str):
+    def __init__(self, slot: str, BonusHP: int, BonusMP: int, BonusSTR: int, BonusDEX: int, BonusDEF: int, BonusAGI: int, onTurnStart: str, onAttack: str, onCast: str, onHit: str, onHurt: str, onStatusGain: str, onApplyStatus: str):
         self.slot = slot
         self.BonusHP = BonusHP
         self.BonusMP = BonusMP
@@ -34,6 +34,15 @@ class Equipment:
         self.BonusDEX = BonusDEX
         self.BonusDEF = BonusDEF
         self.BonusAGI = BonusAGI
+        
+        self.onTurnStart = onTurnStart
+        self.onAttack = onAttack
+        self.onCast = onCast
+        self.onHit = onHit
+        self.onHurt = onHurt
+        self.onStatusGain = onStatusGain
+        self.onApplyStatus = onApplyStatus
+
 
 class Entity:
     def __init__(self, name, HP: int, MP: int, STR: int, DEX: int, DEF: int, AGI: int, spells: list, inventory: dict, blessings: list):
@@ -77,7 +86,7 @@ spells = {
     # spells
     "bolt": Spell("bolt", 5, 1, "MP", "AGI", .5, 0, False, "pass", "pass"),
     "flame": Spell("flame", 5, 1, "AGI", "DEX", 1, 0, False, "applyStatus('burn', victim)", "pass"),
-    "fireball": Spell("fireball", 15, 1, "MP", "DEF", 3, .25, False, "applyStatus('burn', victim)", "applyStatus('burn', caster)"),
+    "fireball": Spell("fireball", 15, 1, "MP", "DEX", 3, .25, False, "applyStatus('burn', victim)", "applyStatus('burn', caster)"),
     "nuke": Spell("nuke", 100784, 10, "HP", inf, 99999, 0, True, "pass", "pass"),
     "doom": Spell("doom", 100, 1, "AGI", inf, 0, 0, False, "applyStatus('impending doom (3)', victim)", "pass"),
 
@@ -144,6 +153,7 @@ monsters = {
 
     # infernal wastes
     "imp": Entity('imp', 70, inf, 10, 15, -5, 20, ["evasion", "attack", "flame", "threaten"], {}, []),
+    "demon": Entity('demon', 100, inf, 25, 10, 10, 10, ["attack", "flame", "courage", "warcry", "foresee"], {}, []),
 
     # what the hell
     "reaper": Entity("reaper", 666, inf, 100, 200, 50, 100, ["doom", "bunny", "evasion", "trip"], {}, [])
@@ -399,8 +409,9 @@ doCombat(player, "spirit")
 doCombat(player, "spirit")
 doCombat(player, "imp")
 doCombat(player, "imp")
+doCombat(player, "demon")
 restSite(player)
-print("your experience with fighting spirits and imps have taught you something")
+print("your experience with fighting spirits and demons have taught you something")
 print("you learned the spells 'flame' and 'fireball'!")
 player.spells += ["flame", "fireball"]
 print("")

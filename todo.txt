@@ -8,3 +8,82 @@
 
 if the player has played before:
     "you feel your predecessors smiling upon you, whispering blessings upon you. what is the blessing? [choose a passive]"
+
+~~~
+classes:
+
+Page: Starting xp requirement is raised, but multiplier per each level is decreased.
+Warrior: Reduces incoming damage by 10% if Warrior’s health is above 75%.
+Assassin: Gains +15% critical hit chance on the first attack each turn.
+Sorcerer: Increases magic-based damage by 5% each time Sorcerer doesn’t take direct damage for a turn (stacks up to 20%).
+Berserker: Gains +10% attack when below 50% health, with an additional +10% every three turns spent at low health.
+Paladin: Heals 5% of max health when blocking or evading an attack (can trigger once per turn).
+Hunter: Gains +5% accuracy and +5% critical hit chance with each consecutive hit, up to a maximum of +15%.
+Monk: Regenerates 3% health each turn and reduces debuff duration by 1 turn.
+Alchemist: Gains 5% bonus damage if the enemy has any debuff; increases to 10% if there are two or more debuffs.
+Knight: Reduces damage from critical hits by 20% and reflects 5% of damage back to the attacker.
+Mystic: Has a 10% chance to completely nullify any status effect applied to Mystic.
+~~~
+aspects:
+
+Time: Gains a stacking 5% speed boost each turn, resetting when using a high-damage skill.
+Space: Every fourth turn, has a 20% chance to fully evade the opponent’s next attack, as if briefly phasing through space.
+Mind: Gains a stacking 3% increase in damage and defense each turn if the player uses a different skill each turn, simulating adaptable thought.
+Heart: Heals 5% of max health each turn if their HP percentage matches or exceeds the opponent’s HP percentage.
+Void: Reduces enemy accuracy by 5% each turn they’re above 50% health, as the Void subtly influences perception.
+Light: Gains a 5% chance each turn to double the damage of their next attack, stacking until triggered.
+Breath: Has a 10% chance each turn to remove any negative status effect currently applied to them, moving as freely as the wind.
+Blood: Deals 5% increased damage for each debuff or status effect applied to them.
+Life: Gains a 5% health regeneration for every turn that they end with less than half of their maximum health.
+Doom: Gains a 10% damage boost each turn after reaching 25% health or below, gradually building strength in alignment with their grim fate.
+Hope: Has a 10% chance each turn to gain a shield that absorbs the next incoming attack, representing unyielding optimism.
+Rage: Gains +5% attack and speed each turn after taking damage, capping at +20%, channeling anger into relentless offense.
+~~~
+Here are some fun and thematic ways for the player to gain skills throughout their run, allowing them to tailor their loadout and adapt to challenges as they progress. These methods keep the acquisition of new skills interesting, with each route offering distinct benefits and potential risks:
+1. Shrines of Power
+Description: Shrines dedicated to each Aspect and Class are scattered throughout the world. When visited, they allow the player to select a new skill or enhance an existing one.
+Mechanic: Each shrine grants a skill from its respective Aspect or Class pool. Some shrines may also require a tribute, like a bit of HP or a consumable item, to activate the blessing.
+
+2. Ancient Tomes and Scrolls
+Description: Hidden in treasure chests or guarded by powerful foes, tomes and scrolls allow the player to learn skills. These can be found in the environment or looted from defeated enemies.
+Mechanic: Tomes offer Aspect-based skills, while scrolls focus on Class-based skills. Once used, they are consumed, and the player can only hold a limited number at a time, encouraging careful decision-making.
+
+3. Skill Trainers
+Description: Friendly NPCs or mystical trainers who appear in safe zones or after certain boss battles. Each trainer specializes in a different skill category and offers unique abilities in exchange for currency or resources.
+Mechanic: Trainers may charge various fees: in-game currency, stat sacrifices, or rare items. Some trainers appear randomly, and others are tied to specific locations, adding to the game’s sense of exploration.
+
+4. Aspect Infusion Events
+Description: Certain events allow players to “attune” themselves more deeply to their chosen Aspect, unlocking a skill specific to their Aspect.
+Mechanic: Infusion events offer skill choices based on the player’s Aspect, potentially enhancing synergy with existing skills. Some events may present a choice between multiple skills or offer randomized skill rewards, depending on player decisions.
+
+5. Enemy Mimicry
+Description: After defeating powerful or unique enemies, the player may “absorb” or “mimic” one of their abilities temporarily.
+Mechanic: This skill is only usable for a limited number of times or turns, adding a temporary but powerful boost. The player may encounter rare items or trainers that can make these mimicked skills permanent.
+
+6. Skill Evolution Through Use
+Description: Skills grow stronger or evolve when used frequently in combat, allowing the player to access more potent abilities over time.
+Mechanic: Each skill has an experience bar, and upon maxing out, the player can select one of two “evolution” paths, adding new effects or increasing its power. This encourages players to invest in skills that align with their playstyle.
+
+7. Artifacts of Skill
+Description: Mystical artifacts or items, scattered in the world, come with embedded skills that the player can learn and master.
+Mechanic: When equipped, the artifact provides a skill that the player can use temporarily. After a certain number of uses, the skill becomes permanently unlocked. This allows players to “try before they buy,” so to speak, when testing skills.
+
+8. Soul Bonding
+Description: Throughout the run, the player might come across ancient spirits or mythical creatures who offer skills in exchange for a bond.
+Mechanic: Bonding with a spirit costs HP or temporary debuffs but grants powerful skills based on the creature’s characteristics (e.g., a fire spirit grants fire-based skills). Once bound, the spirit can also evolve with the player, granting access to enhanced skills.
+
+9. Randomized Skill Totems
+Description: Totems found within dungeons or temples contain randomized skills from different Aspects and Classes, providing a bit of risk-reward.
+Mechanic: Totems generate random skills that the player can claim at the cost of HP or a temporary debuff. Some totems may also “curse” the skill slot, limiting the number of skills a player can hold, but offer rarer skills to make it worthwhile.
+
+10. Memory Fragments
+Description: Collectible memory fragments scattered through the run unlock skills tied to the player’s past, presenting personalized or narrative-driven abilities.
+Mechanic: Each fragment grants a skill or enhances an existing one, giving a sense of progression tied to the player’s story. These fragments may be randomly located, incentivizing exploration.
+
+11. Transmutation Chambers
+Description: These special rooms allow the player to trade one or more of their skills for a new skill, randomly selected from a pool based on their current Aspect or Class.
+Mechanic: The chamber “transmutes” sacrificed skills, giving a chance to experiment with different builds. Chambers are rare, but they can help the player adapt to new challenges.
+
+12. Divine Blessings
+Description: Players can occasionally find divine altars where they can pray to the Aspect-based deities, receiving a skill as a blessing.
+Mechanic: Prayers require a small tribute, such as a portion of health or a temporary debuff. Blessings offer powerful skills that align with the Aspect and often come with bonus effects, such as healing when the skill is used.
