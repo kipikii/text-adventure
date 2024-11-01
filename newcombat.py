@@ -274,13 +274,38 @@ def verify(question:str=None, allowed:list=None):
     while (True):
         chosen = input(question)
         chosen = chosen.lower()
+        if (chosen.startswith("/")):
+            if (chosen == "/help"):
+                print("/help - displays this menu")
+                print("/stats - displays your current stats")
+                print("/patchnotes - shows the patch notes")
+            elif (chosen == "/stats"):
+                global player
+                print("")
+                print("~~~~~~~~~~")
+                print("level: " + str(player.level))
+                print("XP: " + str(player.XP) + "/" + str(player.MaxXP))
+                print("")
+                print("HP: " + str(player.HP) + "/" + str(player.MaxHP))
+                print("MP: " + str(player.MP) + "/" + str(player.MaxMP))
+                print("STR: " + str (player.STR))
+                print("DEX: " + str (player.DEX))
+                print("DEF: " + str (player.DEF))
+                print("AGI: " + str (player.AGI))
+                print("~~~~~~~~~~")
+                print("")
+            elif (chosen == "/patchnotes"):
+                raise ValueError('Variable "patchnotes" is too long to print. Try separating the variable into two different print statements.')
+            else:
+                print("invalid command. to see all valid commands, do /help")
         for i in allowed:
             i = i.lower()
             if (chosen == i):
                 return chosen
 
-def makeEquip(slot, equipper):
-    pass
+def makeEquip(slot, armorHP):
+    
+    equip = Equipment(slot, armorHP, )
 
 def doCombat(player, enemy):
     enemy = copy(monsters[enemy])
