@@ -384,6 +384,9 @@ def unequipItem(equipper:object, slot:str):
     for code in armor.onHurt:
         equipper.onHurt.remove(code)
 
+def generateEquip():
+    pass
+
 # causes a combat to initate between two entities
 def doCombat(player: object, enemy: object):
     enemy = copy(monsters[enemy])
