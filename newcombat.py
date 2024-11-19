@@ -87,8 +87,8 @@ class Entity:
         }
         # combat conditionals, default blank, all will be exec()'d
         self.onTurnStart = onTurnStart
-        # for enemies, onCast is NEVER used, use onAttack instead
         self.onAttack = onAttack
+            # for enemies, onCast is NEVER used, use onAttack instead
         self.onCast = onCast
             # note: onHit and onHurt are executed in castSpell, when about the other target use "victim" and for self, use "caster"
         self.onHit = onHit
