@@ -154,6 +154,11 @@ statuses = {
     "AGI down": Status("AGI down", 0, True, "victim.AGI /= 6/5", "victim.AGI *= 6/5"),
     "bunnied": Status("bunnied", .10, True, "victim.DEX /= 4\nvictim.STR /= 4", "victim.DEX *= 4\nvictim.STR *= 4"),
 
+    "STR down 1": Status("STR down 1", 0, True, "victim.STR -= 1", "victim.STR += 1"),
+    "DEX down 1": Status("DEX down 1", 0, True, "victim.DEX -= 1", "victim.DEX += 1"),
+    "DEF down 1": Status("DEF down 1", 0, True, "victim.DEF -= 1", "victim.DEF += 1"),
+    "AGI down 1": Status("AGI down 1", 0, True, "victim.AGI -= 1", "victim.AGI += 1"),
+
     # DOT effects
     "burn": Status("burn", .25, False, """
 burndmg = ceil(victim.MaxHP / 20)
@@ -206,27 +211,29 @@ def calcHit(attackerHit: int, victimDodge: int):
     else: return False
 
 # gives a status effect to an entity
-def applyStatus(status: str, victim:object):
+def applyStatus(status: str, victim:object, silent:bool = False):
     status = copy(statuses[status])
-    if (victim.name == "you"):
-        print("you now have " + status.name)
-    else:
-        print(victim.name + " now has " + status.name)
+    if (silent == False):
+        if (victim.name == "you"):
+            print("you now have " + status.name)
+        else:
+            print(victim.name + " now has " + status.name)
     victim.status += [status.name]
     if (status.affectOnApply):
         exec(status.effect)
 
 # removes a status effect from an entity
-def removeStatus(status: str, victim:object):
+def removeStatus(status: str, victim:object, silent:bool = False):
     if (status.name in victim.status):
         victim.status.remove(status.name)
-        if (victim.name == "you"):
-            print("you no longer have " + status.name)
-        else:
-            print(status.name + " faded from the " + victim.name)
+        if (silent == False):
+            if (victim.name == "you"):
+                print("you no longer have " + status.name)
+            else:
+                print(status.name + " faded from the " + victim.name)
 
 # causes a status effect to execute it's effect
-def tickStatus(status: str, victim:object):
+def tickStatus(status: str, victim:object, silent:bool = False):
     status = copy(statuses[status])
     if (status.affectOnApply == False):
         exec(status.effect)
@@ -342,7 +349,7 @@ def verify(question:str=None, allowed:list=None):
             if (chosen == i):
                 return chosen
 
-def equipItem(equipper:object, armor:object, slot:str):
+def equip(equipper:object, armor:object, slot:str):
     equipper.equip[slot] = armor
 
     equipper.MaxHP += armor.HP
@@ -358,7 +365,7 @@ def equipItem(equipper:object, armor:object, slot:str):
     equipper.onHit += armor.onHit
     equipper.onHurt += armor.onHurt
 
-def unequipItem(equipper:object, slot:str):
+def unequip(equipper:object, slot:str):
     armor = equipper.equip[slot]
 
     equipper.MaxHP -= armor.HP
@@ -387,13 +394,39 @@ def generateEquip(baseHealth:int, statups:int = 0, perks:int = 0, quirks:int = 0
     DEX = 0
     DEF = 0
     AGI = 0
+    onTurnStart = []
+    onAttack = []
+    onHit = []
+    onCast = []
+    onHurt = []
     for each in range(statups):
         increase = choice("STR", "DEX", "DEF", "AGI")
         exec(increase + " += 1")
     for each in range(perks):
-        onWhat = choice("onTurnStart", "onAttack", "onTurn", "onHit", "onHurt")
-        doWhat = choice("")
-    
+        onWhat = choice("onTurnStart", "onAttack", "onCast", "onHit", "onHurt")
+        doWhat = choice("enemy.HP -= 1\nprint('the ' + enemy.name + ' took 1 damage')",
+"player.HP += 1\nprint('you healed 1 hp')\nif(player.HP > player.MaxHP): player.HP = player.MaxHP",
+"player.HP -= 1\nenemy.HP -= 3\nprint('you took 1 damage')\nprint('the ' + enemy.name + ' took 3 damage)",
+"applyEffect('STR down 1', enemy, True)","applyEffect('DEX down 1', enemy, True)",
+"applyEffect('DEF down 1', enemy, True)","applyEffect('AGI down 1', enemy, True)")
+        exec(onWhat + ".append(" + doWhat +")")
+    for each in range(quirks):
+        onWhat = choice("onTurnStart", "onAttack", "onCast", "onHit", "onHurt")
+        doWhat = choice("player.HP -= 1\nprint('you took 1 damage')", "enemy.HP += 1\n")
+        exec(onWhat + ".append(" + doWhat +")")
+
+# for dictionaries where the values are only integers
+def incrementDict(item:str=None, given:dict = {}, change:int=-1):
+    if (item == None):
+        print("no item given to , returned statement")
+        return
+    if (item in list(given.keys())):
+        given[item] = (given.get(item)) + change
+    else:
+        given[item] = change
+    if (given[item] <= 0):
+        given.pop(item)
+    return given
 
 # causes a combat to initate between two entities
 def doCombat(player: object, enemy: object):
