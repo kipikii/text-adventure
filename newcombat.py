@@ -180,7 +180,7 @@ del burndmg""", "pass"),
 
 monsters = {
     # forest
-    "rat": Entity("rat", 3, inf, 1, 0, 0, 0, ["bite"], {}, []),
+    "rat": Entity("rat", 3, inf, 1, 0, 0, 5, ["bite"], {}, []),
     "wolf": Entity("wolf", 15, inf, 2, 3, 1, 1, ["attack"], {}, []),
     "spirit": Entity("spirit", 25, inf, 4, 5, 0, 4, ["attack", "flame"], {}, []),
 
@@ -194,13 +194,13 @@ monsters = {
 }
 
 # calculates if an attack should hit a given entity
-def calcHit(victimAGI: int, attackerDEX: int):
-    if (victimAGI < 1): victimAGI = 1
-    if (attackerDEX < 1): attackerDEX = 1
-    if (victimAGI == 3): 
-        hitChance = round(log(attackerDEX * (2.999999 / (victimAGI + 0.0000001))) * 40  ) + 90
+def calcHit(attackerHit: int, victimDodge: int):
+    if (victimDodge < 1): victimDodge = 1
+    if (attackerHit < 1): attackerHit = 1
+    if (victimDodge == 3): 
+        hitChance = round(log(attackerHit * (2.999999 / (victimDodge + 0.0000001))) * 40  ) + 90
     else: 
-        hitChance = round(log((attackerDEX) * (3 / (victimAGI + 0.0000001))) * 40) + 90
+        hitChance = round(log((attackerHit) * (3 / (victimDodge + 0.0000001))) * 40) + 90
     if (hitChance < 30): hitChance = 30
     if (hitChance >= randint(1,100)): return True
     else: return False
@@ -233,7 +233,6 @@ def tickStatus(status: str, victim:object):
         if (status.fadeChance >= uniform(0,1)):
             removeStatus(status, victim)
 
-# mana cost, number of casts, stat to use, power of attack (multiplier), stat for hit, damage take on cast (multiplier), effects to enemy, effects to caster
 def castSpell(spell:object, caster:object, victim:object):
     spell = spells[spell]
     if (caster.name != "you"):
@@ -250,19 +249,19 @@ def castSpell(spell:object, caster:object, victim:object):
     else: bypassHit = False
     spellHit = False
     for each in range(spell.procs):
-        if (bypassHit or calcHit(exec(str(spell.hitStat)), victim.AGI)):
+        if (bypassHit or calcHit(eval(spell.hitStat), victim.AGI)):
             spellHit = True
             if (spell.ignoreEnemyDEF):
-                damage = ceil((exec(str(spell.dmgStat))) * (randint(90, 110)/100))
+                damage = ceil((eval(spell.dmgStat)) * (randint(90, 110)/100))
             else:
-                damage = ceil((exec(str(spell.dmgStat)) * (randint(90, 110)/100)) - victim.DEF)
+                damage = ceil((eval(spell.dmgStat) * (randint(90, 110)/100)) - victim.DEF)
             if (damage <= 0):
-                if (spell.damage != 0):
+                if (eval(spell.hitStat) != 0):
                     print("0 damage")
             else:
-                if (spell.damage != 0):
-                    print(str(ceil(damage * spell.damage)) + " damage")
-                    victim.HP -= ceil(damage * spell.damage)
+                if (eval(spell.hitStat) != 0):
+                    print(str(ceil(damage)) + " damage")
+                    victim.HP -= ceil(damage)
                     for each in caster.onHit:
                         exec(each)
                     for each in victim.onHurt:
@@ -270,7 +269,6 @@ def castSpell(spell:object, caster:object, victim:object):
         else:
             print("miss")
             damage = 0
-
         casterDamage = damage * spell.damageRecoil
         if (casterDamage != 0):
             casterDamage = ceil(casterDamage)
