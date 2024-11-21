@@ -12,13 +12,11 @@ def clearTerminal():
 clearTerminal()
 
 class Spell:
-    def __init__(self, name: str, cost: int, procs: int, dmgStat: str, hitStat: str, damage: float, damageRecoil: float, ignoreEnemyDEF: bool, victimEffect: str, selfEffect: str):
+    def __init__(self, name: str, cost: int, procs: int, dmgStat: str, hitStat: str, damageRecoil: float, ignoreEnemyDEF: bool, victimEffect: str, selfEffect: str):
         # spell's name
         self.name = name
         # spell's MP cost
         self.cost = cost
-        # spell's damage multiplier
-        self.damage = damage
         # number of times the spell hits
         self.procs = procs
         # the stat that the spell will use to calculate damage
@@ -107,35 +105,35 @@ class Status:
 
 spells = {
     # melee attacks
-    "attack": Spell("attack", 0, 1, "STR", "DEX", 1, 0, False, "pass", "pass"),
-    "doublecut": Spell("doublecut", 5, 2, "STR", "DEX", 2, 0, False, "pass", "pass"),
-    "tricut": Spell("tricut", 8, 3, "STR", "DEX", 3, 0, False, "pass", "pass"),
-    "bite": Spell("bite", 2, 1, "STR", "DEX", 1, 0, False, "applyStatus('poison', victim)", "pass"),
+    "attack": Spell("attack", 0, 1, "caster.STR", "caster.DEX", 0, False, "pass", "pass"),
+    "doublecut": Spell("doublecut", 5, 2, "caster.STR * 2", "caster.DEX", 0, False, "pass", "pass"),
+    "tricut": Spell("tricut", 8, 3, "caster.STR * 3", "caster.DEX", 0, False, "pass", "pass"),
+    "bite": Spell("bite", 2, 1, "caster.STR", "caster.STR", 0, False, "applyStatus('poison', victim)", "pass"),
     
     # spells
-    "bolt": Spell("bolt", 5, 1, "MP", "AGI", .75, 0, False, "pass", "pass"),
-    "flame": Spell("flame", 5, 1, "AGI", "DEX", 1, 0, False, "applyStatus('burn', victim)", "pass"),
-    "fireball": Spell("fireball", 15, 1, "MP", "DEX", 3, .25, False, "applyStatus('burn', victim)", "applyStatus('burn', caster)"),
-    "nuke": Spell("nuke", 100784, 999, "HP", inf, 99999, 0, True, "pass", "pass"),
-    "doom": Spell("doom", 100, 1, "AGI", inf, 0, 0, False, "applyStatus('impending doom', victim)", "pass"),
+    "bolt": Spell("bolt", 5, 1, "caster.MP * .75", "caster.AGI", 0, False, "pass", "pass"),
+    "flame": Spell("flame", 5, 1, "caster.AGI", "caster.DEX", 0, False, "applyStatus('burn', victim)", "pass"),
+    "fireball": Spell("fireball", 15, 1, "caster.MP * 3", "caster.DEX", .25, False, "applyStatus('burn', victim)", "applyStatus('burn', caster)"),
+    "nuke": Spell("nuke", 100784, 999, "caster.MaxHP * 99999", inf, 0, True, "pass", "pass"),
+    "doom": Spell("doom", 100, 1, "0", inf, 0, False, "applyStatus('impending doom', victim)", "pass"),
 
     # buffs
-    "warcry": Spell("warcry", 10, 1, "STR", inf, 0, 0, True, "pass", "applyStatus('STR up', caster)"),
-    "foresee": Spell("foresee", 10, 1, "DEX", inf, 0, 0, True, "pass", "applyStatus('DEX up', caster)"),
-    "protection": Spell("protection", 10, 1, "DEF", inf, 0, 0, True, "pass", "applyStatus('DEF up', caster)"),
-    "evasion": Spell("evasion", 10, 1, "AGI", inf, 0, 0, True, "pass", "applyStatus('AGI up', caster)"),
-    "bunny": Spell("bunny", 50, 1, "AGI", inf, 0, 0, True, "applyStatus('bunnied', victim)", "applyStatus('bunny', caster)"),
+    "warcry": Spell("warcry", 10, 1, "0", inf, 0, True, "pass", "applyStatus('STR up', caster)"),
+    "foresee": Spell("foresee", 10, 1, "0", inf, 0, True, "pass", "applyStatus('DEX up', caster)"),
+    "protection": Spell("protection", 10, 1, "0", inf, 0, True, "pass", "applyStatus('DEF up', caster)"),
+    "evasion": Spell("evasion", 10, 1, "0", inf, 0, True, "pass", "applyStatus('AGI up', caster)"),
+    "bunny": Spell("bunny", 50, 1, "0", inf, 0, True, "applyStatus('bunnied', victim)", "applyStatus('bunny', caster)"),
 
     # debuffs
-    "threaten": Spell("threaten", 10, 1, "STR", inf, 0, 0, True, "applyStatus('STR down', victim)", "pass"),
-    "trip": Spell("trip", 10, 1, "DEX", inf, 0, 0, True, "applyStatus('DEX down', victim)", "pass"),
-    "exploit": Spell("exploit", 10, 1, "DEF", inf, 0, 0, True, "applyStatus('DEF down', victim)", "pass"),
-    "slow": Spell("slow", 10, 1, "AGI", inf, 0, 0, True, "applyStatus('AGI down', victim)", "pass"),
+    "threaten": Spell("threaten", 10, 1, "0", inf, 0, True, "applyStatus('STR down', victim)", "pass"),
+    "trip": Spell("trip", 10, 1, "0", inf, 0, True, "applyStatus('DEX down', victim)", "pass"),
+    "exploit": Spell("exploit", 10, 1, "0", inf, 0, True, "applyStatus('DEF down', victim)", "pass"),
+    "slow": Spell("slow", 10, 1, "0", inf, 0, True, "applyStatus('AGI down', victim)", "pass"),
 
     # healing & other
-    "bravery": Spell("bravery", 5, 1, "DEF", inf, 0, -1, True, "pass", "pass"),
-    "courage": Spell("courage", 15, 2, "DEF", inf, 0, -1.2, True, "pass", "pass"),
-    "valor": Spell("valor", 45, 3, "DEF", inf, 0, -1.8, True, "pass", "if(randint(1,4) == 1): applyStatus('DEF up', caster)"),
+    "bravery": Spell("bravery", 5, 1, "caster.DEF", inf, -1, True, "pass", "pass"),
+    "courage": Spell("courage", 15, 2, "caster.DEF", inf, -1.2, True, "pass", "pass"),
+    "valor": Spell("valor", 45, 3, "caster.DEF", inf, -1.8, True, "pass", "if(randint(1,4) == 1): applyStatus('DEF up', caster)"),
 
     # items
 
@@ -252,12 +250,12 @@ def castSpell(spell:object, caster:object, victim:object):
     else: bypassHit = False
     spellHit = False
     for each in range(spell.procs):
-        if (bypassHit or calcHit(eval("caster." + str(spell.hitStat)), victim.AGI)):
+        if (bypassHit or calcHit(exec(str(spell.hitStat)), victim.AGI)):
             spellHit = True
-            if (spell.ignoreEnemyDEF == False):
-                damage = ceil((eval("caster." + str(spell.dmgStat)) * (randint(90, 110)/100)) - victim.DEF)
+            if (spell.ignoreEnemyDEF):
+                damage = ceil((exec(str(spell.dmgStat))) * (randint(90, 110)/100))
             else:
-                damage = ceil((eval("caster." + str(spell.dmgStat)) * (randint(90, 110)/100)))
+                damage = ceil((exec(str(spell.dmgStat)) * (randint(90, 110)/100)) - victim.DEF)
             if (damage <= 0):
                 if (spell.damage != 0):
                     print("0 damage")
@@ -265,13 +263,14 @@ def castSpell(spell:object, caster:object, victim:object):
                 if (spell.damage != 0):
                     print(str(ceil(damage * spell.damage)) + " damage")
                     victim.HP -= ceil(damage * spell.damage)
-        for each in caster.onHit:
-            exec(each)
-        for each in victim.onHit:
-            exec(each)
+                    for each in caster.onHit:
+                        exec(each)
+                    for each in victim.onHurt:
+                        exec(each)
         else:
             print("miss")
             damage = 0
+
         casterDamage = damage * spell.damageRecoil
         if (casterDamage != 0):
             casterDamage = ceil(casterDamage)
@@ -384,8 +383,19 @@ def unequipItem(equipper:object, slot:str):
     for code in armor.onHurt:
         equipper.onHurt.remove(code)
 
-def generateEquip():
-    pass
+def generateEquip(baseHealth:int, statups:int = 0, perks:int = 0, quirks:int = 0):
+    HP = log(-statups / (ceil(baseHealth / (10-(2*perks)+(2*quirks)))) + 1) + baseHealth
+    STR = 0
+    DEX = 0
+    DEF = 0
+    AGI = 0
+    for each in range(statups):
+        increase = choice("STR", "DEX", "DEF", "AGI")
+        exec(increase + " += 1")
+    for each in range(perks):
+        onWhat = choice("onTurnStart", "onAttack", "onTurn", "onHit", "onHurt")
+        doWhat = choice("")
+    
 
 # causes a combat to initate between two entities
 def doCombat(player: object, enemy: object):
@@ -399,7 +409,7 @@ def doCombat(player: object, enemy: object):
         if (chosen == "attack" or chosen == "a"):
             clearTerminal()
             castSpell("attack", player, enemy)
-            for each in player.onHit:
+            for each in player.onAttack:
                 exec(each)
         elif (chosen == "spell" or chosen == "skill" or chosen == "s"):
             print("")
