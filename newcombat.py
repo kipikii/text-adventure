@@ -49,7 +49,10 @@ class Equipment:
         self.onHurt = onHurt
 
 class Entity:
-    def __init__(self, name: str, HP: int, MP: int, STR: int, DEX: int, DEF: int, AGI: int, spells: list, inventory: dict, blessings: list, onTurnStart: list = [], onAttack: list = [], onCast: list = [], onHit: list = [], onHurt: list = []):
+    def __init__(self, name: str, HP: int, MP: int, STR: int, DEX: int, DEF: int, AGI: int, spells: list,
+     inventory: dict, blessings: list, onTurnStart: list = [], onAttack: list = [], onCast: list = [], 
+     onHit: list = [], onHurt: list = []
+     ):
         self.level = 1
         # experience points
         self.XP = 0
@@ -115,25 +118,25 @@ spells = {
     "flame": Spell("flame", 5, 1, "caster.AGI", "caster.DEX", 0, False, "applyStatus('burn', victim)", "pass"),
     "fireball": Spell("fireball", 15, 1, "caster.MP * 3", "caster.DEX", .25, False, "applyStatus('burn', victim)", "applyStatus('burn', caster)"),
     "nuke": Spell("nuke", 100784, 999, "caster.MaxHP * 99999", inf, 0, True, "pass", "pass"),
-    "doom": Spell("doom", 100, 1, "0", inf, 0, False, "applyStatus('impending doom', victim)", "pass"),
+    "doom": Spell("doom", 100, 1, "0", "inf", 0, False, "applyStatus('impending doom', victim)", "pass"),
 
     # buffs
-    "warcry": Spell("warcry", 10, 1, "0", inf, 0, True, "pass", "applyStatus('STR up', caster)"),
-    "foresee": Spell("foresee", 10, 1, "0", inf, 0, True, "pass", "applyStatus('DEX up', caster)"),
-    "protection": Spell("protection", 10, 1, "0", inf, 0, True, "pass", "applyStatus('DEF up', caster)"),
-    "evasion": Spell("evasion", 10, 1, "0", inf, 0, True, "pass", "applyStatus('AGI up', caster)"),
-    "bunny": Spell("bunny", 50, 1, "0", inf, 0, True, "applyStatus('bunnied', victim)", "applyStatus('bunny', caster)"),
+    "warcry": Spell("warcry", 10, 1, "0", "inf", 0, True, "pass", "applyStatus('STR up', caster)"),
+    "foresee": Spell("foresee", 10, 1, "0", "inf", 0, True, "pass", "applyStatus('DEX up', cast   er)"),
+    "protection": Spell("protection", 10, 1, "0", "inf", 0, True, "pass", "applyStatus('DEF up', caster)"),
+    "evasion": Spell("evasion", 10, 1, "0", "inf", 0, True, "pass", "applyStatus('AGI up', caster)"),
+    "bunny": Spell("bunny", 50, 1, "0", "inf", 0, True, "applyStatus('bunnied', victim)", "applyStatus('bunny', caster)"),
 
     # debuffs
-    "threaten": Spell("threaten", 10, 1, "0", inf, 0, True, "applyStatus('STR down', victim)", "pass"),
-    "trip": Spell("trip", 10, 1, "0", inf, 0, True, "applyStatus('DEX down', victim)", "pass"),
-    "exploit": Spell("exploit", 10, 1, "0", inf, 0, True, "applyStatus('DEF down', victim)", "pass"),
-    "slow": Spell("slow", 10, 1, "0", inf, 0, True, "applyStatus('AGI down', victim)", "pass"),
+    "threaten": Spell("threaten", 10, 1, "0", "inf", 0, True, "applyStatus('STR down', victim)", "pass"),
+    "trip": Spell("trip", 10, 1, "0", "inf", 0, True, "applyStatus('DEX down', victim)", "pass"),
+    "exploit": Spell("exploit", 10, 1, "0", "inf", 0, True, "applyStatus('DEF down', victim)", "pass"),
+    "slow": Spell("slow", 10, 1, "0", "inf", 0, True, "applyStatus('AGI down', victim)", "pass"),
 
     # healing & other
-    "bravery": Spell("bravery", 5, 1, "caster.DEF", inf, -1, True, "pass", "pass"),
-    "courage": Spell("courage", 15, 2, "caster.DEF", inf, -1.2, True, "pass", "pass"),
-    "valor": Spell("valor", 45, 3, "caster.DEF", inf, -1.8, True, "pass", "if(randint(1,4) == 1): applyStatus('DEF up', caster)"),
+    "bravery": Spell("bravery", 5, 1, "caster.DEF", "inf", -1, True, "pass", "pass"),
+    "courage": Spell("courage", 15, 2, "caster.DEF", "inf", -1.2, True, "pass", "pass"),
+    "valor": Spell("valor", 45, 3, "caster.DEF", "inf", -1.8, True, "pass", "if(randint(1,4) == 1): applyStatus('DEF up', caster)"),
 
     # items
 
@@ -146,6 +149,12 @@ statuses = {
     "DEF up": Status("DEF up", 0, True, "victim.DEF *= 6/5", "victim.DEF /= 6/5"),
     "AGI up": Status("AGI up", 0, True, "victim.AGI *= 6/5", "victim.AGI /= 6/5"),
     "bunny": Status("bunny", .10, True, "victim.AGI *= 4\nvictim.STR /= 8", "victim.AGI /= 4\nvictim.STR *= 8"),
+
+    "STR up 1": Status("STR up 1", 0, True, "victim.STR += 1", "victim.STR -= 1"),
+    "DEX up 1": Status("DEX up 1", 0, True, "victim.DEX += 1", "victim.DEX -= 1"),
+    "DEF up 1": Status("DEF up 1", 0, True, "victim.DEF += 1", "victim.DEF -= 1"),
+    "AGI up 1": Status("AGI up 1", 0, True, "victim.AGI += 1", "victim.AGI -= 1"),
+
 
     # stat debuffs
     "STR down": Status("STR down", 0, True, "victim.STR /= 6/5", "victim.STR *= 6/5"),
@@ -161,7 +170,7 @@ statuses = {
 
     # DOT effects
     "burn": Status("burn", .25, False, """
-burndmg = ceil(victim.MaxHP / 20)
+burndmg = ceil(victim.MaxHP / 18)
 if (victim.name == "you"):
     print('you took ' + str(burndmg) + ' damage from burn')
 else:
@@ -252,16 +261,16 @@ def castSpell(spell:object, caster:object, victim:object):
             print(caster.name + " attack")
         else:
             print(caster.name + " cast " + spell.name + "!")
-    if (spell.hitStat == inf): bypassHit = True
+    if (eval(spell.hitStat) == inf): bypassHit = True
     else: bypassHit = False
     spellHit = False
     for each in range(spell.procs):
         if (bypassHit or calcHit(eval(spell.hitStat), victim.AGI)):
             spellHit = True
             if (spell.ignoreEnemyDEF):
-                damage = ceil((eval(spell.dmgStat)) * (randint(90, 110)/100))
+                damage = ceil((eval(spell.dmgStat)) * (randint(100, 115)/100))
             else:
-                damage = ceil((eval(spell.dmgStat) * (randint(90, 110)/100)) - victim.DEF)
+                damage = ceil((eval(spell.dmgStat) * (randint(100, 115)/100)) - victim.DEF)
             if (damage <= 0):
                 if (eval(spell.hitStat) != 0):
                     print("0 damage")
@@ -388,8 +397,9 @@ def unequip(equipper:object, slot:str):
     for code in armor.onHurt:
         equipper.onHurt.remove(code)
 
-def generateEquip(baseHealth:int, statups:int = 0, perks:int = 0, quirks:int = 0):
+def generateEquip(baseHealth:int, slot:str = choice('weapon','head','chest','legs','charm'), statups:int = 0, perks:int = 0, quirks:int = 0):
     HP = log(-statups / (ceil(baseHealth / (10-(2*perks)+(2*quirks)))) + 1) + baseHealth
+    MP = 0
     STR = 0
     DEX = 0
     DEF = 0
@@ -400,21 +410,47 @@ def generateEquip(baseHealth:int, statups:int = 0, perks:int = 0, quirks:int = 0
     onCast = []
     onHurt = []
     for each in range(statups):
-        increase = choice("STR", "DEX", "DEF", "AGI")
+        increase = choice("MP", "STR", "DEX", "DEF", "AGI")
         exec(increase + " += 1")
+        if (increase == "MP"):
+            MP += 1
     for each in range(perks):
         onWhat = choice("onTurnStart", "onAttack", "onCast", "onHit", "onHurt")
-        doWhat = choice("enemy.HP -= 1\nprint('the ' + enemy.name + ' took 1 damage')",
-"player.HP += 1\nprint('you healed 1 hp')\nif(player.HP > player.MaxHP): player.HP = player.MaxHP",
-"player.HP -= 1\nenemy.HP -= 3\nprint('you took 1 damage')\nprint('the ' + enemy.name + ' took 3 damage)",
-"applyEffect('STR down 1', enemy, True)","applyEffect('DEX down 1', enemy, True)",
-"applyEffect('DEF down 1', enemy, True)","applyEffect('AGI down 1', enemy, True)")
+        doWhat = choice(
+            "hurt = ceil(enemy.MaxHP / 30)\nenemy.HP -= hurt\nprint('the' + enemy.name + 'took ' + str(heal) + ' damage')",
+            "heal = ceil(player.MaxHP / 25)\nplayer.HP += heal\nprint('you healed ' + str(heal) + ' hp')\nif(player.HP > player.MaxHP): player.HP = player.MaxHP",
+            "player.HP -= 2\nenemy.HP -= 10\nprint('you took 2 damage')\nprint('the ' + enemy.name + ' took 10 damage)",
+            "applyEffect('STR down 1', enemy)",
+            "applyEffect('DEX down 1', enemy)",
+            "applyEffect('DEF down 1', enemy)",
+            "applyEffect('AGI down 1', enemy)",
+            "applyEffect('STR up 1', player)",
+            "applyEffect('DEX up 1', player)",
+            "applyEffect('DEF up 1', player)",
+            "applyEffect('AGI up 1', player)",
+            "if (randint(1,10) == 1): applyEffect('poison', enemy)",
+            "if (randint(1,10) == 1): applyEffect('burn', enemy)"
+        )
         exec(onWhat + ".append(" + doWhat +")")
     for each in range(quirks):
         onWhat = choice("onTurnStart", "onAttack", "onCast", "onHit", "onHurt")
-        doWhat = choice("player.HP -= 1\nprint('you took 1 damage')", "enemy.HP += 1\n")
+        doWhat = choice(
+            "hurt = ceil(player.MaxHP / 25)\nplayer.HP -= hurt\nprint('you took ' + str(hurt) + ' damage')\nif(player.HP > player.maxHP): player.HP = player.MaxHP", 
+            "heal = ceil(enemy.MaxHP / 25)\nenemy.HP += heal\nprint('the' + enemy.name + 'healed ' + str(heal) + ' hp')\nif(enemy.HP > enemy.maxHP): enemy.HP = enemy.MaxHP"
+            "applyEffect('STR up 1', enemy)",
+            "applyEffect('DEX up 1', enemy)",
+            "applyEffect('DEF up 1', enemy)",
+            "applyEffect('AGI up 1', enemy)",
+            "applyEffect('STR down 1', player)",
+            "applyEffect('DEX down 1', player)",
+            "applyEffect('DEF down 1', player)",
+            "applyEffect('AGI down 1', player)",
+            "if (randint(1,10) == 1): applyEffect('poison', player)",
+            "if (randint(1,10) == 1): applyEffect('burn', player)"
+        )
         exec(onWhat + ".append(" + doWhat +")")
-
+    return Equipment(slot, HP, MP, STR, DEX, DEF, AGI, onTurnStart, onAttack, onCast, onHit, onHurt)
+    
 # for dictionaries where the values are only integers
 def incrementDict(item:str=None, given:dict = {}, change:int=-1):
     if (item == None):
@@ -482,6 +518,7 @@ def doCombat(player: object, enemy: object):
             for each in enemy.status:
                 tickStatus(each, enemy)
     if (player.HP > 0):
+        (player.status).reverse()
         for each in player.status:
             each = copy(statuses[each])
             removeStatus(each, player)
@@ -560,7 +597,7 @@ def restSite(player: object):
             clearTerminal()
             break
 
-player = Entity("you", 20, 5, 3, 5, 0, 0, ["doublecut", "bolt", "warcry", "protection", "bravery"], { }, [], ["print('turn started')"], ["print('attacked enemy')"], ["print('casted a spell')"], ["print('hit enemy')"], ["print('got hurt')"])
+player = Entity("you", 20, 5, 3, 5, 0, 0, ["doublecut", "bolt", "warcry", "protection", "bravery"], { }, [])
 
 doCombat(player, "rat")
 doCombat(player, "wolf")
