@@ -6,6 +6,71 @@ from time import *
 from copy import *
 import os
 
+armor_adjectives = [
+    "durable",
+    "sturdy",
+    "resilient",
+    "heavy",
+    "lightweight",
+    "reinforced",
+    "imposing",
+    "gleaming",
+    "shiny",
+    "polished",
+    "ornate",
+    "simple",
+    "intricate",
+    "decorative",
+    "protective",
+    "indestructible",
+    "formidable",
+    "battle-worn",
+    "spiked",
+    "hardened",
+    "plate",
+    "leather",
+    "flexible",
+    "heavy-duty",
+    "glimmering",
+    "enchanted",
+    "runic",
+    "sacred",
+    "ethereal",
+    "resistant",
+    "insulated",
+    "thick",
+    "layered",
+    "armored",
+    "reinforced",
+    "fortified",
+    "resplendent",
+    "tough",
+    "sleek",
+    "metallic",
+    "riveted",
+    "chiseled",
+    "scarred",
+    "adaptable",
+    "immaculate",
+    "battle-ready",
+    "weathered",
+    "custom",
+    "magicked",
+    "ancient",
+    "mythic",
+    "unyielding",
+    "combat-ready",
+    "heavy-duty",
+    "sharp-edged",
+    "bladed",
+    "scaled",
+    "enigmatic",
+    "fireproof",
+    "shockproof",
+    "cute",
+    "repaired"
+]
+
 def clearTerminal():
     os.system('cls' if os.name == 'nt' else 'clear')
 
@@ -33,7 +98,8 @@ class Spell:
         self.selfEffect = selfEffect
 
 class Equipment:
-    def __init__(self, slot: str, BonusHP: int, BonusMP: int, BonusSTR: int, BonusDEX: int, BonusDEF: int, BonusAGI: int, onTurnStart: list, onAttack: list, onCast: list, onHit: list, onHurt: list):
+    def __init__(self, name:str, slot: str, BonusHP: int, BonusMP: int, BonusSTR: int, BonusDEX: int, BonusDEF: int, BonusAGI: int, onTurnStart: list, onAttack: list, onCast: list, onHit: list, onHurt: list):
+        self.name = name
         self.slot = slot
         self.HP = BonusHP
         self.MP = BonusMP
@@ -78,12 +144,14 @@ class Entity:
         self.blessings = blessings
         # items held by the entity
         self.inventory = inventory
+        # armor held by the entity
+        self.heldarmors = {}
         # equipped items
         self.equip = {
             "weapon": None,
-            "head": None,
-            "chest": None,
-            "legs": None,
+            "helmet": None,
+            "chestplate": None,
+            "boots": None,
             "charm": None
         }
         # combat conditionals, default blank, all will be exec()'d
@@ -378,9 +446,9 @@ def unequip(equipper:object, slot:str):
     armor = equipper.equip[slot]
 
     equipper.MaxHP -= armor.HP
-    if equipper.HP > equipper.maxHP: equipper.HP = equipper.MaxHP
+    if equipper.HP > equipper.MaxHP: equipper.HP = equipper.MaxHP
     equipper.MaxMP -= armor.MP
-    if equipper.MP > equipper.maxMP: equipper.MP = equipper.MaxMP
+    if equipper.MP > equipper.MaxMP: equipper.MP = equipper.MaxMP
     equipper.STR -= armor.STR
     equipper.DEX -= armor.DEX
     equipper.DEF -= armor.DEF
@@ -397,20 +465,31 @@ def unequip(equipper:object, slot:str):
     for code in armor.onHurt:
         equipper.onHurt.remove(code)
 
-def generateEquip(baseHealth:int, slot:str = choice('weapon','head','chest','legs','charm'), statups:int = 0, perks:int = 0, quirks:int = 0):
-    HP = log(-statups / (ceil(baseHealth / (10-(2*perks)+(2*quirks)))) + 1) + baseHealth
+def generateEquip(player:object, dropper: str, baseHealth:int, statups:int = 0, perks:int = 0, quirks:int = 0, slot:str = 'random'):
+    if (slot == 'random'):
+        slot = choice(['weapon','helmet','chestplate','boots','charm'])
+    HP = -statups/(ceil(baseHealth/(10-(2*perks)+(2*quirks))))
+    if HP < 0:
+        override = HP
+        HP = 1
+    else:
+        override = 0
+    HP = round(log(HP) + override)
     MP = 0
     STR = 0
     DEX = 0
     DEF = 0
     AGI = 0
+    name = choice(armor_adjectives) + " " + slot + " of the " + dropper.name
+    while (name in player.inventory.keys()):
+        name = choice(armor_adjectives) + slot + " of the " + dropper.name
     onTurnStart = []
     onAttack = []
     onHit = []
     onCast = []
     onHurt = []
     for each in range(statups):
-        increase = choice("MP", "STR", "DEX", "DEF", "AGI")
+        increase = choice(["MP", "STR", "DEX", "DEF", "AGI"])
         exec(increase + " += 1")
         if (increase == "MP"):
             MP += 1
@@ -449,9 +528,9 @@ def generateEquip(baseHealth:int, slot:str = choice('weapon','head','chest','leg
             "if (randint(1,10) == 1): applyEffect('burn', player)"
         )
         exec(onWhat + ".append(" + doWhat +")")
-    return Equipment(slot, HP, MP, STR, DEX, DEF, AGI, onTurnStart, onAttack, onCast, onHit, onHurt)
+    return Equipment(name, slot, HP, MP, STR, DEX, DEF, AGI, onTurnStart, onAttack, onCast, onHit, onHurt)
     
-# for dictionaries where the values are only integers
+# for dictionaries where the key's values are only numbers
 def incrementDict(item:str=None, given:dict = {}, change:int=-1):
     if (item == None):
         print("no item given to , returned statement")
@@ -473,12 +552,16 @@ def doCombat(player: object, enemy: object):
             exec(each)
         print("[Your HP: " + str(player.HP) + " / " + str(player.MaxHP) + "] [Your MP: " + str(player.MP)+ " / " + str(player.MaxMP) + "]")
         chosen = verify("what would you like to do? [attack, spell, item]\n> ", ["attack", "spell", "skill", "item", "a", "s", "i"])
+        # player uses attack action
         if (chosen == "attack" or chosen == "a"):
             clearTerminal()
             castSpell("attack", player, enemy)
+            # proc on attack abilities
             for each in player.onAttack:
                 exec(each)
+        # player casts spell
         elif (chosen == "spell" or chosen == "skill" or chosen == "s"):
+            # list player's spells
             print("")
             print("your spells:")
             for each in player.spells:
@@ -486,52 +569,77 @@ def doCombat(player: object, enemy: object):
                 print(each.name + ": " + str(each.cost) + " MP")
             print("")
             allowed = player.spells + ["back"]
-            chosen = verify("choose an skill to use, or type back to go back\n> ", allowed)
+            # let the player choose a spell to cast
+            chosen = verify("choose an spell to cast, or type back to go back\n> ", allowed)
+            # player wants to go back
             if (chosen == "back"):
+                # restart loop (player chooses action again)
                 clearTerminal()
                 continue
+            # player casts a spell
             else:
                 clearTerminal()
+                # check for enough MP
                 if (spells[chosen].cost <= player.MP):
+                    # cast the spell
                     castSpell(chosen, player, enemy)
+                    # proc on cast abilities
                     for each in player.onCast:
                         exec(each)
                 else:
+                    # restart loop (player chooses action again)
                     clearTerminal()
                     print("not enough mana!")
                     print("")
                     continue
+        # player uses an item
         elif (chosen == "item" or chosen == "i"):
             print("WHAT THE HELL IS AN ITEM *eagle screech*")
             continue
+        # proc all of the player's status effects
         for each in player.status:
             tickStatus(each, player)
+        # regenerate 1 mana for each 10 max mana the player has
         player.MP += ceil(player.MaxMP / 10)
+        # if the player has overflowing mana, bring it back down to the max
         if (player.MP > player.MaxMP): player.MP = player.MaxMP
+        # if the player is alive:
         if (enemy.HP > 0):
+            # proc enemy's turn start abilities
             for each in enemy.onTurnStart:
                 exec(each)
             print("")
+            # enemy casts a random spell from their spell list
             castSpell(choice(enemy.spells), enemy, player)
+            # proc enemy's on attack abilities
             for each in enemy.onAttack:
                 exec(each)
+            # proc all of its status effects
             for each in enemy.status:
                 tickStatus(each, enemy)
     if (player.HP > 0):
+        # remove statuses from player in reverse order
         (player.status).reverse()
         for each in player.status:
             each = copy(statuses[each])
             removeStatus(each, player)
         print("")
         print("victory!")
+        # give the player xp points
         xpGain = round(enemy.MaxHP * uniform(1, 1.4)) + randint(0, 3)
         print("you gained " + str(xpGain) + " xp")
         player.XP += xpGain
         del xpGain
+        # enemy has a chance to drop equipment
+        if (randint(1, 1) == 1):
+            dropped = generateEquip(player, enemy, player.level/max((player.level^2)/enemy.MaxHP , 1), round((enemy.STR + enemy.DEX + enemy.DEF + enemy.AGI)/2))
+            player.heldarmors[dropped.name] = dropped
+            print("the " + enemy.name + " dropped a " + dropped.name)
+        # if the player's xp is high enough, increase level
         while (player.XP >= player.MaxXP):
             print("")
-            print("*** level up! ***")
-            print("Max HP increased by 5, max MP increased by 2, and all stats increased by 1!")
+            print("<<< level up! >>>")
+            print("max HP increased by 5, max MP increased by 2, and all stats increased by 1!")
             player.MaxHP += 5
             player.MaxMP += 2
             player.STR += 1
@@ -543,12 +651,12 @@ def doCombat(player: object, enemy: object):
             if (chosen == "HP"):
                 player.MaxHP += 3
                 player.HP = player.MaxHP
-                print("Max HP increased by 3")
+                print("max HP increased by 5")
                 print("HP fully restored!")
             elif (chosen == "MP"):
                 player.MaxMP += 1
                 player.MP = player.MaxMP
-                print("Max MP increased by 2")
+                print("max MP increased by 2")
                 print("MP fully restored!")
             else:
                 exec("player." + chosen + " += 1")
@@ -575,10 +683,10 @@ def restSite(player: object):
     print("")
     chosen = None
     while (True):
-        chosen = verify("what will you do? [rest, equip, leave]\n> ", ["rest", "equip", "leave", "r", "e", "l"])
+        chosen = verify("what will you do? [rest, equip, unequip, drop, leave]\n> ", ["rest", "equip", "unequip", "drop", "leave", "r", "e", "u", "d", "l"])
         if (chosen == "rest" or chosen == "r"):
             if (player.HP >= player.MaxHP and player.MP >= player.MaxMP):
-                print("you already feel rested, no reason to do so")
+                print("you already feel rested, you don't feel the need to do so again right now")
                 input("enter anything to continue...\n> ")
                 clearTerminal()
             else:
@@ -588,9 +696,35 @@ def restSite(player: object):
                 input("enter anything to continue...\n> ")
                 clearTerminal()
         elif (chosen == "equip" or chosen == "e"):
-            print("you're not even sure what equipping means, so you decide not to do that, whatever it means.")   
-            input("enter anything to continue... ")
-            clearTerminal()
+            print('\nyour equipment:\n')
+            for each in player.heldarmors.keys():
+                print(each)
+            select = verify("\nwhat would you like to equip? type back to go back\n> ", list(player.heldarmors.keys()) + ["back"])
+            if (select == 'back'):
+                clearTerminal()
+                continue
+            elif (select in player.heldarmors.keys()):
+                print(player.heldarmors)
+                select = player.heldarmors.get(select)
+                print(player.equip)
+                if (player.equip.get(select.slot, None) is not None):
+                    print("you unequip your " + select.name)
+                    unequip(player, select.slot)
+                equip(player, player.heldarmors.get(select.name), select.slot)
+                print('you equip the ' + select.name)
+                input("enter anything to continue...\n> ")
+                clearTerminal()
+        elif (chosen == "unequip" or chosen == "u"):
+            select = verify("\nwhat slot would you like to unequip? type back to go back [weapon, helmet, chestplate, boots, charm] \n> ", ["weapon", "helmet", 'chestplate', 'boots', 'charm', 'back'])
+            select = player.equip.get(select)
+            if (select != None):
+                print("you unequip the " + select.name)
+                unequip(player, select.slot)
+            else:
+                print("you don't have anything to unequip there! ")
+                input("enter anything to continue...\n> ")
+        elif (chosen == "drop" or chosen == "d"):
+            pass
         elif (chosen == "leave" or chosen == "l"):
             print("")
             input("enter anything to continue...\n> ")
