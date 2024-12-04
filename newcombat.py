@@ -710,8 +710,9 @@ def restSite(player: object):
                 if (player.equip.get(select.slot, None) is not None):
                     print("you unequip your " + select.name)
                     unequip(player, select.slot)
-                equip(player, player.heldarmors.get(select.name), select.slot)
                 print('you equip the ' + select.name)
+                equip(player, player.heldarmors.get(select.name), select.slot)
+                player.heldarmors.pop(select.name)
                 input("enter anything to continue...\n> ")
                 clearTerminal()
         elif (chosen == "unequip" or chosen == "u"):
@@ -720,6 +721,7 @@ def restSite(player: object):
             if (select != None):
                 print("you unequip the " + select.name)
                 unequip(player, select.slot)
+                player.heldarmors[select.name] = select
             else:
                 print("you don't have anything to unequip there! ")
                 input("enter anything to continue...\n> ")
