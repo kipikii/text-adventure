@@ -185,12 +185,12 @@ spells = {
     "bolt": Spell("bolt", 5, 1, "caster.MP * .75", "caster.AGI", 0, False, "pass", "pass"),
     "flame": Spell("flame", 5, 1, "caster.AGI", "caster.DEX", 0, False, "applyStatus('burn', victim)", "pass"),
     "fireball": Spell("fireball", 15, 1, "caster.MP * 3", "caster.DEX", .25, False, "applyStatus('burn', victim)", "applyStatus('burn', caster)"),
-    "nuke": Spell("nuke", 100784, 999, "caster.MaxHP * 99999", inf, 0, True, "pass", "pass"),
+    "nuke": Spell("nuke", 100784*0, 999, "caster.MaxHP * 99999", inf, 0, True, "pass", "pass"),
     "doom": Spell("doom", 100, 1, "0", "inf", 0, False, "applyStatus('impending doom', victim)", "pass"),
 
     # buffs
     "warcry": Spell("warcry", 10, 1, "0", "inf", 0, True, "pass", "applyStatus('STR up', caster)"),
-    "foresee": Spell("foresee", 10, 1, "0", "inf", 0, True, "pass", "applyStatus('DEX up', cast   er)"),
+    "foresee": Spell("foresee", 10, 1, "0", "inf", 0, True, "pass", "applyStatus('DEX up', caster)"),
     "protection": Spell("protection", 10, 1, "0", "inf", 0, True, "pass", "applyStatus('DEF up', caster)"),
     "evasion": Spell("evasion", 10, 1, "0", "inf", 0, True, "pass", "applyStatus('AGI up', caster)"),
     "bunny": Spell("bunny", 50, 1, "0", "inf", 0, True, "applyStatus('bunnied', victim)", "applyStatus('bunny', caster)"),
@@ -279,10 +279,15 @@ monsters = {
 def calcHit(attackerHit: int, victimDodge: int):
     if (victimDodge < 1): victimDodge = 1
     if (attackerHit < 1): attackerHit = 1
-    if (victimDodge == 3): 
-        hitChance = round(log(attackerHit * (2.999999 / (victimDodge + 0.0000001))) * 40  ) + 90
-    else: 
-        hitChance = round(log((attackerHit) * (3 / (victimDodge + 0.0000001))) * 40) + 90
+    if (isinf(attackerHit)): bypassHit = True
+    else: bypassHit = False
+    if (bypassHit):
+        return True
+    else:
+        if (victimDodge == 3): 
+            hitChance = round(log(attackerHit * (2.999999 / (victimDodge + 0.0000001))) * 40  ) + 90
+        else: 
+            hitChance = round(log((attackerHit) * (3 / (victimDodge + 0.0000001))) * 40) + 90
     if (hitChance < 30): hitChance = 30
     if (hitChance >= randint(1,100)): return True
     else: return False
@@ -303,6 +308,7 @@ def applyStatus(status: str, victim:object, silent:bool = False):
 def removeStatus(status: str, victim:object, silent:bool = False):
     if (status.name in victim.status):
         victim.status.remove(status.name)
+        exec(status.reverseEffect)
         if (silent == False):
             if (victim.name == "you"):
                 print("you no longer have " + status.name)
@@ -329,7 +335,7 @@ def castSpell(spell:object, caster:object, victim:object):
             print(caster.name + " attack")
         else:
             print(caster.name + " cast " + spell.name + "!")
-    if (eval(spell.hitStat) == inf): bypassHit = True
+    if (spell.hitStat == inf): bypassHit = True
     else: bypassHit = False
     spellHit = False
     for each in range(spell.procs):
@@ -340,10 +346,10 @@ def castSpell(spell:object, caster:object, victim:object):
             else:
                 damage = ceil((eval(spell.dmgStat) * (randint(100, 115)/100)) - victim.DEF)
             if (damage <= 0):
-                if (eval(spell.hitStat) != 0):
+                if (spell.hitStat != 0):
                     print("0 damage")
             else:
-                if (eval(spell.hitStat) != 0):
+                if (spell.hitStat != 0):
                     print(str(ceil(damage)) + " damage")
                     victim.HP -= ceil(damage)
                     for each in caster.onHit:
@@ -427,6 +433,17 @@ def verify(question:str=None, allowed:list=None):
                 return chosen
 
 def equip(equipper:object, armor:object, slot:str):
+    subtract = lambda x, y: x - y
+    def diff(input1, input2):
+        return str(subtract(input1, input2))
+
+    savedMaxHP = equipper.MaxHP
+    savedMaxMP = equipper.MaxMP
+    savedSTR = equipper.STR
+    savedDEX = equipper.DEX
+    savedDEF = equipper.DEF
+    savedAGI = equipper.AGI
+
     equipper.equip[slot] = armor
 
     equipper.MaxHP += armor.HP
@@ -442,7 +459,29 @@ def equip(equipper:object, armor:object, slot:str):
     equipper.onHit += armor.onHit
     equipper.onHurt += armor.onHurt
 
+    print("\nHP: " + diff(equipper.MaxHP, savedMaxHP))
+    print("MP: " + diff(equipper.MaxMP, savedMaxMP))
+    print("STR: " + diff(equipper.STR,savedSTR))
+    print("DEX: " + diff(equipper.DEX,savedDEX))
+    print("DEF: " + diff(equipper.DEF,savedDEF))
+    print("AGI: " + diff(equipper.AGI,savedAGI))
+
+    if equipper.HP > equipper.MaxHP: equipper.HP = equipper.MaxHP
+    if equipper.MaxHP < 0: print("warning: your max hp is less than 0! increase your max hp and heal, or you'll die after your next turn")
+    if equipper.HP < 0: print("warning: your hp is less than 0! heal before you go into your next fight, or you'll die after your next turn")
+
 def unequip(equipper:object, slot:str):
+    subtract = lambda x, y: x - y
+    def diff(input1, input2):
+        return str(subtract(input1, input2))
+
+    savedMaxHP = equipper.MaxHP
+    savedMaxMP = equipper.MaxMP
+    savedSTR = equipper.STR
+    savedDEX = equipper.DEX
+    savedDEF = equipper.DEF
+    savedAGI = equipper.AGI
+
     armor = equipper.equip[slot]
 
     equipper.MaxHP -= armor.HP
@@ -465,35 +504,51 @@ def unequip(equipper:object, slot:str):
     for code in armor.onHurt:
         equipper.onHurt.remove(code)
 
+    print("\nHP: " + diff(equipper.MaxHP, savedMaxHP))
+    print("MP: " + diff(equipper.MaxMP, savedMaxMP))
+    print("STR: " + diff(equipper.STR,savedSTR))
+    print("DEX: " + diff(equipper.DEX,savedDEX))
+    print("DEF: " + diff(equipper.DEF,savedDEF))
+    print("AGI: " + diff(equipper.AGI,savedAGI))
+
+    if equipper.HP > equipper.MaxHP: equipper.HP = equipper.MaxHP
+    if equipper.MaxHP < 0: print("warning: your max hp is less than 0! you will die after your next turn if you don't increase your max hp and rest")
+    if equipper.HP < 0: print("warning: your hp is less than 0! heal before you go into your next fight, or you'll die after your next turn")
+
 def generateEquip(player:object, dropper: str, baseHealth:int, statups:int = 0, perks:int = 0, quirks:int = 0, slot:str = 'random'):
     if (slot == 'random'):
         slot = choice(['weapon','helmet','chestplate','boots','charm'])
-    HP = -statups/(ceil(baseHealth/(10-(2*perks)+(2*quirks))))
-    if HP < 0:
-        override = HP
-        HP = 1
-    else:
-        override = 0
-    HP = round(log(HP) + override)
-    MP = 0
-    STR = 0
-    DEX = 0
-    DEF = 0
-    AGI = 0
     name = choice(armor_adjectives) + " " + slot + " of the " + dropper.name
     while (name in player.inventory.keys()):
         name = choice(armor_adjectives) + slot + " of the " + dropper.name
+    bonusHP = statups/max(ceil(baseHealth/(10-(2*perks)+(2*quirks))), 1)
+    if bonusHP < 0:
+        override = bonusHP
+        bonusHP = 1
+    else:
+        override = 0
+    bonusHP = round(log(bonusHP) + override)
+
+    list_of_things = [0, 0, 0, 0, 0]
+    for _ in range(statups):
+        index = -1
+        a = randint(0,4)
+        for _ in list_of_things:
+            index += 1
+            if a == index: 
+                list_of_things[index] += randint(1,2)
+    bonusMP = list_of_things[0]
+    bonusSTR = list_of_things[1]
+    bonusDEX = list_of_things[2]
+    bonusDEF = list_of_things[3]
+    bonusAGI = list_of_things[4]
+
     onTurnStart = []
     onAttack = []
     onHit = []
     onCast = []
     onHurt = []
-    for each in range(statups):
-        increase = choice(["MP", "STR", "DEX", "DEF", "AGI"])
-        exec(increase + " += 1")
-        if (increase == "MP"):
-            MP += 1
-    for each in range(perks):
+    for _ in list(range(perks)):
         onWhat = choice("onTurnStart", "onAttack", "onCast", "onHit", "onHurt")
         doWhat = choice(
             "hurt = ceil(enemy.MaxHP / 30)\nenemy.HP -= hurt\nprint('the' + enemy.name + 'took ' + str(heal) + ' damage')",
@@ -511,7 +566,7 @@ def generateEquip(player:object, dropper: str, baseHealth:int, statups:int = 0, 
             "if (randint(1,10) == 1): applyEffect('burn', enemy)"
         )
         exec(onWhat + ".append(" + doWhat +")")
-    for each in range(quirks):
+    for _ in list(range(quirks)):
         onWhat = choice("onTurnStart", "onAttack", "onCast", "onHit", "onHurt")
         doWhat = choice(
             "hurt = ceil(player.MaxHP / 25)\nplayer.HP -= hurt\nprint('you took ' + str(hurt) + ' damage')\nif(player.HP > player.maxHP): player.HP = player.MaxHP", 
@@ -528,7 +583,7 @@ def generateEquip(player:object, dropper: str, baseHealth:int, statups:int = 0, 
             "if (randint(1,10) == 1): applyEffect('burn', player)"
         )
         exec(onWhat + ".append(" + doWhat +")")
-    return Equipment(name, slot, HP, MP, STR, DEX, DEF, AGI, onTurnStart, onAttack, onCast, onHit, onHurt)
+    return Equipment(name, slot, round(bonusHP), round(bonusMP), round(bonusSTR), round(bonusDEX), round(bonusDEF), round(bonusAGI), onTurnStart, onAttack, onCast, onHit, onHurt)
     
 # for dictionaries where the key's values are only numbers
 def incrementDict(item:str=None, given:dict = {}, change:int=-1):
@@ -622,7 +677,7 @@ def doCombat(player: object, enemy: object):
         (player.status).reverse()
         for each in player.status:
             each = copy(statuses[each])
-            removeStatus(each, player)
+            removeStatus(each, player, True)
         print("")
         print("victory!")
         # give the player xp points
@@ -631,10 +686,13 @@ def doCombat(player: object, enemy: object):
         player.XP += xpGain
         del xpGain
         # enemy has a chance to drop equipment
-        if (randint(1, 1) == 1):
-            dropped = generateEquip(player, enemy, player.level/max((player.level^2)/enemy.MaxHP , 1), round((enemy.STR + enemy.DEX + enemy.DEF + enemy.AGI)/2))
-            player.heldarmors[dropped.name] = dropped
-            print("the " + enemy.name + " dropped a " + dropped.name)
+        dropchance = round(max(normalvariate(.4, 1), 0))
+        if (dropchance > 0):
+            print("\nhere's what you found:\n")
+            for _ in range(dropchance):
+                dropped = generateEquip(player, enemy, round(log(enemy.MaxHP)*(player.level^2)), floor((enemy.STR + enemy.DEX + enemy.DEF + enemy.AGI)/5))
+                player.heldarmors[dropped.name] = dropped 
+                print(" + " + dropped.name)
         # if the player's xp is high enough, increase level
         while (player.XP >= player.MaxXP):
             print("")
@@ -651,16 +709,16 @@ def doCombat(player: object, enemy: object):
             if (chosen == "HP"):
                 player.MaxHP += 3
                 player.HP = player.MaxHP
-                print("max HP increased by 5")
+                print(f"max HP increased by {str(3)}")
                 print("HP fully restored!")
             elif (chosen == "MP"):
-                player.MaxMP += 1
+                player.MaxMP += 2
                 player.MP = player.MaxMP
-                print("max MP increased by 2")
+                print(f"max MP increased by {str(2)}")
                 print("MP fully restored!")
             else:
-                exec("player." + chosen + " += 1")
-                print(chosen + " increased by 1")
+                exec(f"player.{chosen} += {1}")
+                print(f"{chosen} increased by {str(1)}")
             player.XP -= player.MaxXP
             player.MaxXP = round(player.MaxXP * 1.5)
             player.level += 1
@@ -697,19 +755,37 @@ def restSite(player: object):
                 clearTerminal()
         elif (chosen == "equip" or chosen == "e"):
             print('\nyour equipment:\n')
+            index = 0
             for each in player.heldarmors.keys():
-                print(each)
-            select = verify("\nwhat would you like to equip? type back to go back\n> ", list(player.heldarmors.keys()) + ["back"])
+                print(f"{index}. {each}")
+                index += 1
+            weirdlist = list(range(len(player.heldarmors.keys())))
+            weirdlist = [str(each) for each in weirdlist]
+            select = verify("\nwhat would you like to equip? type back to go back\n> ", list(player.heldarmors.keys()) + ["back"] + weirdlist)
             if (select == 'back'):
                 clearTerminal()
                 continue
             elif (select in player.heldarmors.keys()):
-                print(player.heldarmors)
                 select = player.heldarmors.get(select)
-                print(player.equip)
-                if (player.equip.get(select.slot, None) is not None):
-                    print("you unequip your " + select.name)
-                    unequip(player, select.slot)
+                if (player.equip.get(select.slot, None) != None):
+                    toUnequip = player.equip.get(select.slot)
+                    print("you unequip your " + toUnequip.name)
+                    unequip(player, toUnequip.slot)
+                    player.heldarmors[toUnequip.name] = toUnequip
+                print('you equip the ' + select.name)
+                equip(player, player.heldarmors.get(select.name), select.slot)
+                player.heldarmors.pop(select.name)
+                input("enter anything to continue...\n> ")
+                clearTerminal()
+            else:
+                select = int(select)
+                select = list(player.heldarmors.keys())[select]
+                select = player.heldarmors.get(select)
+                if (player.equip.get(select.slot, None) != None):
+                    toUnequip = player.equip.get(select.slot)
+                    print("you unequip your " + toUnequip.name)
+                    unequip(player, toUnequip.slot)
+                    player.heldarmors[toUnequip.name] = toUnequip
                 print('you equip the ' + select.name)
                 equip(player, player.heldarmors.get(select.name), select.slot)
                 player.heldarmors.pop(select.name)
@@ -717,6 +793,9 @@ def restSite(player: object):
                 clearTerminal()
         elif (chosen == "unequip" or chosen == "u"):
             select = verify("\nwhat slot would you like to unequip? type back to go back [weapon, helmet, chestplate, boots, charm] \n> ", ["weapon", "helmet", 'chestplate', 'boots', 'charm', 'back'])
+            if (select == "back"):
+                clearTerminal()
+                continue            
             select = player.equip.get(select)
             if (select != None):
                 print("you unequip the " + select.name)
@@ -724,9 +803,31 @@ def restSite(player: object):
                 player.heldarmors[select.name] = select
             else:
                 print("you don't have anything to unequip there! ")
-                input("enter anything to continue...\n> ")
+            input("enter anything to continue...\n> ")
+            clearTerminal()
         elif (chosen == "drop" or chosen == "d"):
-            pass
+            clearTerminal()
+            print('\nyour equipment:\n')
+            index = 0
+            for each in player.heldarmors.keys():
+                print(f"{index}. {each}")
+                index += 1
+            weirdlist = list(range(len(player.heldarmors.keys())))
+            weirdlist = [str(each) for each in weirdlist]
+            select = verify("\nwhat would you like to drop? type back to go back\n> ", list(player.heldarmors.keys()) + ["back"] + weirdlist)
+            if (select == 'back'):
+                clearTerminal()
+                continue
+            elif (select in player.heldarmors.keys()):
+                player.heldarmors.pop(select)
+                print("\nyou dropped your " + select)
+            else:
+                select = int(select)
+                select = list(player.heldarmors.keys())[select]
+                player.heldarmors.pop(select)
+                print("\nyou dropped your " + select)
+            input("\nenter anything to continue...\n> ")
+            clearTerminal()
         elif (chosen == "leave" or chosen == "l"):
             print("")
             input("enter anything to continue...\n> ")
@@ -751,7 +852,7 @@ doCombat(player, "imp")
 doCombat(player, "imp")
 doCombat(player, "demon")
 restSite(player)
-print("your experience with fighting spirits and demons have taught you something")
+print("your experience with fighting spirits and fiends have taught you something")
 print("you learned the spells 'flame' and 'fireball'!")
 player.spells += ["flame", "fireball"]
 print("")
