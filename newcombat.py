@@ -1,10 +1,6 @@
 ### man, my old code is very SPAGHETTI and INEFFICIENT ###
 ### let's streamline this hunk of junk ###
-from random import *    
-from math import *
-from time import *
-from copy import *
-import os
+import random, math, time, copy, os
 
 armor_adjectives = [
     "durable",
@@ -78,7 +74,6 @@ clearTerminal()
 
 class Spell:
     def __init__(self, name: str, cost: int, procs: int, dmgStat: str, hitStat: str, damageRecoil: float, ignoreEnemyDEF: bool, victimEffect: str, selfEffect: str):
-        # spell's name
         self.name = name
         # spell's MP cost
         self.cost = cost
@@ -97,6 +92,11 @@ class Spell:
         # code to execute after casting the spell (regardless of hitting)
         self.selfEffect = selfEffect
 
+class Modifier:
+    def __init__ (self, name:str, code:str):
+        self.name = name
+        self.code = code
+
 class Equipment:
     def __init__(self, name:str, slot: str, BonusHP: int, BonusMP: int, BonusSTR: int, BonusDEX: int, BonusDEF: int, BonusAGI: int, onTurnStart: list, onAttack: list, onCast: list, onHit: list, onHurt: list):
         self.name = name
@@ -114,9 +114,15 @@ class Equipment:
         self.onHit = onHit
         self.onHurt = onHurt
 
+class Item:
+    def __init__(self, name:str, code:str, usableOutsideCombat:bool):
+        self.name = name
+        self.code = code
+        self.usableOutsideCombat = usableOutsideCombat
+
 class Entity:
     def __init__(self, name: str, HP: int, MP: int, STR: int, DEX: int, DEF: int, AGI: int, spells: list,
-     inventory: dict, blessings: list, onTurnStart: list = [], onAttack: list = [], onCast: list = [], 
+     inventory: dict = {}, blessings: list = [], onTurnStart: list = [], onAttack: list = [], onCast: list = [], 
      onHit: list = [], onHurt: list = []
      ):
         self.level = 1
@@ -185,15 +191,15 @@ spells = {
     "bolt": Spell("bolt", 5, 1, "caster.MP * .75", "caster.AGI", 0, False, "pass", "pass"),
     "flame": Spell("flame", 5, 1, "caster.AGI", "caster.DEX", 0, False, "applyStatus('burn', victim)", "pass"),
     "fireball": Spell("fireball", 15, 1, "caster.MP * 3", "caster.DEX", .25, False, "applyStatus('burn', victim)", "applyStatus('burn', caster)"),
-    "nuke": Spell("nuke", 100784*0, 999, "caster.MaxHP * 99999", inf, 0, True, "pass", "pass"),
-    "doom": Spell("doom", 100, 1, "0", "inf", 0, False, "applyStatus('impending doom', victim)", "pass"),
+    "nuke": Spell("nuke", 100784*0, 999, "caster.MaxHP * 99999", math.inf, 0, True, "pass", "pass"),
+    "doom": Spell("doom", 100, 1, "0", "math.inf", 0, False, "applyStatus('impending doom', victim)", "pass"),
 
     # buffs
-    "warcry": Spell("warcry", 10, 1, "0", "inf", 0, True, "pass", "applyStatus('STR up', caster)"),
-    "foresee": Spell("foresee", 10, 1, "0", "inf", 0, True, "pass", "applyStatus('DEX up', caster)"),
-    "protection": Spell("protection", 10, 1, "0", "inf", 0, True, "pass", "applyStatus('DEF up', caster)"),
-    "evasion": Spell("evasion", 10, 1, "0", "inf", 0, True, "pass", "applyStatus('AGI up', caster)"),
-    "bunny": Spell("bunny", 50, 1, "0", "inf", 0, True, "applyStatus('bunnied', victim)", "applyStatus('bunny', caster)"),
+    "warcry": Spell("warcry", 10, 1, "0", "math.inf", 0, True, "pass", "applyStatus('STR up', caster)"),
+    "foresee": Spell("foresee", 10, 1, "0", "math.inf", 0, True, "pass", "applyStatus('DEX up', caster)"),
+    "protection": Spell("protection", 10, 1, "0", "math.inf", 0, True, "pass", "applyStatus('DEF up', caster)"),
+    "evasion": Spell("evasion", 10, 1, "0", "math.inf", 0, True, "pass", "applyStatus('AGI up', caster)"),
+    "bunny": Spell("bunny", 50, 1, "0", "math.inf", 0, True, "applyStatus('bunnied', victim)", "applyStatus('bunny', caster)"),
 
     # debuffs
     "threaten": Spell("threaten", 10, 1, "0", "inf", 0, True, "applyStatus('STR down', victim)", "pass"),
@@ -204,7 +210,7 @@ spells = {
     # healing & other
     "bravery": Spell("bravery", 5, 1, "caster.DEF", "inf", -1, True, "pass", "pass"),
     "courage": Spell("courage", 15, 2, "caster.DEF", "inf", -1.2, True, "pass", "pass"),
-    "valor": Spell("valor", 45, 3, "caster.DEF", "inf", -1.8, True, "pass", "if(randint(1,4) == 1): applyStatus('DEF up', caster)"),
+    "valor": Spell("valor", 45, 3, "caster.DEF", "inf", -1.8, True, "pass", "if(random.randint(1,4) == 1): applyStatus('DEF up', caster)"),
 
     # items
 
@@ -256,40 +262,41 @@ victim.HP -= burndmg
 del burndmg""", "pass"),
 
     # other
-    "impending doom": Status("impending doom", .33, False, "pass", "applyStatus('doom', victim)"),
+    "impending doom": Status("impending doom", .5, False, "pass", "applyStatus('doom', victim)"),
     "doom": Status("doom", 0, False, "print('death calls.')\nprint('your HP drops to 0')\nvictim.HP = 0", "pass"),
 }
 
 monsters = {
     # forest
-    "rat": Entity("rat", 3, inf, 1, 0, 0, 5, ["bite"], {}, []),
-    "wolf": Entity("wolf", 15, inf, 2, 3, 1, 1, ["attack"], {}, []),
-    "spirit": Entity("spirit", 25, inf, 4, 5, 0, 4, ["attack", "flame"], {}, []),
+    "rat": Entity("rat", 3, math.inf, 1, 0, 0, 5, ["bite"]),
+    "wolf": Entity("wolf", 15, math.inf, 2, 3, 1, 1, ["attack"]),
+    "spirit": Entity("spirit", 25, math.inf, 4, 5, 0, 4, ["attack", "flame"]),
 
     # infernal wastes
-    "imp": Entity('imp', 70, inf, 10, 15, -5, 20, ["evasion", "attack", "flame", "threaten"], {}, []),
-    "demon": Entity('demon', 100, inf, 25, 10, 6, 10, ["attack", "flame", "courage", "warcry", "foresee"], {}, []),
-    "warg": Entity('warg', 150, inf, 10, 20, 10, 10, ["bite", "tricut"], {}, [], ["applyStatus('STR up', enemy)"]),
+    "imp": Entity('imp', 70, math.inf, 10, 15, -5, 20, ["evasion", "attack", "flame", "threaten"]),
+    "demon": Entity('demon', 100, math.inf, 25, 10, 6, 10, ["attack", "flame", "courage", "warcry", "foresee"]),
+    "warg": Entity('warg', 150, math.inf, 10, 20, 10, 10, ["bite", "tricut"], {}, [], ["applyStatus('STR up', enemy)"]),
 
     # what the hell
-    "reaper": Entity("reaper", 666, inf, 100, 200, 50, 100, ["doom", "bunny", "evasion", "trip"], {}, [])
+    "reaper": Entity("reaper", 666, math.inf, 100, 200, 50, 100, ["doom", "bunny", "evasion", "trip"]),
+    "minor deity": Entity("minor deity", 7777, math.inf, 100, 1000, 50, 50, ["evasion"])
 }
 
 # calculates if an attack should hit a given entity
 def calcHit(attackerHit: int, victimDodge: int):
     if (victimDodge < 1): victimDodge = 1
     if (attackerHit < 1): attackerHit = 1
-    if (isinf(attackerHit)): bypassHit = True
+    if (math.isinf(attackerHit)): bypassHit = True
     else: bypassHit = False
     if (bypassHit):
         return True
     else:
         if (victimDodge == 3): 
-            hitChance = round(log(attackerHit * (2.999999 / (victimDodge + 0.0000001))) * 40  ) + 90
+            hitChance = round(math.log(attackerHit * (2.999999 / (victimDodge + 0.0000001))) * 40  ) + 90
         else: 
-            hitChance = round(log((attackerHit) * (3 / (victimDodge + 0.0000001))) * 40) + 90
+            hitChance = round(math.log((attackerHit) * (3 / (victimDodge + 0.0000001))) * 40) + 90
     if (hitChance < 30): hitChance = 30
-    if (hitChance >= randint(1,100)): return True
+    if (hitChance >= random.randint(1,100)): return True
     else: return False
 
 # gives a status effect to an entity
@@ -320,7 +327,7 @@ def tickStatus(status: str, victim:object, silent:bool = False):
     status = copy(statuses[status])
     if (status.affectOnApply == False):
         exec(status.effect)
-        if (status.fadeChance >= uniform(0,1)):
+        if (status.fadeChance >= random.uniform(0,1)):
             removeStatus(status, victim)
 
 def castSpell(spell:object, caster:object, victim:object):
@@ -335,23 +342,23 @@ def castSpell(spell:object, caster:object, victim:object):
             print(caster.name + " attack")
         else:
             print(caster.name + " cast " + spell.name + "!")
-    if (spell.hitStat == inf): bypassHit = True
+    if (spell.hitStat == math.inf): bypassHit = True
     else: bypassHit = False
     spellHit = False
     for each in range(spell.procs):
         if (bypassHit or calcHit(eval(spell.hitStat), victim.AGI)):
             spellHit = True
             if (spell.ignoreEnemyDEF):
-                damage = ceil((eval(spell.dmgStat)) * (randint(100, 115)/100))
+                damage = math.ceil((eval(spell.dmgStat)) * (random.randint(100, 115)/100))
             else:
-                damage = ceil((eval(spell.dmgStat) * (randint(100, 115)/100)) - victim.DEF)
+                damage = math.ceil((eval(spell.dmgStat) * (random.randint(100, 115)/100)) - victim.DEF)
             if (damage <= 0):
                 if (spell.hitStat != 0):
                     print("0 damage")
             else:
                 if (spell.hitStat != 0):
-                    print(str(ceil(damage)) + " damage")
-                    victim.HP -= ceil(damage)
+                    print(str(math.ceil(damage)) + " damage")
+                    victim.HP -= math.ceil(damage)
                     for each in caster.onHit:
                         exec(each)
                     for each in victim.onHurt:
@@ -361,7 +368,7 @@ def castSpell(spell:object, caster:object, victim:object):
             damage = 0
         casterDamage = damage * spell.damageRecoil
         if (casterDamage != 0):
-            casterDamage = ceil(casterDamage)
+            casterDamage = math.ceil(casterDamage)
             if (caster.name == "you"):
                 if (casterDamage < 0):
                     print("you healed " + str(casterDamage * -1) + " hp")
@@ -517,26 +524,27 @@ def unequip(equipper:object, slot:str):
 
 def generateEquip(player:object, dropper: str, baseHealth:int, statups:int = 0, perks:int = 0, quirks:int = 0, slot:str = 'random'):
     if (slot == 'random'):
-        slot = choice(['weapon','helmet','chestplate','boots','charm'])
-    name = choice(armor_adjectives) + " " + slot + " of the " + dropper.name
+        slot = random.choice(['weapon','helmet','chestplate','boots','charm'])
+    name = random.choice(armor_adjectives) + " " + slot + " of the " + dropper.name
     while (name in player.inventory.keys()):
-        name = choice(armor_adjectives) + slot + " of the " + dropper.name
-    bonusHP = statups/max(ceil(baseHealth/(10-(2*perks)+(2*quirks))), 1)
-    if bonusHP < 0:
-        override = bonusHP
-        bonusHP = 1
-    else:
-        override = 0
-    bonusHP = round(log(bonusHP) + override)
+        name = random.choice(armor_adjectives) + slot + " of the " + dropper.name
+    # bonusHP = statups/max(ceil(baseHealth/(10-(2*perks)+(2*quirks))), 1)
+    # if bonusHP < 0:
+    #     override = bonusHP
+    #     bonusHP = 1
+    # else:
+    #     override = 0
+    # bonusHP = round(log(bonusHP) + override)
+    bonusHP = baseHealth
 
     list_of_things = [0, 0, 0, 0, 0]
     for _ in range(statups):
         index = -1
-        a = randint(0,4)
+        a = random.randint(0,4)
         for _ in list_of_things:
             index += 1
             if a == index: 
-                list_of_things[index] += randint(1,2)
+                list_of_things[index] += random.randint(1,2) 
     bonusMP = list_of_things[0]
     bonusSTR = list_of_things[1]
     bonusDEX = list_of_things[2]
@@ -549,8 +557,8 @@ def generateEquip(player:object, dropper: str, baseHealth:int, statups:int = 0, 
     onCast = []
     onHurt = []
     for _ in list(range(perks)):
-        onWhat = choice("onTurnStart", "onAttack", "onCast", "onHit", "onHurt")
-        doWhat = choice(
+        onWhat = random.choice("onTurnStart", "onAttack", "onCast", "onHit", "onHurt")
+        doWhat = random.choice(
             "hurt = ceil(enemy.MaxHP / 30)\nenemy.HP -= hurt\nprint('the' + enemy.name + 'took ' + str(heal) + ' damage')",
             "heal = ceil(player.MaxHP / 25)\nplayer.HP += heal\nprint('you healed ' + str(heal) + ' hp')\nif(player.HP > player.MaxHP): player.HP = player.MaxHP",
             "player.HP -= 2\nenemy.HP -= 10\nprint('you took 2 damage')\nprint('the ' + enemy.name + ' took 10 damage)",
@@ -567,8 +575,8 @@ def generateEquip(player:object, dropper: str, baseHealth:int, statups:int = 0, 
         )
         exec(onWhat + ".append(" + doWhat +")")
     for _ in list(range(quirks)):
-        onWhat = choice("onTurnStart", "onAttack", "onCast", "onHit", "onHurt")
-        doWhat = choice(
+        onWhat = random.choice("onTurnStart", "onAttack", "onCast", "onHit", "onHurt")
+        doWhat = random.choice(
             "hurt = ceil(player.MaxHP / 25)\nplayer.HP -= hurt\nprint('you took ' + str(hurt) + ' damage')\nif(player.HP > player.maxHP): player.HP = player.MaxHP", 
             "heal = ceil(enemy.MaxHP / 25)\nenemy.HP += heal\nprint('the' + enemy.name + 'healed ' + str(heal) + ' hp')\nif(enemy.HP > enemy.maxHP): enemy.HP = enemy.MaxHP"
             "applyEffect('STR up 1', enemy)",
@@ -619,13 +627,16 @@ def doCombat(player: object, enemy: object):
             # list player's spells
             print("")
             print("your spells:")
+            index = 0
             for each in player.spells:
                 each = spells[each]
-                print(each.name + ": " + str(each.cost) + " MP")
-            print("")
-            allowed = player.spells + ["back"]
+                print(f"{index}. {each.name}: {each.cost} MP")
+                index += 1
+            weirdlist = list(range(len(player.spells)))
+            weirdlist = [str(each) for each in weirdlist]
+            allowed = player.spells + ["back"] + weirdlist
             # let the player choose a spell to cast
-            chosen = verify("choose an spell to cast, or type back to go back\n> ", allowed)
+            chosen = verify("\nchoose an spell to cast, or type back to go back\n> ", allowed)
             # player wants to go back
             if (chosen == "back"):
                 # restart loop (player chooses action again)
@@ -633,6 +644,8 @@ def doCombat(player: object, enemy: object):
                 continue
             # player casts a spell
             else:
+                if (chosen not in player.spells):
+                    chosen = player.spells[int(chosen)]
                 clearTerminal()
                 # check for enough MP
                 if (spells[chosen].cost <= player.MP):
@@ -655,7 +668,7 @@ def doCombat(player: object, enemy: object):
         for each in player.status:
             tickStatus(each, player)
         # regenerate 1 mana for each 10 max mana the player has
-        player.MP += ceil(player.MaxMP / 10)
+        player.MP += math.ceil(player.MaxMP / 10)
         # if the player has overflowing mana, bring it back down to the max
         if (player.MP > player.MaxMP): player.MP = player.MaxMP
         # if the player is alive:
@@ -665,7 +678,7 @@ def doCombat(player: object, enemy: object):
                 exec(each)
             print("")
             # enemy casts a random spell from their spell list
-            castSpell(choice(enemy.spells), enemy, player)
+            castSpell(random.choice(enemy.spells), enemy, player)
             # proc enemy's on attack abilities
             for each in enemy.onAttack:
                 exec(each)
@@ -681,16 +694,16 @@ def doCombat(player: object, enemy: object):
         print("")
         print("victory!")
         # give the player xp points
-        xpGain = round(enemy.MaxHP * uniform(1, 1.4)) + randint(0, 3)
+        xpGain = round(enemy.MaxHP / 2 * random.uniform(1, 1.4))
         print("you gained " + str(xpGain) + " xp")
         player.XP += xpGain
         del xpGain
         # enemy has a chance to drop equipment
-        dropchance = round(max(normalvariate(.4, 1), 0))
+        dropchance = round(max(random.normalvariate(.4, 1), 0))
         if (dropchance > 0):
             print("\nhere's what you found:\n")
             for _ in range(dropchance):
-                dropped = generateEquip(player, enemy, round(log(enemy.MaxHP)*(player.level^2)), floor((enemy.STR + enemy.DEX + enemy.DEF + enemy.AGI)/5))
+                dropped = generateEquip(player, enemy, round(math.log(enemy.MaxHP)*(player.level^2)), math.floor((enemy.STR + enemy.DEX + enemy.DEF + enemy.AGI)/3))
                 player.heldarmors[dropped.name] = dropped 
                 print(" + " + dropped.name)
         # if the player's xp is high enough, increase level
@@ -735,7 +748,7 @@ def doCombat(player: object, enemy: object):
 
 # allows the player to heal, equip gear
 def restSite(player: object):
-    randchoice = choice(["campfire", "campsite", "clearing", "small ruin"])
+    randchoice = random.choice(["campfire", "campsite", "clearing", "small ruin"])
     print("you come across a " + randchoice)
     print("you feel like this is a safe place for you to gather yourself.")
     print("")
