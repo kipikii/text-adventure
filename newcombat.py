@@ -301,7 +301,7 @@ def calcHit(attackerHit: int, victimDodge: int):
 
 # gives a status effect to an entity
 def applyStatus(status: str, victim:object, silent:bool = False):
-    status = copy.copy(statuses[status])
+    status = statuses[status]
     if (silent == False):
         if (victim.name == "you"):
             print("you now have " + status.name)
@@ -313,41 +313,26 @@ def applyStatus(status: str, victim:object, silent:bool = False):
 
 # removes a status effect from an entity
 def removeStatus(status: str, victim:object, silent:bool = False):
-#     if (status.name in victim.status):
-#         victim.status.remove(status.name)
-#         exec(status.reverseEffect)
-#         if (silent == False):
-#             if (victim.name == "you"):
-#                 print("you no longer have " + status.name)
-#             else:
-#                 print(status.name + " faded from the " + victim.name)
-#     else:
-#         raise(f"A status effect was attempted to be removed on {victim.name}, but it didn't exist in {victim.name}'s status list.")
-    status = copy.copy(statuses[status])
-    if (status.name in victim.status):
-        statusIndex = victim.status.index(status)
-        if (len(victim.status) > 1): firstHalf = victim.status[:statusIndex]
-        else: firstHalf = []
-        secondHalf = victim.status[statusIndex:]
-        removed = secondHalf.pop(0)
-        exec(removed.reverseStatus)
-        if (silent == False):
-            if (victim.name == "you"):
-                print("you no longer have " + status.name)
-            else:
-                print(status.name + " faded from the " + victim.name)
-        for each in secondHalf:
-            applyStatus(status, victim, True)
-            firstHalf.append(each)
-    else:
-        raise IndexError(f"A status effect was attempted to be removed on {victim.name}, but it didn't exist in {victim.name}'s status list.")
+    statusIndex = victim.status.index(status)
+    if (len(victim.status) > 1): firstHalf = victim.status[:statusIndex]
+    else: firstHalf = []
+    secondHalf = victim.status[statusIndex:]
+    removed = secondHalf.pop(0)
+    exec(removed.reverseEffect)
+    if (silent == False):
+        if (victim.name == "you"):
+            print("you no longer have " + status.name)
+        else:
+            print(status.name + " faded from the " + victim.name)
+    for each in secondHalf:
+        applyStatus(each.name, victim, True)
+        firstHalf.append(each)
 
 # causes a status effect to execute it's effect
-def tickStatus(status: str, victim:object, silent:bool = False):
-    status = copy.copy(statuses[status.name])
+def tickStatus(status: str, victim:object, silent:bool = False, doFadeChance:bool = True):
     if (status.affectOnApply == False):
         exec(status.effect)
-        if (status.fadeChance >= random.uniform(0,1)):
+        if (doFadeChance and status.fadeChance >= random.uniform(0,1)):
             removeStatus(status, victim)
 
 def castSpell(spell:object, caster:object, victim:object):
@@ -683,15 +668,13 @@ def doCombat(player: object, enemy: object):
         # player uses an item
         elif (chosen == "item" or chosen == "i"):
             print("WHAT THE HELL IS AN ITEM *eagle screech*")
-            continue
         # proc all of the player's status effects
         for each in player.status:
-            tickStatus(each, player)
+            tickStatus(each, player, (enemy.HP > 0))
         # regenerate 1 mana for each 10 max mana the player has
         player.MP += math.ceil(player.MaxMP / 10)
-        # if the player has overflowing mana, bring it back down to the max
         if (player.MP > player.MaxMP): player.MP = player.MaxMP
-        # if the player is alive:
+        # if the enemy is alive:
         if (enemy.HP > 0):
             # proc enemy's turn start abilities
             for each in enemy.onTurnStart:
@@ -709,7 +692,6 @@ def doCombat(player: object, enemy: object):
         # remove statuses from player in reverse order
         (player.status).reverse()
         for each in player.status:
-            each = copy.copy(statuses[each])
             removeStatus(each, player, True)
         print("")
         print("victory!")
@@ -742,16 +724,16 @@ def doCombat(player: object, enemy: object):
             if (chosen == "HP"):
                 player.MaxHP += 3
                 player.HP = player.MaxHP
-                print(f"max HP increased by {str(3)}")
+                print("max HP increased by 3")
                 print("HP fully restored!")
             elif (chosen == "MP"):
                 player.MaxMP += 2
                 player.MP = player.MaxMP
-                print(f"max MP increased by {str(2)}")
+                print("max MP increased by 3")
                 print("MP fully restored!")
             else:
                 exec(f"player.{chosen} += {1}")
-                print(f"{chosen} increased by {str(1)}")
+                print(f"{chosen} increased by 3")
             player.XP -= player.MaxXP
             player.MaxXP = round(player.MaxXP * 1.5)
             player.level += 1
