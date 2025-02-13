@@ -202,15 +202,15 @@ spells = {
     "bunny": Spell("bunny", 50, 1, "0", "math.inf", 0, True, "applyStatus('bunnied', victim)", "applyStatus('bunny', caster)"),
 
     # debuffs
-    "threaten": Spell("threaten", 10, 1, "0", "inf", 0, True, "applyStatus('STR down', victim)", "pass"),
-    "trip": Spell("trip", 10, 1, "0", "inf", 0, True, "applyStatus('DEX down', victim)", "pass"),
-    "exploit": Spell("exploit", 10, 1, "0", "inf", 0, True, "applyStatus('DEF down', victim)", "pass"),
-    "slow": Spell("slow", 10, 1, "0", "inf", 0, True, "applyStatus('AGI down', victim)", "pass"),
+    "threaten": Spell("threaten", 10, 1, "0", "math.inf", 0, True, "applyStatus('STR down', victim)", "pass"),
+    "trip": Spell("trip", 10, 1, "0", "math.inf", 0, True, "applyStatus('DEX down', victim)", "pass"),
+    "exploit": Spell("exploit", 10, 1, "0", "math.inf", 0, True, "applyStatus('DEF down', victim)", "pass"),
+    "slow": Spell("slow", 10, 1, "0", "math.inf", 0, True, "applyStatus('AGI down', victim)", "pass"),
 
     # healing & other
-    "bravery": Spell("bravery", 5, 1, "caster.DEF", "inf", -1, True, "pass", "pass"),
-    "courage": Spell("courage", 15, 2, "caster.DEF", "inf", -1.2, True, "pass", "pass"),
-    "valor": Spell("valor", 45, 3, "caster.DEF", "inf", -1.8, True, "pass", "if(random.randint(1,4) == 1): applyStatus('DEF up', caster)"),
+    "bravery": Spell("bravery", 5, 1, "caster.DEF", "math.inf", -1, True, "pass", "pass"),
+    "courage": Spell("courage", 15, 2, "caster.DEF", "math.inf", -1.2, True, "pass", "pass"),
+    "valor": Spell("valor", 45, 3, "caster.DEF", "math.inf", -1.8, True, "pass", "if(random.randint(1,4) == 1): applyStatus('DEF up', caster)"),
 
     # items
 
@@ -244,7 +244,7 @@ statuses = {
 
     # DOT effects
     "burn": Status("burn", .25, False, """
-burndmg = ceil(victim.MaxHP / 18)
+burndmg = math.ceil(victim.MaxHP / 18)
 if (victim.name == "you"):
     print('you took ' + str(burndmg) + ' damage from burn')
 else:
@@ -253,7 +253,7 @@ victim.HP -= burndmg
 del burndmg""", "pass"),
 
     "poison": Status("poison", .1, False, """
-burndmg = ceil(victim.MaxHP / 20)
+burndmg = math.ceil(victim.MaxHP / 20)
 if (victim.name == "you"):
     print('you took ' + str(burndmg) + ' damage from poison')
 else:
@@ -301,30 +301,50 @@ def calcHit(attackerHit: int, victimDodge: int):
 
 # gives a status effect to an entity
 def applyStatus(status: str, victim:object, silent:bool = False):
-    status = copy(statuses[status])
+    status = copy.copy(statuses[status])
     if (silent == False):
         if (victim.name == "you"):
             print("you now have " + status.name)
         else:
             print(victim.name + " now has " + status.name)
-    victim.status += [status.name]
+    victim.status += [status]
     if (status.affectOnApply):
         exec(status.effect)
 
 # removes a status effect from an entity
 def removeStatus(status: str, victim:object, silent:bool = False):
+#     if (status.name in victim.status):
+#         victim.status.remove(status.name)
+#         exec(status.reverseEffect)
+#         if (silent == False):
+#             if (victim.name == "you"):
+#                 print("you no longer have " + status.name)
+#             else:
+#                 print(status.name + " faded from the " + victim.name)
+#     else:
+#         raise(f"A status effect was attempted to be removed on {victim.name}, but it didn't exist in {victim.name}'s status list.")
+    status = copy.copy(statuses[status])
     if (status.name in victim.status):
-        victim.status.remove(status.name)
-        exec(status.reverseEffect)
+        statusIndex = victim.status.index(status)
+        if (len(victim.status) > 1): firstHalf = victim.status[:statusIndex]
+        else: firstHalf = []
+        secondHalf = victim.status[statusIndex:]
+        removed = secondHalf.pop(0)
+        exec(removed.reverseStatus)
         if (silent == False):
             if (victim.name == "you"):
                 print("you no longer have " + status.name)
             else:
                 print(status.name + " faded from the " + victim.name)
+        for each in secondHalf:
+            applyStatus(status, victim, True)
+            firstHalf.append(each)
+    else:
+        raise IndexError(f"A status effect was attempted to be removed on {victim.name}, but it didn't exist in {victim.name}'s status list.")
 
 # causes a status effect to execute it's effect
 def tickStatus(status: str, victim:object, silent:bool = False):
-    status = copy(statuses[status])
+    status = copy.copy(statuses[status.name])
     if (status.affectOnApply == False):
         exec(status.effect)
         if (status.fadeChance >= random.uniform(0,1)):
@@ -528,7 +548,7 @@ def generateEquip(player:object, dropper: str, baseHealth:int, statups:int = 0, 
     name = random.choice(armor_adjectives) + " " + slot + " of the " + dropper.name
     while (name in player.inventory.keys()):
         name = random.choice(armor_adjectives) + slot + " of the " + dropper.name
-    # bonusHP = statups/max(ceil(baseHealth/(10-(2*perks)+(2*quirks))), 1)
+    # bonusHP = statups/max(math.ceil(baseHealth/(10-(2*perks)+(2*quirks))), 1)
     # if bonusHP < 0:
     #     override = bonusHP
     #     bonusHP = 1
@@ -559,8 +579,8 @@ def generateEquip(player:object, dropper: str, baseHealth:int, statups:int = 0, 
     for _ in list(range(perks)):
         onWhat = random.choice("onTurnStart", "onAttack", "onCast", "onHit", "onHurt")
         doWhat = random.choice(
-            "hurt = ceil(enemy.MaxHP / 30)\nenemy.HP -= hurt\nprint('the' + enemy.name + 'took ' + str(heal) + ' damage')",
-            "heal = ceil(player.MaxHP / 25)\nplayer.HP += heal\nprint('you healed ' + str(heal) + ' hp')\nif(player.HP > player.MaxHP): player.HP = player.MaxHP",
+            "hurt = math.ceil(enemy.MaxHP / 30)\nenemy.HP -= hurt\nprint('the' + enemy.name + 'took ' + str(heal) + ' damage')",
+            "heal = math.ceil(player.MaxHP / 25)\nplayer.HP += heal\nprint('you healed ' + str(heal) + ' hp')\nif(player.HP > player.MaxHP): player.HP = player.MaxHP",
             "player.HP -= 2\nenemy.HP -= 10\nprint('you took 2 damage')\nprint('the ' + enemy.name + ' took 10 damage)",
             "applyEffect('STR down 1', enemy)",
             "applyEffect('DEX down 1', enemy)",
@@ -577,8 +597,8 @@ def generateEquip(player:object, dropper: str, baseHealth:int, statups:int = 0, 
     for _ in list(range(quirks)):
         onWhat = random.choice("onTurnStart", "onAttack", "onCast", "onHit", "onHurt")
         doWhat = random.choice(
-            "hurt = ceil(player.MaxHP / 25)\nplayer.HP -= hurt\nprint('you took ' + str(hurt) + ' damage')\nif(player.HP > player.maxHP): player.HP = player.MaxHP", 
-            "heal = ceil(enemy.MaxHP / 25)\nenemy.HP += heal\nprint('the' + enemy.name + 'healed ' + str(heal) + ' hp')\nif(enemy.HP > enemy.maxHP): enemy.HP = enemy.MaxHP"
+            "hurt = math.ceil(player.MaxHP / 25)\nplayer.HP -= hurt\nprint('you took ' + str(hurt) + ' damage')\nif(player.HP > player.maxHP): player.HP = player.MaxHP", 
+            "heal = math.ceil(enemy.MaxHP / 25)\nenemy.HP += heal\nprint('the' + enemy.name + 'healed ' + str(heal) + ' hp')\nif(enemy.HP > enemy.maxHP): enemy.HP = enemy.MaxHP"
             "applyEffect('STR up 1', enemy)",
             "applyEffect('DEX up 1', enemy)",
             "applyEffect('DEF up 1', enemy)",
@@ -608,7 +628,7 @@ def incrementDict(item:str=None, given:dict = {}, change:int=-1):
 
 # causes a combat to initate between two entities
 def doCombat(player: object, enemy: object):
-    enemy = copy(monsters[enemy])
+    enemy = copy.copy(monsters[enemy])
     print("a " + enemy.name + " appeared!")
     while (player.HP > 0 and enemy.HP > 0):
         for each in player.onTurnStart:
@@ -689,7 +709,7 @@ def doCombat(player: object, enemy: object):
         # remove statuses from player in reverse order
         (player.status).reverse()
         for each in player.status:
-            each = copy(statuses[each])
+            each = copy.copy(statuses[each])
             removeStatus(each, player, True)
         print("")
         print("victory!")
