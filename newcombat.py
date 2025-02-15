@@ -244,7 +244,7 @@ items = {
     "wind tonic": Item("wind tonic", """print("you drink the wind tonic... it's empty..?)"\napplyStatus('AGI up', player, False))""", 2),
 
     # weapons
-    "throwing knife": Item("throwing knife", "ouch = max((player.STR+player.DEX)/2, 1)\nenemy.HP -= ouch\nprint(f'you huck the throwing knife at the {enemy.name} for {ouch} damage')",2)
+    "throwing knife": Item("throwing knife", "ouch = max(round((player.STR+player.DEX)/2), 1)\nenemy.HP -= ouch\nprint(f'you huck the throwing knife at the {enemy.name} for {ouch} damage')",2)
 }
 
 statuses = {
@@ -346,24 +346,25 @@ def applyStatus(status: str, victim:object, silent:bool = False):
 
 # removes a status effect from an entity
 def removeStatus(status: str, victim:object, silent:bool = False):
-    statusIndex = victim.status.index(status)
-    if (len(victim.status) > 1): firstHalf = victim.status[:statusIndex]
-    else: firstHalf = []
-    secondHalf = victim.status[statusIndex:]
-    secondHalf.reverse()
-    for each in secondHalf: exec(each.reverseEffect)
-    secondHalf.reverse()    
-    removed = secondHalf.pop(0)
-    exec(removed.reverseEffect)
-    if (silent == False):
-        if (victim.name == "you"):
-            print("you no longer have " + status.name)
-        else:
-            print(status.name + " faded from the " + victim.name)
-    for each in secondHalf:
-        applyStatus(each.name, victim, True)
-        firstHalf.append(each)
-    victim.status = firstHalf
+    if (statuses[status] in victim.status): 
+        statusIndex = victim.status.index(status)
+        if (len(victim.status) > 1): firstHalf = victim.status[:statusIndex]
+        else: firstHalf = []
+        secondHalf = victim.status[statusIndex:]
+        secondHalf.reverse()
+        for each in secondHalf: exec(each.reverseEffect)
+        secondHalf.reverse()    
+        removed = secondHalf.pop(0)
+        exec(removed.reverseEffect)
+        if (silent == False):
+            if (victim.name == "you"):
+                print("you no longer have " + status.name)
+            else:
+                print(status.name + " faded from the " + victim.name)
+        for each in secondHalf:
+            applyStatus(each.name, victim, True)
+            firstHalf.append(each)
+        victim.status = firstHalf
 
 # causes a status effect to execute it's effect
 def tickStatus(status: str, victim:object, silent:bool = False, doFadeChance:bool = True):
