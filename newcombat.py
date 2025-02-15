@@ -68,9 +68,10 @@ armor_adjectives = [
 ]
 
 def clearTerminal():
-    os.system('cls' if os.name == 'nt' else 'clear')
+    pass
 
-clearTerminal()
+# clear terminal code
+os.system('cls' if os.name == 'nt' else 'clear')
 
 class Spell:
     def __init__(self, name: str, cost: int, procs: int, dmgStat: str, hitStat: str, damageRecoil: float, ignoreEnemyDEF: bool, victimEffect: str, selfEffect: str):
@@ -115,9 +116,10 @@ class Equipment:
         self.onHurt = onHurt
 
 class Item:
-    def __init__(self, name:str, code:str, usableOutsideCombat:bool):
+    def __init__(self, name:str, code:str, minLevel:int, usableOutsideCombat:bool = False):
         self.name = name
         self.code = code
+        self.minLevel = minLevel
         self.usableOutsideCombat = usableOutsideCombat
 
 class Entity:
@@ -216,6 +218,35 @@ spells = {
 
 }
 
+items = {
+    # healing
+    "small heal": Item("small heal", "print('you sip the small healing potion')\nplayer.HP += 10\nprint('you heal 10 HP')", 1, True),
+    "medium heal": Item("medium heal", "print('you drink the medium healing potion')\nplayer.HP += 50\nprint('you heal 50 HP')", 5, True),
+    "large heal": Item("large heal", "print('you chug the large healing potion')\nplayer.HP += 100\nprint('you heal 100 HP')", 10, True),
+    "massive heal": Item("massive heal", "print('you reluctantly gulp down the massive healing potion...')\nplayer.HP += 200\nprint('you heal 200 HP')", 20, True),
+    "panacea": Item("panacea", """print('you savor the panacea')
+    player.HP = player.MaxHP
+    print('you heal to full HP')
+    for each in player.status:
+        removeStatus(each, player, True)
+    print('you are cured of all statuses') """, 10, True),
+
+    # mana regen
+    "small mana": Item("small mana", "print('you sip the small mana potion')\nplayer.MP += 5\nprint('you gain 5 MP')", 1, True),
+    "medium mana": Item("medium mana", "print('you drink the medium mana potion')\nplayer.MP += 20\nprint('you gain 20 MP')", 5, True),
+    "large mana": Item("large mana", "print('you chug the large mana potion')\nplayer.MP += 50\nprint('you gain 50 MP')", 10, True),
+    "massive mana": Item("massive mana", "print('you reluctantly gulp down the massive mana potion...')\nplayer.MP += 100\nprint('you gain 100 MP')", 20, True),
+    
+    # tonics
+    "pepper tonic": Item("pepper tonic", "print('you drink the pepper tonic... spicy!')\napplyStatus('STR up', player, False)", 2),
+    "carrot tonic": Item("carrot tonic", "print('you drink the carrot tonic... tastes like carrots.')\napplyStatus('DEX up', player, False)", 2),
+    "ginger tonic": Item("ginger tonic", "print('you drink the ginger tonic... so bitter!')\napplyStatus('DEF up', player, False)", 2),
+    "wind tonic": Item("wind tonic", """print("you drink the wind tonic... it's empty..?)"\napplyStatus('AGI up', player, False))""", 2),
+
+    # weapons
+    "throwing knife": Item("throwing knife", "ouch = max((player.STR+player.DEX)/2, 1)\nenemy.HP -= ouch\nprint(f'you huck the throwing knife at the {enemy.name} for {ouch} damage')",2)
+}
+
 statuses = {
     # stat buffs
     "STR up": Status("STR up", 0, True, "victim.STR *= 6/5", "victim.STR /= 6/5"),
@@ -228,7 +259,6 @@ statuses = {
     "DEX up 1": Status("DEX up 1", 0, True, "victim.DEX += 1", "victim.DEX -= 1"),
     "DEF up 1": Status("DEF up 1", 0, True, "victim.DEF += 1", "victim.DEF -= 1"),
     "AGI up 1": Status("AGI up 1", 0, True, "victim.AGI += 1", "victim.AGI -= 1"),
-
 
     # stat debuffs
     "STR down": Status("STR down", 0, True, "victim.STR /= 6/5", "victim.STR *= 6/5"),
@@ -279,7 +309,10 @@ monsters = {
 
     # what the hell
     "reaper": Entity("reaper", 666, math.inf, 100, 200, 50, 100, ["doom", "bunny", "evasion", "trip"]),
-    "minor deity": Entity("minor deity", 7777, math.inf, 100, 1000, 50, 50, ["evasion"])
+    "minor deity": Entity("minor deity", 7777, math.inf, 100, 1000, 50, 50, ["evasion"]),
+
+    # other
+    "test dummy": Entity('test dummy', 99999, math.inf, 0, 99999, 0, 0, ['bite'])
 }
 
 # calculates if an attack should hit a given entity
@@ -317,6 +350,9 @@ def removeStatus(status: str, victim:object, silent:bool = False):
     if (len(victim.status) > 1): firstHalf = victim.status[:statusIndex]
     else: firstHalf = []
     secondHalf = victim.status[statusIndex:]
+    secondHalf.reverse()
+    for each in secondHalf: exec(each.reverseEffect)
+    secondHalf.reverse()    
     removed = secondHalf.pop(0)
     exec(removed.reverseEffect)
     if (silent == False):
@@ -327,6 +363,7 @@ def removeStatus(status: str, victim:object, silent:bool = False):
     for each in secondHalf:
         applyStatus(each.name, victim, True)
         firstHalf.append(each)
+    victim.status = firstHalf
 
 # causes a status effect to execute it's effect
 def tickStatus(status: str, victim:object, silent:bool = False, doFadeChance:bool = True):
@@ -396,17 +433,12 @@ def castSpell(spell:object, caster:object, victim:object):
     else: print(victim.name + " hp: " + str(victim.HP) + " / " + str(victim.MaxHP))
 
 # provided a list and a question, forces the player to make a choice from the list
-def verify(question:str=None, allowed:list=None):
+def verify(question:str, allowed:list):
     index = 0
-    for prompt in allowed:
-        allowed[index] = prompt.lower()
+    for each in allowed:
+        allowed[index] = each.lower()
         index += 1
     del index
-    if (allowed == None):
-        print("no given list for verify, returned statement")
-        return
-    if (question == None):
-        question = "what will you do? "
     while (True):
         chosen = input(question)
         chosen = chosen.lower()
@@ -416,6 +448,7 @@ def verify(question:str=None, allowed:list=None):
                 print("/stats - displays your current stats")
                 print("/quit - quits the game")
                 print("/patchnotes - shows the patch notes")
+                print("/inventory - shows your inventory")
             elif (chosen == "/stats"):
                 global player
                 print("")
@@ -437,6 +470,11 @@ def verify(question:str=None, allowed:list=None):
             elif (chosen == "/quit"):
                 print("bye!")
                 quit()
+            elif (chosen == "/inventory"):
+                print("your items:")
+                for eachKey, eachValue in player.inventory.items():
+                    print(f"{eachKey.name}: {eachValue}")
+                print("")
             else:
                 print("invalid command. to see all valid commands, do /help")
         for i in allowed:
@@ -613,13 +651,14 @@ def incrementDict(item:str=None, given:dict = {}, change:int=-1):
 
 # causes a combat to initate between two entities
 def doCombat(player: object, enemy: object):
-    enemy = copy.copy(monsters[enemy])
+    enemy = monsters[enemy]
     print("a " + enemy.name + " appeared!")
     while (player.HP > 0 and enemy.HP > 0):
         for each in player.onTurnStart:
             exec(each)
         print("[Your HP: " + str(player.HP) + " / " + str(player.MaxHP) + "] [Your MP: " + str(player.MP)+ " / " + str(player.MaxMP) + "]")
-        chosen = verify("what would you like to do? [attack, spell, item]\n> ", ["attack", "spell", "skill", "item", "a", "s", "i"])
+        chosen = verify("what would you like to do? [attack, spell, item, pass]\n> ", ["attack", "spell", "skill", "item", "pass", "a", "s", "i", "p"])
+        print("")
         # player uses attack action
         if (chosen == "attack" or chosen == "a"):
             clearTerminal()
@@ -641,7 +680,7 @@ def doCombat(player: object, enemy: object):
             weirdlist = [str(each) for each in weirdlist]
             allowed = player.spells + ["back"] + weirdlist
             # let the player choose a spell to cast
-            chosen = verify("\nchoose an spell to cast, or type back to go back\n> ", allowed)
+            chosen = verify("\nchoose a spell to cast, or type back to go back\n> ", allowed)
             # player wants to go back
             if (chosen == "back"):
                 # restart loop (player chooses action again)
@@ -667,14 +706,32 @@ def doCombat(player: object, enemy: object):
                     continue
         # player uses an item
         elif (chosen == "item" or chosen == "i"):
-            print("WHAT THE HELL IS AN ITEM *eagle screech*")
+            print("")
+            print("your items:")
+            allowed = []
+            for key in player.inventory:
+                value = player.inventory[key]
+                print(f"{key.name}: {value}")
+                allowed.append(key.name)
+            allowed = allowed + ["back"]
+            chosen = verify("\nchoose an item to use, or type back to go back\n> ", allowed)
+            if chosen == "back":
+                continue
+            else:
+                usedItem = items[chosen]
+                exec(usedItem.code)
+                incrementDict(usedItem, player.inventory)
+                if player.HP > player.MaxHP: player.HP = player.MaxHP
+                if player.MP > player.MaxMP: player.MP = player.MaxMP
         # proc all of the player's status effects
+        elif (chosen == "pass" or chosen == "p"):
+            print("you wait")
         for each in player.status:
             tickStatus(each, player, (enemy.HP > 0))
         # regenerate 1 mana for each 10 max mana the player has
         player.MP += math.ceil(player.MaxMP / 10)
         if (player.MP > player.MaxMP): player.MP = player.MaxMP
-        # if the enemy is alive:
+        # if the enemy is alive:    
         if (enemy.HP > 0):
             # proc enemy's turn start abilities
             for each in enemy.onTurnStart:
@@ -701,13 +758,25 @@ def doCombat(player: object, enemy: object):
         player.XP += xpGain
         del xpGain
         # enemy has a chance to drop equipment
+        # do the same with consumables
         dropchance = round(max(random.normalvariate(.4, 1), 0))
+        itemDropchance = round(max(random.normalvariate(1, 1), 0))
+        if dropchance > 0 or itemDropchance > 0: print("\nhere's what you found:\n")
         if (dropchance > 0):
-            print("\nhere's what you found:\n")
             for _ in range(dropchance):
                 dropped = generateEquip(player, enemy, round(math.log(enemy.MaxHP)*(player.level^2)), math.floor((enemy.STR + enemy.DEX + enemy.DEF + enemy.AGI)/3))
                 player.heldarmors[dropped.name] = dropped 
-                print(" + " + dropped.name)
+                print(" + " + dropped.name) 
+        dropList = []
+        for each in items.values():
+            if each.minLevel <= player.level:
+                dropList.append(each)
+        if (itemDropchance > 0 and len(dropList) > 0):
+            for _ in range(itemDropchance):
+                randChoice = random.choice(dropList)
+                incrementDict(randChoice, player.inventory, 1)
+                print(f" + {randChoice.name}")
+                
         # if the player's xp is high enough, increase level
         while (player.XP >= player.MaxXP):
             print("")
@@ -738,7 +807,7 @@ def doCombat(player: object, enemy: object):
             player.MaxXP = round(player.MaxXP * 1.5)
             player.level += 1
         print("")
-        input("enter anything to continue... ")
+        # input("enter anything to continue... ")
         clearTerminal()
     else:
         print("you were slain...")
@@ -760,13 +829,13 @@ def restSite(player: object):
         if (chosen == "rest" or chosen == "r"):
             if (player.HP >= player.MaxHP and player.MP >= player.MaxMP):
                 print("you already feel rested, you don't feel the need to do so again right now")
-                input("enter anything to continue...\n> ")
+                # input("enter anything to continue...\n> ")
                 clearTerminal()
             else:
                 player.HP = player.MaxHP
                 player.MP = player.MaxMP
                 print("MP and HP fully restored!")
-                input("enter anything to continue...\n> ")
+                # input("enter anything to continue...\n> ")
                 clearTerminal()
         elif (chosen == "equip" or chosen == "e"):
             print('\nyour equipment:\n')
@@ -790,7 +859,7 @@ def restSite(player: object):
                 print('you equip the ' + select.name)
                 equip(player, player.heldarmors.get(select.name), select.slot)
                 player.heldarmors.pop(select.name)
-                input("enter anything to continue...\n> ")
+                # input("enter anything to continue...\n> ")
                 clearTerminal()
             else:
                 select = int(select)
@@ -804,7 +873,7 @@ def restSite(player: object):
                 print('you equip the ' + select.name)
                 equip(player, player.heldarmors.get(select.name), select.slot)
                 player.heldarmors.pop(select.name)
-                input("enter anything to continue...\n> ")
+                # input("enter anything to continue...\n> ")
                 clearTerminal()
         elif (chosen == "unequip" or chosen == "u"):
             select = verify("\nwhat slot would you like to unequip? type back to go back [weapon, helmet, chestplate, boots, charm] \n> ", ["weapon", "helmet", 'chestplate', 'boots', 'charm', 'back'])
@@ -818,7 +887,7 @@ def restSite(player: object):
                 player.heldarmors[select.name] = select
             else:
                 print("you don't have anything to unequip there! ")
-            input("enter anything to continue...\n> ")
+            # input("enter anything to continue...\n> ")
             clearTerminal()
         elif (chosen == "drop" or chosen == "d"):
             clearTerminal()
@@ -841,15 +910,17 @@ def restSite(player: object):
                 select = list(player.heldarmors.keys())[select]
                 player.heldarmors.pop(select)
                 print("\nyou dropped your " + select)
-            input("\nenter anything to continue...\n> ")
+            # input("\nenter anything to continue...\n> ")
             clearTerminal()
         elif (chosen == "leave" or chosen == "l"):
-            print("")
-            input("enter anything to continue...\n> ")
+            print("you get up and get going\n")
+            # input("enter anything to continue...\n> ")
             clearTerminal()
             break
 
 player = Entity("you", 20, 5, 3, 5, 0, 0, ["doublecut", "bolt", "warcry", "protection", "bravery"], { }, [])
+
+# player = Entity("you", 99999, 99999, 3, 5, 0, 0, ["doublecut", "bolt", "warcry", "protection", "bravery", "bite"], { }, [])
 
 doCombat(player, "rat")
 doCombat(player, "wolf")
@@ -859,7 +930,7 @@ print("your experience with fighting beasts have taught you something")
 print("you learned the spell 'bite'!")
 player.spells += ["bite"]
 print("")
-input("enter anything to continue...\n> ")
+# input("enter anything to continue...\n> ")
 clearTerminal()
 doCombat(player, "spirit")
 doCombat(player, "spirit")
@@ -871,7 +942,7 @@ print("your experience with fighting spirits and fiends have taught you somethin
 print("you learned the spells 'flame' and 'fireball'!")
 player.spells += ["flame", "fireball"]
 print("")
-input("enter anything to continue...\n> ")
+# input("enter anything to continue...\n> ")
 clearTerminal()
 doCombat(player, "warg")
 restSite(player)
