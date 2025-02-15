@@ -210,9 +210,6 @@ spells = {
     "bravery": Spell("bravery", 5, 1, "caster.DEF", "math.inf", -1, True, "pass", "pass"),
     "courage": Spell("courage", 15, 2, "caster.DEF", "math.inf", -1.2, True, "pass", "pass"),
     "valor": Spell("valor", 45, 3, "caster.DEF", "math.inf", -1.8, True, "pass", "if(random.randint(1,4) == 1): applyStatus('DEF up', caster)"),
-
-    # items
-
 }
 
 items = {
@@ -238,7 +235,7 @@ items = {
     "pepper tonic": Item("pepper tonic", "print('you drink the pepper tonic... spicy!')\napplyStatus('STR up', player, False)", 1),
     "carrot tonic": Item("carrot tonic", "print('you drink the carrot tonic... tastes like carrots.')\napplyStatus('DEX up', player, False)", 1),
     "ginger tonic": Item("ginger tonic", "print('you drink the ginger tonic... so bitter!')\napplyStatus('DEF up', player, False)", 1),
-    "wind tonic": Item("wind tonic", """print("you drink the wind tonic... it's empty..?)"\napplyStatus('AGI up', player, False))""", 1),
+    "wind tonic": Item("wind tonic", """print("you drink the wind tonic... it's empty..?")\napplyStatus('AGI up', player, False))""", 1),
 
     # weapons
     "throwing knife": Item("throwing knife", "ouch = max(round((player.STR+player.DEX)/2), 1)\nenemy.HP -= ouch\nprint(f'you huck the throwing knife at the {enemy.name} for {ouch} damage')",2)
@@ -342,8 +339,8 @@ def applyStatus(status: str, victim:object, silent:bool = False):
         exec(status.effect)
 
 # removes a status effect from an entity
-def removeStatus(status: str, victim:object, silent:bool = False):
-    if (statuses[status] in victim.status): 
+def removeStatus(status: object, victim:object, silent:bool = False):
+    if (status in victim.status): 
         statusIndex = victim.status.index(status)
         if (len(victim.status) > 1): firstHalf = victim.status[:statusIndex]
         else: firstHalf = []
@@ -364,7 +361,7 @@ def removeStatus(status: str, victim:object, silent:bool = False):
         victim.status = firstHalf
 
 # causes a status effect to execute it's effect
-def tickStatus(status: str, victim:object, silent:bool = False, doFadeChance:bool = True):
+def tickStatus(status:object, victim:object, doFadeChance:bool = True):
     if (status.affectOnApply == False):
         exec(status.effect)
         if (doFadeChance and status.fadeChance >= random.uniform(0,1)):
@@ -648,7 +645,7 @@ def incrementDict(item:str=None, given:dict = {}, change:int=-1):
 
 # causes a combat to initate between two entities
 def doCombat(player: object, enemy: object):
-    enemy = monsters[enemy]
+    enemy = copy.copy(monsters[enemy])
     print("a " + enemy.name + " appeared!")
     while (player.HP > 0 and enemy.HP > 0):
         for each in player.onTurnStart:
@@ -665,7 +662,6 @@ def doCombat(player: object, enemy: object):
         # player casts spell
         elif (chosen == "spell" or chosen == "skill" or chosen == "s"):
             # list player's spells
-            print("")
             print("your spells:")
             index = 0
             for each in player.spells:
@@ -699,7 +695,6 @@ def doCombat(player: object, enemy: object):
                     continue
         # player uses an item
         elif (chosen == "item" or chosen == "i"):
-            print("")
             print("your items:")
             allowed = []
             for key in player.inventory:
