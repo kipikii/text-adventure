@@ -67,10 +67,7 @@ armor_adjectives = [
     "repaired"
 ]
 
-def clearTerminal():
-    pass
-
-# clear terminal code
+# clear funky terminal code
 os.system('cls' if os.name == 'nt' else 'clear')
 
 class Spell:
@@ -580,7 +577,6 @@ def generateEquip(player:object, dropper: str, baseHealth:int, statups:int = 0, 
     #     override = 0
     # bonusHP = round(log(bonusHP) + override)
     bonusHP = baseHealth
-
     list_of_things = [0, 0, 0, 0, 0]
     for _ in range(statups):
         index = -1
@@ -606,14 +602,14 @@ def generateEquip(player:object, dropper: str, baseHealth:int, statups:int = 0, 
             "hurt = math.ceil(enemy.MaxHP / 30)\nenemy.HP -= hurt\nprint('the' + enemy.name + 'took ' + str(heal) + ' damage')",
             "heal = math.ceil(player.MaxHP / 25)\nplayer.HP += heal\nprint('you healed ' + str(heal) + ' hp')\nif(player.HP > player.MaxHP): player.HP = player.MaxHP",
             "player.HP -= 2\nenemy.HP -= 10\nprint('you took 2 damage')\nprint('the ' + enemy.name + ' took 10 damage)",
-            "applyEffect('STR down 1', enemy)",
-            "applyEffect('DEX down 1', enemy)",
-            "applyEffect('DEF down 1', enemy)",
-            "applyEffect('AGI down 1', enemy)",
-            "applyEffect('STR up 1', player)",
-            "applyEffect('DEX up 1', player)",
-            "applyEffect('DEF up 1', player)",
-            "applyEffect('AGI up 1', player)",
+            "applyEffect('STR down', enemy)",
+            "applyEffect('DEX down', enemy)",
+            "applyEffect('DEF down', enemy)",
+            "applyEffect('AGI down', enemy)",
+            "applyEffect('STR up', player)",
+            "applyEffect('DEX up', player)",
+            "applyEffect('DEF up', player)",
+            "applyEffect('AGI up', player)",
             "if (randint(1,10) == 1): applyEffect('poison', enemy)",
             "if (randint(1,10) == 1): applyEffect('burn', enemy)"
         )
@@ -623,14 +619,14 @@ def generateEquip(player:object, dropper: str, baseHealth:int, statups:int = 0, 
         doWhat = random.choice(
             "hurt = math.ceil(player.MaxHP / 25)\nplayer.HP -= hurt\nprint('you took ' + str(hurt) + ' damage')\nif(player.HP > player.maxHP): player.HP = player.MaxHP", 
             "heal = math.ceil(enemy.MaxHP / 25)\nenemy.HP += heal\nprint('the' + enemy.name + 'healed ' + str(heal) + ' hp')\nif(enemy.HP > enemy.maxHP): enemy.HP = enemy.MaxHP"
-            "applyEffect('STR up 1', enemy)",
-            "applyEffect('DEX up 1', enemy)",
-            "applyEffect('DEF up 1', enemy)",
-            "applyEffect('AGI up 1', enemy)",
-            "applyEffect('STR down 1', player)",
-            "applyEffect('DEX down 1', player)",
-            "applyEffect('DEF down 1', player)",
-            "applyEffect('AGI down 1', player)",
+            "applyEffect('STR up', enemy)",
+            "applyEffect('DEX up', enemy)",
+            "applyEffect('DEF up', enemy)",
+            "applyEffect('AGI up', enemy)",
+            "applyEffect('STR down', player)",
+            "applyEffect('DEX down', player)",
+            "applyEffect('DEF down', player)",
+            "applyEffect('AGI down', player)",
             "if (randint(1,10) == 1): applyEffect('poison', player)",
             "if (randint(1,10) == 1): applyEffect('burn', player)"
         )
@@ -662,7 +658,6 @@ def doCombat(player: object, enemy: object):
         print("")
         # player uses attack action
         if (chosen == "attack" or chosen == "a"):
-            clearTerminal()
             castSpell("attack", player, enemy)
             # proc on attack abilities
             for each in player.onAttack:
@@ -685,13 +680,11 @@ def doCombat(player: object, enemy: object):
             # player wants to go back
             if (chosen == "back"):
                 # restart loop (player chooses action again)
-                clearTerminal()
                 continue
             # player casts a spell
             else:
                 if (chosen not in player.spells):
                     chosen = player.spells[int(chosen)]
-                clearTerminal()
                 # check for enough MP
                 if (spells[chosen].cost <= player.MP):
                     # cast the spell
@@ -700,8 +693,7 @@ def doCombat(player: object, enemy: object):
                     for each in player.onCast:
                         exec(each)
                 else:
-                    # restart loop (player chooses action again)
-                    clearTerminal()
+                    # restart loop (player chooses action again)      
                     print("not enough mana!")
                     print("")
                     continue
@@ -807,15 +799,12 @@ def doCombat(player: object, enemy: object):
             player.XP -= player.MaxXP
             player.MaxXP = round(player.MaxXP * 1.5)
             player.level += 1
-        print("")
-        # input("enter anything to continue... ")
-        clearTerminal()
+        print("")  
     else:
         print("you were slain...")
         end = None
         while (end != "quit"):
-            end = input("type 'quit' to quit the app\n> ")
-            clearTerminal()
+            end = input("type 'quit' to quit the app\n> ")        
         quit()
 
 # allows the player to heal, equip gear
@@ -830,14 +819,12 @@ def restSite(player: object):
         if (chosen == "rest" or chosen == "r"):
             if (player.HP >= player.MaxHP and player.MP >= player.MaxMP):
                 print("you already feel rested, you don't feel the need to do so again right now")
-                # input("enter anything to continue...\n> ")
-                clearTerminal()
+                # input("enter anything to continue...\n> ")       
             else:
                 player.HP = player.MaxHP
                 player.MP = player.MaxMP
                 print("MP and HP fully restored!")
                 # input("enter anything to continue...\n> ")
-                clearTerminal()
         elif (chosen == "equip" or chosen == "e"):
             print('\nyour equipment:\n')
             index = 0
@@ -847,8 +834,7 @@ def restSite(player: object):
             weirdlist = list(range(len(player.heldarmors.keys())))
             weirdlist = [str(each) for each in weirdlist]
             select = verify("\nwhat would you like to equip? type back to go back\n> ", list(player.heldarmors.keys()) + ["back"] + weirdlist)
-            if (select == 'back'):
-                clearTerminal()
+            if (select == 'back'):                 
                 continue
             elif (select in player.heldarmors.keys()):
                 select = player.heldarmors.get(select)
@@ -860,8 +846,7 @@ def restSite(player: object):
                 print('you equip the ' + select.name)
                 equip(player, player.heldarmors.get(select.name), select.slot)
                 player.heldarmors.pop(select.name)
-                # input("enter anything to continue...\n> ")
-                clearTerminal()
+                # input("enter anything to continue...\n> ")                 
             else:
                 select = int(select)
                 select = list(player.heldarmors.keys())[select]
@@ -874,12 +859,10 @@ def restSite(player: object):
                 print('you equip the ' + select.name)
                 equip(player, player.heldarmors.get(select.name), select.slot)
                 player.heldarmors.pop(select.name)
-                # input("enter anything to continue...\n> ")
-                clearTerminal()
+                # input("enter anything to continue...\n> ")                 
         elif (chosen == "unequip" or chosen == "u"):
             select = verify("\nwhat slot would you like to unequip? type back to go back [weapon, helmet, chestplate, boots, charm] \n> ", ["weapon", "helmet", 'chestplate', 'boots', 'charm', 'back'])
-            if (select == "back"):
-                clearTerminal()
+            if (select == "back"):                 
                 continue            
             select = player.equip.get(select)
             if (select != None):
@@ -888,10 +871,8 @@ def restSite(player: object):
                 player.heldarmors[select.name] = select
             else:
                 print("you don't have anything to unequip there! ")
-            # input("enter anything to continue...\n> ")
-            clearTerminal()
-        elif (chosen == "drop" or chosen == "d"):
-            clearTerminal()
+            # input("enter anything to continue...\n> ")             
+        elif (chosen == "drop" or chosen == "d"):             
             print('\nyour equipment:\n')
             index = 0
             for each in player.heldarmors.keys():
@@ -900,8 +881,7 @@ def restSite(player: object):
             weirdlist = list(range(len(player.heldarmors.keys())))
             weirdlist = [str(each) for each in weirdlist]
             select = verify("\nwhat would you like to drop? type back to go back\n> ", list(player.heldarmors.keys()) + ["back"] + weirdlist)
-            if (select == 'back'):
-                clearTerminal()
+            if (select == 'back'):                 
                 continue
             elif (select in player.heldarmors.keys()):
                 player.heldarmors.pop(select)
@@ -911,12 +891,10 @@ def restSite(player: object):
                 select = list(player.heldarmors.keys())[select]
                 player.heldarmors.pop(select)
                 print("\nyou dropped your " + select)
-            # input("\nenter anything to continue...\n> ")
-            clearTerminal()
+            # input("\nenter anything to continue...\n> ")            
         elif (chosen == "leave" or chosen == "l"):
             print("you get up and get going\n")
-            # input("enter anything to continue...\n> ")
-            clearTerminal()
+            # input("enter anything to continue...\n> ")             
             break
 
 player = Entity("you", 20, 5, 3, 5, 0, 0, ["doublecut", "bolt", "warcry", "protection", "bravery"], { }, [])
@@ -931,8 +909,7 @@ print("your experience with fighting beasts have taught you something")
 print("you learned the spell 'bite'!")
 player.spells += ["bite"]
 print("")
-# input("enter anything to continue...\n> ")
-clearTerminal()
+# input("enter anything to continue...\n> ") 
 doCombat(player, "spirit")
 doCombat(player, "spirit")
 doCombat(player, "imp")
@@ -943,8 +920,7 @@ print("your experience with fighting spirits and fiends have taught you somethin
 print("you learned the spells 'flame' and 'fireball'!")
 player.spells += ["flame", "fireball"]
 print("")
-# input("enter anything to continue...\n> ")
-clearTerminal()
+# input("enter anything to continue...\n> ") 
 doCombat(player, "warg")
 restSite(player)
 doCombat(player, "reaper")
