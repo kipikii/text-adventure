@@ -570,7 +570,7 @@ def generateEquip(player:object, dropper: str, baseHealth:int, statups:int = 0, 
     if (slot == 'random'):
         slot = random.choice(['weapon','helmet','chestplate','boots','charm'])
     name = random.choice(armor_adjectives) + " " + slot + " of the " + dropper.name
-    while (name in player.inventory.keys()):
+    while (name in player.inventory.keys() or name in player.equip.values()):
         name = random.choice(armor_adjectives) + slot + " of the " + dropper.name
     # bonusHP = statups/max(math.ceil(baseHealth/(10-(2*perks)+(2*quirks))), 1)
     # if bonusHP < 0:
