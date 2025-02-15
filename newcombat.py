@@ -802,7 +802,7 @@ def doCombat(player: object, enemy: object):
                 print("MP fully restored!")
             else:
                 exec(f"player.{chosen} += {1}")
-                print(f"{chosen} increased by 3")
+                print(f"{chosen} increased by 1")
             player.XP -= player.MaxXP
             player.MaxXP = round(player.MaxXP * 1.5)
             player.level += 1
