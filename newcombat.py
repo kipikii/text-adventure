@@ -235,7 +235,7 @@ items = {
     "pepper tonic": Item("pepper tonic", "print('you drink the pepper tonic... spicy!')\napplyStatus('STR up', player, False)", 1),
     "carrot tonic": Item("carrot tonic", "print('you drink the carrot tonic... tastes like carrots.')\napplyStatus('DEX up', player, False)", 1),
     "ginger tonic": Item("ginger tonic", "print('you drink the ginger tonic... so bitter!')\napplyStatus('DEF up', player, False)", 1),
-    "wind tonic": Item("wind tonic", """print("you drink the wind tonic... it's empty..?")\napplyStatus('AGI up', player, False))""", 1),
+    "wind tonic": Item("wind tonic", """print("you drink the wind tonic... it's empty..?")\napplyStatus('AGI up', player, False)""", 1),
 
     # weapons
     "throwing knife": Item("throwing knife", "ouch = max(round((player.STR+player.DEX)/2), 1)\nenemy.HP -= ouch\nprint(f'you huck the throwing knife at the {enemy.name} for {ouch} damage')",2)
@@ -747,8 +747,8 @@ def doCombat(player: object, enemy: object):
         del xpGain
         # enemy has a chance to drop equipment
         # do the same with consumables
-        dropchance = round(max(random.normalvariate(.4, 1), 0))
-        itemDropchance = round(max(random.normalvariate(1, 1), 0))
+        dropchance = math.floor(max(random.normalvariate(.4, 1), 0))
+        itemDropchance = math.floor(max(random.normalvariate(1, 1), 0))
         if dropchance > 0 or itemDropchance > 0: print("\nhere's what you found:\n")
         if (dropchance > 0):
             for _ in range(dropchance):
@@ -764,7 +764,6 @@ def doCombat(player: object, enemy: object):
                 randChoice = random.choice(dropList)
                 incrementDict(randChoice, player.inventory, 1)
                 print(f" + {randChoice.name}")
-                
         # if the player's xp is high enough, increase level
         while (player.XP >= player.MaxXP):
             print("")
