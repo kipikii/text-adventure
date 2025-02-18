@@ -1,6 +1,6 @@
 ### man, my old code is very SPAGHETTI and INEFFICIENT ###
 ### let's streamline this hunk of junk ###
-import random, math, time, copy, os
+import random, math, copy, os
 
 armor_adjectives = [
     "durable",
@@ -749,6 +749,11 @@ def doCombat(player: object, enemy: object):
         # do the same with consumables
         dropchance = math.floor(max(random.normalvariate(.4, 1), 0))
         itemDropchance = math.floor(max(random.normalvariate(1, 1), 0))
+        numEquipped = 0
+        for each in player.equip.values():
+            if each != None:
+                numEquipped += 1
+        if dropchance < 1 and numEquipped <= 1: dropchance = 1
         if dropchance > 0 or itemDropchance > 0: print("\nhere's what you found:\n")
         if (dropchance > 0):
             for _ in range(dropchance):
