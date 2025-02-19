@@ -830,12 +830,10 @@ def restSite(player: object):
         if chosen == "rest" or chosen == "r":
             if player.HP >= player.MaxHP and player.MP >= player.MaxMP:
                 print("you already feel rested, you don't feel the need to do so again right now")
-                # input("enter anything to continue...\n> ")       
             else:
                 player.HP = player.MaxHP
                 player.MP = player.MaxMP
                 print("MP and HP fully restored!")
-                # input("enter anything to continue...\n> ")
         elif chosen == "equip" or chosen == "e":
             print('\nyour equipment:\n')
             index = 0
@@ -857,7 +855,6 @@ def restSite(player: object):
                 print('you equip the ' + select.name)
                 equip(player, player.heldarmors.get(select.name), select.slot)
                 player.heldarmors.pop(select.name)
-                # input("enter anything to continue...\n> ")                 
             else:
                 select = int(select)
                 select = list(player.heldarmors.keys())[select]
@@ -870,7 +867,6 @@ def restSite(player: object):
                 print('you equip the ' + select.name)
                 equip(player, player.heldarmors.get(select.name), select.slot)
                 player.heldarmors.pop(select.name)
-                # input("enter anything to continue...\n> ")                 
         elif chosen == "unequip" or chosen == "u":
             select = verify("\nwhat slot would you like to unequip? type back to go back [weapon, helmet, chestplate, boots, charm] \n> ", ["weapon", "helmet", 'chestplate', 'boots', 'charm', 'back'])
             if select == "back":                 
@@ -882,7 +878,6 @@ def restSite(player: object):
                 player.heldarmors[select.name] = select
             else:
                 print("you don't have anything to unequip there! ")
-            # input("enter anything to continue...\n> ")             
         elif chosen == "drop" or chosen == "d":             
             print('\nyour equipment:\n')
             index = 0
@@ -905,7 +900,6 @@ def restSite(player: object):
             # input("\nenter anything to continue...\n> ")            
         elif chosen == "leave" or chosen == "l":
             print("you get up and get going\n")
-            # input("enter anything to continue...\n> ")             
             break
 
 player = Entity("you", 20, 5, 3, 5, 0, 0, ["doublecut", "bolt", "warcry", "protection", "bravery"], { }, [])
@@ -920,7 +914,6 @@ print("your experience with fighting beasts have taught you something")
 print("you learned the spell 'bite'!")
 player.spells += ["bite"]
 print("")
-# input("enter anything to continue...\n> ") 
 doCombat(player, "spirit")
 doCombat(player, "spirit")
 print("your experience with fighting spirits have taught you something")
@@ -935,7 +928,6 @@ print("your experience with fighting fiends have taught you something")
 print("you learned the spells 'flame' and 'fireball'!")
 player.spells += ["flame", "fireball"]
 print("")
-# input("enter anything to continue...\n> ") 
 doCombat(player, "warg")
 restSite(player)
 doCombat(player, "reaper")
