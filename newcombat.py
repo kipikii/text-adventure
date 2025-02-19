@@ -186,22 +186,22 @@ spells = {
     "attack": Spell("attack", 0, 1, "caster.STR", "caster.DEX", 0, False, "pass", "pass", "A basic attack, known by most."),
     "doublecut": Spell("doublecut", 5, 2, "caster.STR", "caster.DEX", 0, False, "pass", "pass", "The caster attacks twice in quick succession."),
     "tricut": Spell("tricut", 8, 3, "caster.STR", "caster.DEX", 0, False, "pass", "pass", "The caster attacks thrice in quick succession."),
-    "bite": Spell("bite", 2, 1, "caster.STR * .5", "caster.STR", 0, False, "applyStatus('poison', victim)", "pass", "The user temporarily gain fangs and bites down on their opponent, inflicting poison."),
+    "bite": Spell("bite", 2, 1, "caster.STR * .5", "caster.STR", 0, False, "applyStatus('poison', victim)", "pass", "The user bites down on their opponent, inflicting poison."),
     
     # spells
-    "bolt": Spell("bolt", 5, 1, "caster.MP", "caster.AGI", 0, False, "pass", "pass", "Cast a small bolt of mana at the user's foe, dealing damage proportional to their current MP, before MP deduction."),
+    "bolt": Spell("bolt", 5, 1, "caster.MP", "caster.AGI", 0, False, "pass", "pass", "Cast a small bolt of mana at the user's foe, dealing damage equal to their current MP, before MP deduction."),
     "bolt volley": Spell("bolt volley", 15, 5, "caster.MP", "caster.AGI / 1.5", 0, False, "pass", "pass", "The user casts 'bolt' five times in quick succession with reduced accuracy."),
     "flame": Spell("flame", 5, 1, "caster.DEF", "caster.DEX", 0, False, "applyStatus('burn', victim)", "pass", "Fire a small flame at the user's foe, dealing damage and burning them."),
-    "fireball": Spell("fireball", 15, 1, "caster.DEF * 3", "caster.DEX", .25, False, "applyStatus('burn', victim)", "pass", "Summon a large fireball, dealing massive damage and burning the user's foe, but hurts the caster in the process."),
-    "nuke": Spell("nuke", 100784, 999, "caster.MaxHP * 99999", math.inf, 0, True, "pass", "pass", "An ancient magic, long lost to time. Requires a unfeasible amount of mana to cast, but obliterates any foe that opposes its users."),
-    "doom": Spell("doom", 100, 1, "0", "math.inf", 0, False, "applyStatus('impending doom', victim)", "pass", "A spell that causes the caster's foe to feel an impending sense of doom."),
+    "fireball": Spell("fireball", 15, 1, "caster.DEF * 3", "caster.DEX", .25, False, "applyStatus('burn', victim)", "pass", "Summon a large fireball, dealing damage equal to 3 times the caster's DEF and burning the user's foe, but hurts the caster in the process."),
+    "nuke": Spell("nuke", 100784, 999, "caster.MaxHP * 99999", math.inf, 0, True, "pass", "pass", "An ancient magic, long lost to time. Requires a unfeasible amount of mana to cast, but is sure to obliterate any foe that opposes its user."),
+    "doom": Spell("doom", 100, 1, "0", "math.inf", 0, False, "applyStatus('impending doom', victim)", "pass", "..."),
 
     # buffs
     "warcry": Spell("warcry", 6, 1, "0", "math.inf", 0, True, "pass", "applyStatus('STR up', caster)", "The caster makes a loud battle cry, increasing the their STR by 20%."),
     "foresee": Spell("foresee", 6, 1, "0", "math.inf", 0, True, "pass", "applyStatus('DEX up', caster)", "Focuses the caster's mind on their opponent's movements, increasing the user's DEX by 20%."),
     "protection": Spell("protection", 6, 1, "0", "math.inf", 0, True, "pass", "applyStatus('DEF up', caster)", "The caster puts their guard up, increasing their DEF by 20%."),
     "evasion": Spell("evasion", 6, 1, "0", "math.inf", 0, True, "pass", "applyStatus('AGI up', caster)", "Become ready to dodge at a moment's notice, increasing the caster's AGI by 20%."),
-    "bunny": Spell("bunny", 9, 1, "0", "math.inf", 0, True, "pass", "applyStatus('bunny', caster)", "Magically transforms the user into a bunny, cutting their STR by 87.5%% in exchange for 4 times the AGI."),
+    "bunny": Spell("bunny", 9, 1, "0", "math.inf", 0, True, "pass", "applyStatus('bunny', caster)", f"Magically transforms the user into a bunny, cutting their STR by 87.5% in exchange for 4 times the AGI."),
 
     # debuffs
     "threaten": Spell("threaten", 6, 1, "0", "math.inf", 0, True, "applyStatus('STR down', victim)", "pass", "The caster threatens their opponent, decreasing the victim's STR by 20%."),
@@ -310,6 +310,10 @@ monsters = {
     "test dummy": Entity('test dummy', 99999, math.inf, 0, 99999, 0, 0, ['bite'])
 }
 
+modifiers = {
+
+}
+
 # calculates if an attack should hit a given entity
 def calcHit(attackerHit: int, victimDodge: int):
     if (victimDodge < 1): victimDodge = 1
@@ -370,50 +374,48 @@ def tickStatus(status:object, victim:object, doFadeChance:bool = True):
 
 def castSpell(spell:object, caster:object, victim:object):
     spell = spells[spell]
-    if (caster.name != "you"):
-        if (spell.name == "attack"):
+    if caster.name != "you":
+        if spell.name == "attack":
             print("the " + caster.name + " attacks")
         else:
             print("the " + caster.name + " casts " + spell.name + "!")
     else:
-        if (spell.name == "attack"):
+        if spell.name == "attack":
             print(caster.name + " attack")
         else:
             print(caster.name + " cast " + spell.name + "!")
-    if (spell.hitStat == math.inf): bypassHit = True
+    if spell.hitStat == math.inf: bypassHit = True
     else: bypassHit = False
     spellHit = False
     for each in range(spell.procs):
-        if (bypassHit or calcHit(eval(spell.hitStat), victim.AGI)):
+        if bypassHit or calcHit(eval(spell.hitStat), victim.AGI):
             spellHit = True
-            if (spell.ignoreEnemyDEF):
+            if spell.ignoreEnemyDEF:
                 damage = math.ceil((eval(spell.dmgStat)) * (random.randint(100, 115)/100))
             else:
                 damage = math.ceil((eval(spell.dmgStat) * (random.randint(100, 115)/100)) - victim.DEF)
-            if (damage <= 0):
-                if (spell.dmgStat != 0):
-                    print("0 damage")
-            else:
-                if (spell.hitStat != 0):
-                    print(str(math.ceil(damage)) + " damage")
-                    victim.HP -= math.ceil(damage)
-                    for each in caster.onHit:
-                        exec(each)
-                    for each in victim.onHurt:
-                        exec(each)
+            if damage <= 0 and spell.hitStat != math.inf:
+                print("0 damage")
+            elif spell.hitStat != 0:
+                print(str(math.ceil(damage)) + " damage")
+                victim.HP -= math.ceil(damage)
+                for each in caster.onHit:
+                    exec(each)
+                for each in victim.onHurt:
+                    exec(each)
         else:
             print("miss")
             damage = 0
         casterDamage = damage * spell.damageRecoil
-        if (casterDamage != 0):
+        if casterDamage != 0:
             casterDamage = math.ceil(casterDamage)
-            if (caster.name == "you"):
-                if (casterDamage < 0):
+            if caster.name == "you":
+                if casterDamage < 0:
                     print("you healed " + str(casterDamage * -1) + " hp")
                 else:
                     print("you took " + str(casterDamage) + " damage from recoil")
             else:
-                if (casterDamage < 0):
+                if casterDamage < 0:
                     print("the " + caster.name + " healed " + str(casterDamage * -1) + " hp")
                 else:
                     print("the " + caster.name + " took " + str(casterDamage) + " damage from recoil")
@@ -435,17 +437,18 @@ def verify(question:str, allowed:list):
         allowed[index] = each.lower()
         index += 1
     del index
-    while (True):
+    while True:
         chosen = input(question)
         chosen = chosen.lower()
-        if (chosen.startswith("/")):
-            if (chosen == "/help"):
+        if chosen.startswith("/"):
+            if chosen == "/help":
                 print("/help - displays this menu")
                 print("/stats - displays your current stats")
                 print("/quit - quits the game")
-                print("/patchnotes - shows the patch notes")
                 print("/inventory - shows your inventory")
-            elif (chosen == "/stats"):
+                print("/spell <spellName> - gives you information regarding the spell provided")
+                print("/patchnotes - shows the patch notes :)")
+            elif chosen == "/stats":
                 global player
                 print("")
                 print("~~~~~~~~~~")
@@ -461,16 +464,22 @@ def verify(question:str, allowed:list):
                 print("AGI: " + str (player.AGI))
                 print("~~~~~~~~~~")
                 print("")
-            elif (chosen == "/patchnotes"):
+            elif chosen == "/patchnotes":
                 raise ValueError('Variable "patchnotes" is too long to print. Try separating the variable into two different print statements.')
-            elif (chosen == "/quit"):
+            elif chosen == "/quit":
                 print("bye!")
                 quit()
-            elif (chosen == "/inventory"):
+            elif chosen == "/inventory":
                 print("your items:")
                 for eachKey, eachValue in player.inventory.items():
                     print(f"{eachKey.name}: {eachValue}")
                 print("")
+            elif "/spell " in chosen:
+                spellName = chosen.removeprefix("/spell ")
+                if spellName in spells.keys():
+                    print(f"\n- {spells[spellName].description}\n")
+                else:
+                    print("invalid spell name.\n")
             else:
                 print("invalid command. to see all valid commands, do /help")
         for i in allowed:
