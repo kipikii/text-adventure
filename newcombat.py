@@ -71,7 +71,7 @@ armor_adjectives = [
 os.system('cls' if os.name == 'nt' else 'clear')
 
 class Spell:
-    def __init__(self, name: str, cost: int, procs: int, dmgStat: str, hitStat: str, damageRecoil: float, ignoreEnemyDEF: bool, victimEffect: str, selfEffect: str):
+    def __init__(self, name: str, cost: int, procs: int, dmgStat: str, hitStat: str, damageRecoil: float = 0, ignoreEnemyDEF: bool = False, victimEffect: str = "pass", selfEffect: str = "pass", description: str = "This is a spell."):
         self.name = name
         # spell's MP cost
         self.cost = cost
@@ -89,6 +89,8 @@ class Spell:
         self.victimEffect = victimEffect
         # code to execute after casting the spell (regardless of hitting)
         self.selfEffect = selfEffect
+        # spell description, duh
+        self.description = description
 
 class Modifier:
     def __init__ (self, name:str, code:str):
@@ -181,35 +183,37 @@ class Status:
 
 spells = {
     # melee attacks
-    "attack": Spell("attack", 0, 1, "caster.STR", "caster.DEX", 0, False, "pass", "pass"),
-    "doublecut": Spell("doublecut", 5, 2, "caster.STR * 2", "caster.DEX", 0, False, "pass", "pass"),
-    "tricut": Spell("tricut", 8, 3, "caster.STR * 3", "caster.DEX", 0, False, "pass", "pass"),
-    "bite": Spell("bite", 2, 1, "caster.STR", "caster.STR", 0, False, "applyStatus('poison', victim)", "pass"),
+    "attack": Spell("attack", 0, 1, "caster.STR", "caster.DEX", 0, False, "pass", "pass", "A basic attack, known by most."),
+    "doublecut": Spell("doublecut", 5, 2, "caster.STR", "caster.DEX", 0, False, "pass", "pass", "The caster attacks twice in quick succession."),
+    "tricut": Spell("tricut", 8, 3, "caster.STR", "caster.DEX", 0, False, "pass", "pass", "The caster attacks thrice in quick succession."),
+    "bite": Spell("bite", 2, 1, "caster.STR * .5", "caster.STR", 0, False, "applyStatus('poison', victim)", "pass", "The user temporarily gain fangs and bites down on their opponent, inflicting poison."),
     
     # spells
-    "bolt": Spell("bolt", 5, 1, "caster.MP * .75", "caster.AGI", 0, False, "pass", "pass"),
-    "flame": Spell("flame", 5, 1, "caster.AGI", "caster.DEX", 0, False, "applyStatus('burn', victim)", "pass"),
-    "fireball": Spell("fireball", 15, 1, "caster.MP * 3", "caster.DEX", .25, False, "applyStatus('burn', victim)", "applyStatus('burn', caster)"),
-    "nuke": Spell("nuke", 100784*0, 999, "caster.MaxHP * 99999", math.inf, 0, True, "pass", "pass"),
-    "doom": Spell("doom", 100, 1, "0", "math.inf", 0, False, "applyStatus('impending doom', victim)", "pass"),
+    "bolt": Spell("bolt", 5, 1, "caster.MP", "caster.AGI", 0, False, "pass", "pass", "Cast a small bolt of mana at the user's foe, dealing damage proportional to their current MP, before MP deduction."),
+    "bolt volley": Spell("bolt volley", 15, 5, "caster.MP", "caster.AGI / 1.5", 0, False, "pass", "pass", "The user casts 'bolt' five times in quick succession with reduced accuracy."),
+    "flame": Spell("flame", 5, 1, "caster.DEF", "caster.DEX", 0, False, "applyStatus('burn', victim)", "pass", "Fire a small flame at the user's foe, dealing damage and burning them."),
+    "fireball": Spell("fireball", 15, 1, "caster.DEF * 3", "caster.DEX", .25, False, "applyStatus('burn', victim)", "pass", "Summon a large fireball, dealing massive damage and burning the user's foe, but hurts the caster in the process."),
+    "nuke": Spell("nuke", 100784, 999, "caster.MaxHP * 99999", math.inf, 0, True, "pass", "pass", "An ancient magic, long lost to time. Requires a unfeasible amount of mana to cast, but obliterates any foe that opposes its users."),
+    "doom": Spell("doom", 100, 1, "0", "math.inf", 0, False, "applyStatus('impending doom', victim)", "pass", "A spell that causes the caster's foe to feel an impending sense of doom."),
 
     # buffs
-    "warcry": Spell("warcry", 10, 1, "0", "math.inf", 0, True, "pass", "applyStatus('STR up', caster)"),
-    "foresee": Spell("foresee", 10, 1, "0", "math.inf", 0, True, "pass", "applyStatus('DEX up', caster)"),
-    "protection": Spell("protection", 10, 1, "0", "math.inf", 0, True, "pass", "applyStatus('DEF up', caster)"),
-    "evasion": Spell("evasion", 10, 1, "0", "math.inf", 0, True, "pass", "applyStatus('AGI up', caster)"),
-    "bunny": Spell("bunny", 50, 1, "0", "math.inf", 0, True, "applyStatus('bunnied', victim)", "applyStatus('bunny', caster)"),
+    "warcry": Spell("warcry", 6, 1, "0", "math.inf", 0, True, "pass", "applyStatus('STR up', caster)", "The caster makes a loud battle cry, increasing the their STR by 20%."),
+    "foresee": Spell("foresee", 6, 1, "0", "math.inf", 0, True, "pass", "applyStatus('DEX up', caster)", "Focuses the caster's mind on their opponent's movements, increasing the user's DEX by 20%."),
+    "protection": Spell("protection", 6, 1, "0", "math.inf", 0, True, "pass", "applyStatus('DEF up', caster)", "The caster puts their guard up, increasing their DEF by 20%."),
+    "evasion": Spell("evasion", 6, 1, "0", "math.inf", 0, True, "pass", "applyStatus('AGI up', caster)", "Become ready to dodge at a moment's notice, increasing the caster's AGI by 20%."),
+    "bunny": Spell("bunny", 9, 1, "0", "math.inf", 0, True, "pass", "applyStatus('bunny', caster)", "Magically transforms the user into a bunny, cutting their STR by 87.5%% in exchange for 4 times the AGI."),
 
     # debuffs
-    "threaten": Spell("threaten", 10, 1, "0", "math.inf", 0, True, "applyStatus('STR down', victim)", "pass"),
-    "trip": Spell("trip", 10, 1, "0", "math.inf", 0, True, "applyStatus('DEX down', victim)", "pass"),
-    "exploit": Spell("exploit", 10, 1, "0", "math.inf", 0, True, "applyStatus('DEF down', victim)", "pass"),
-    "slow": Spell("slow", 10, 1, "0", "math.inf", 0, True, "applyStatus('AGI down', victim)", "pass"),
+    "threaten": Spell("threaten", 6, 1, "0", "math.inf", 0, True, "applyStatus('STR down', victim)", "pass", "The caster threatens their opponent, decreasing the victim's STR by 20%."),
+    "slow": Spell("slow", 6, 1, "0", "math.inf", 0, True, "applyStatus('DEX down', victim)", "pass", "Slows down the caster's foe, decreasing their DEX by 20%."),
+    "exploit": Spell("exploit", 6, 1, "0", "math.inf", 0, True, "applyStatus('DEF down', victim)", "pass", "Finds a weakness in the caster's foe, decreasing their DEF by 20%."),
+    "trip": Spell("trip", 6, 1, "0", "math.inf", 0, True, "applyStatus('AGI down', victim)", "pass", "Trips up the user's foe, lowering their AGI by 20%."),
 
     # healing & other
-    "bravery": Spell("bravery", 5, 1, "caster.DEF", "math.inf", -1, True, "pass", "pass"),
-    "courage": Spell("courage", 15, 2, "caster.DEF", "math.inf", -1.2, True, "pass", "pass"),
-    "valor": Spell("valor", 45, 3, "caster.DEF", "math.inf", -1.8, True, "pass", "if(random.randint(1,4) == 1): applyStatus('DEF up', caster)"),
+    "bravery": Spell("bravery", 5, 1, "caster.DEF", "math.inf", -1, True, "pass", "pass", "Grants the caster a surge of determination, restoring health equal to the caster's DEF."),
+    "courage": Spell("courage", 15, 2, "caster.DEF", "math.inf", -1.5, True, "pass", "pass", "Channels the caster's resolve into healing their wounds, restoring HP equal to 1.5 times the caster's DEF."),
+    "valor": Spell("valor", 45, 3, "caster.DEF", "math.inf", -2, True, "pass", "if(random.randint(1,2) == 1): applyStatus('DEF up', caster)", "The caster steels themself with unwavering valor, healing HP equal to 2 times the caster's DEF"),
+    "cleanse": Spell("cleanse", 8, 1, "0", "math.inf", 0, True, "pass", "print('you have been cleansed of all statuses')\nfor each in caster.status: removeStatus(each, victim, True)", "Cleanses the user of all status effects, including buffs.")
 }
 
 items = {
@@ -219,11 +223,9 @@ items = {
     "large heal": Item("large heal", "print('you chug the large healing potion')\nplayer.HP += 100\nprint('you heal 100 HP')", 10, True),
     "massive heal": Item("massive heal", "print('you reluctantly gulp down the massive healing potion...')\nplayer.HP += 200\nprint('you heal 200 HP')", 20, True),
     "panacea": Item("panacea", """print('you savor the panacea')
-    player.HP = player.MaxHP
-    print('you heal to full HP')
     for each in player.status:
         removeStatus(each, player, True)
-    print('you are cured of all statuses') """, 10, True),
+    print('you are cured of all statuses') """, 2, True),
 
     # mana regen
     "small mana": Item("small mana", "print('you sip the small mana potion')\nplayer.MP += 5\nprint('you gain 5 MP')", 1, True),
@@ -259,7 +261,6 @@ statuses = {
     "DEX down": Status("DEX down", 0, True, "victim.DEX /= 6/5", "victim.DEX *= 6/5"),
     "DEF down": Status("DEF down", 0, True, "victim.DEF /= 6/5", "victim.DEF *= 6/5"),
     "AGI down": Status("AGI down", 0, True, "victim.AGI /= 6/5", "victim.AGI *= 6/5"),
-    "bunnied": Status("bunnied", .10, True, "victim.DEX /= 4\nvictim.STR /= 4", "victim.DEX *= 4\nvictim.STR *= 4"),
 
     "STR down 1": Status("STR down 1", 0, True, "victim.STR -= 1", "victim.STR += 1"),
     "DEX down 1": Status("DEX down 1", 0, True, "victim.DEX -= 1", "victim.DEX += 1"),
@@ -390,7 +391,7 @@ def castSpell(spell:object, caster:object, victim:object):
             else:
                 damage = math.ceil((eval(spell.dmgStat) * (random.randint(100, 115)/100)) - victim.DEF)
             if (damage <= 0):
-                if (spell.hitStat != 0):
+                if (spell.dmgStat != 0):
                     print("0 damage")
             else:
                 if (spell.hitStat != 0):
@@ -491,7 +492,9 @@ def equip(equipper:object, armor:object, slot:str):
 
     equipper.equip[slot] = armor
 
+    equipper.HP += armor.HP
     equipper.MaxHP += armor.HP
+    equipper.HP += armor.MP
     equipper.MaxMP += armor.MP
     equipper.STR += armor.STR
     equipper.DEX += armor.DEX
@@ -717,7 +720,7 @@ def doCombat(player: object, enemy: object):
         for each in player.status:
             tickStatus(each, player, (enemy.HP > 0))
         # regenerate 1 mana for each 10 max mana the player has
-        player.MP += math.ceil(player.MaxMP / 10)
+        if not math.isinf(player.MP): player.MP += math.ceil(player.MaxMP / 10)
         if (player.MP > player.MaxMP): player.MP = player.MaxMP
         # if the enemy is alive:    
         if (enemy.HP > 0):
@@ -911,11 +914,15 @@ print("")
 # input("enter anything to continue...\n> ") 
 doCombat(player, "spirit")
 doCombat(player, "spirit")
+print("your experience with fighting spirits have taught you something")
+print("you learned the spell 'cleanse'!")
+player.spells += ["cleanse"]
+print("")
 doCombat(player, "imp")
 doCombat(player, "imp")
 doCombat(player, "demon")
 restSite(player)
-print("your experience with fighting spirits and fiends have taught you something")
+print("your experience with fighting fiends have taught you something")
 print("you learned the spells 'flame' and 'fireball'!")
 player.spells += ["flame", "fireball"]
 print("")
