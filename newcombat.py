@@ -313,7 +313,11 @@ monsters = {
     "test dummy": Entity('test dummy', 99999, math.inf, 0, 99999, 0, 0, ['bite'])
 }
 
-modifiers = {
+perks = {
+
+}
+
+quirks = {
 
 }
 
@@ -587,9 +591,9 @@ def unequip(equipper:object, slot:str):
 def generateEquip(player:object, dropper: str, baseHealth:int, statups:int = 0, perks:int = 0, quirks:int = 0, slot:str = 'random'):
     if slot == 'random':
         slot = random.choice(['weapon','helmet','chestplate','boots','charm'])
-    name = random.choice(armor_adjectives) + " " + slot + " of the " + dropper.name
+    name = random.choice(armor_adjectives) + " " + slot + " of the " + dropper
     while (name in player.inventory.keys() or name in player.equip.values()):
-        name = random.choice(armor_adjectives) + slot + " of the " + dropper.name
+        name = random.choice(armor_adjectives) + slot + " of the " + dropper
     # bonusHP = statups/max(math.ceil(baseHealth/(10-(2*perks)+(2*quirks))), 1)
     # if bonusHP < 0:
     #     override = bonusHP
@@ -788,7 +792,7 @@ def doCombat(player: Entity, enemy: Entity):
         if dropchance > 0 or itemDropchance > 0: print("\nhere's what you found:\n")
         if dropchance > 0:
             for _ in range(dropchance):
-                dropped = generateEquip(player, enemy, round(math.log(enemy.MaxHP)*(player.level^2)), math.floor((enemy.STR + enemy.DEX + enemy.DEF + enemy.AGI)/3))
+                dropped = generateEquip(player, enemy.name, round(math.log(enemy.MaxHP)*(player.level^2)), math.floor((enemy.STR + enemy.DEX + enemy.DEF + enemy.AGI)/3))
                 player.heldarmors[dropped.name] = dropped 
                 print(" + " + dropped.name) 
         dropList = []
@@ -934,19 +938,20 @@ def doShop(player: Entity):
             cost = math.ceil(((each.minLevel**1.3) / (player.level)) * random.randint(10,13) + random.randint(-5, 5))
             stock.append(Buyable(each, cost))
             stockNames.append(each.name)
-    # ask if buying, selling, or leaving
-    print('a little kobold traveling merchant waves to you, setting their massive backpack down')
     inquire = '\n"oh hi!" they say. "how can i help ya?" [buy, sell, leave]\n> '
     buyInquire = '\n"...what do you want to buy?" or type back to go back\n> '
     sellInquire = '\n"what exactly do ya wanna sell?" or back to go back\n> '
+    armorCost = round(player.MaxHP * random.uniform(10,15))
+    print('a little kobold traveling merchant waves to you, setting their massive backpack down')
     chosen = None
     while chosen != "leave" and chosen != "l":
+        # ask if buying, selling, or leaving
         chosen = verify(inquire, ["buy", "sell", "leave", "b", "s", "l"])
         # main shop menu
         inquire = '\n"what else can i help ya with?" [buy, sell, leave]\n> '
         if chosen == "buy" or chosen == "b":
             # buy submenu
-            subChosen = verify('\n"sure! what do ya wanna buy?" [items, back]\n> ', ["items", "i", "back", "b"])
+            subChosen = verify('\n"sure! what do ya wanna buy?" [items, equips, back]\n> ', ["items", "i", "back", "b", "equips", "e"])
             if subChosen == "back" or subChosen == "b":
                 continue
             elif subChosen == "items" or subChosen == "i":
@@ -982,6 +987,25 @@ def doShop(player: Entity):
                         print(f" + {item.name}")
                         player.gold -= item.cost
                         incrementDict(item.item, player.inventory, 1)
+            elif subChosen == "equips" or subChosen == "e":
+                armorType = verify('\n"...okay! what kind of equipment?" [weapon, head, chestplate, boots, charm, back]\n> ', ['weapon', 'head', 'chestplate', 'boots', 'charm', 'back'])
+                if armorType == "back": continue
+                confirm = verify(f'''"sure! that'll be {armorCost} gold. all good?" [yes, no]\n> ''', ["yes", "no", 'y', 'n'])
+                if confirm == 'n' or confirm == 'no': 
+                    print('"awh."')
+                    continue
+                else:
+                    if player.gold >= armorCost:
+                        print('you hand over the gold, and the kobold digs into their backpack')
+                        player.gold -= armorCost
+                        print('''"let's see... here! this should fit you well."''')
+                        generatedEquip = generateEquip(player, "self", round(player.MaxHP * random.uniform(0.5,0.75)), math.floor((player.STR + player.DEX + player.DEF + player.AGI)/3), 0, 0, armorType)
+                        print('"here ya go!"')
+                        print(f" + {generatedEquip.name}")
+                        player.heldarmors[generatedEquip.name] = generatedEquip
+                        armorCost = round(player.MaxHP * random.uniform(10,15))
+                    else:
+                        print('''"hey, you don't have enough money... maybe some other time?''')
         elif chosen == "sell" or chosen == "s":
             # buy submenu
             subChosen = verify('\n"sure! what do ya wanna sell?" [items, back]\n> ', ["items", "i", "back", "b"])
