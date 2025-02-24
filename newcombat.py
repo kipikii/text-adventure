@@ -225,10 +225,10 @@ items = {
     "large heal": Item("large heal", "print('you chug the large healing potion')\nplayer.HP += 100\nprint('you heal 100 HP')", 10, True),
     "massive heal": Item("massive heal", "print('you reluctantly gulp down the massive healing potion...')\nplayer.HP += 200\nprint('you heal 200 HP')", 20, True),
     "panacea": Item("panacea", """
-    print('you savor the panacea')
-    for each in player.status:
-        removeStatus(each, player, True)
-    print('you are cured of all statuses')""", 2, True),
+print('you savor the panacea')
+for each in player.status:
+    removeStatus(each, player, True)
+print('you are cured of all statuses')""", 2, True),
 
     # mana regen
     "small mana": Item("small mana", "print('you sip the small mana potion')\nplayer.MP += 5\nprint('you gain 5 MP')", 1, True),
@@ -486,7 +486,7 @@ def verify(question:str, allowed:list):
                 print("")
                 print("your equips:")
                 for key, value in player.heldarmors.items():
-                    print(f"{key} [{value.BonusHP}, {value.BonusMP}, {value.BonusSTR}, {value.BonusDEX}, {value.BonusDEF}, {value.BonusAGI}]")
+                    print(f"{key}: [{value.HP}, {value.MP}, {value.STR}, {value.DEX}, {value.DEF}, {value.AGI}]")
             elif chosen == "/credits":
                 print("")
                 print("troy semos - main developer")
@@ -740,8 +740,6 @@ def doCombat(player: Entity, enemy: Entity):
             chosen = verify("\nchoose an item to use, or type back to go back\n> ", allowed)
             if chosen == "back": continue
             else:
-                print(chosen)
-                print(type(chosen))
                 if chosen.isdigit(): chosen = allowed[int(chosen)]
                 usedItem = items[chosen]
                 exec(usedItem.code)
@@ -863,7 +861,7 @@ def restSite(player: Entity):
             print('\nyour equipment:\n')
             index = 0
             for key, value in player.heldarmors.items():
-                print(f"{index}. {key} [{value.BonusHP}, {value.BonusMP}, {value.BonusSTR}, {value.BonusDEX}, {value.BonusDEF}, {value.BonusAGI}]")
+                print(f"{index}. {key} [{value.HP}, {value.MP}, {value.STR}, {value.DEX}, {value.DEF}, {value.AGI}]")
                 index += 1
             weirdlist = list(range(len(player.heldarmors.keys())))
             weirdlist = [str(each) for each in weirdlist]
@@ -894,7 +892,7 @@ def restSite(player: Entity):
                 player.heldarmors.pop(select.name)
         elif chosen == "unequip" or chosen == "u":
             for key, value in player.equip:
-                print(f"{key}: {value.name} [{value.BonusHP}, {value.BonusMP}, {value.BonusSTR}, {value.BonusDEX}, {value.BonusDEF}, {value.BonusAGI}]")
+                print(f"{key}: {value.name} [{value.HP}, {value.MP}, {value.STR}, {value.DEX}, {value.DEF}, {value.AGI}]")
             select = verify("\nwhat slot would you like to unequip? type back to go back [weapon, helmet, chestplate, boots, charm] \n> ", ["weapon", "helmet", 'chestplate', 'boots', 'charm', 'back'])
             if select == "back":                 
                 continue            
@@ -909,7 +907,7 @@ def restSite(player: Entity):
             print('\nyour equipment:\n')
             index = 0
             for key, value in player.heldarmors.items():
-                print(f"{index}. {key} [{value.BonusHP}, {value.BonusMP}, {value.BonusSTR}, {value.BonusDEX}, {value.BonusDEF}, {value.BonusAGI}]")
+                print(f"{index}. {key} [{value.HP}, {value.MP}, {value.STR}, {value.DEX}, {value.DEF}, {value.AGI}]")
                 index += 1
             weirdlist = list(range(len(player.heldarmors.keys())))
             weirdlist = [str(each) for each in weirdlist]
