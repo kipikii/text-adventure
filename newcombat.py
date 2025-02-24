@@ -478,7 +478,7 @@ def verify(question:str, allowed:list):
                 print(f"your gold: {player.gold}")
                 print("\nyour items:")
                 for eachKey, eachValue in player.inventory.items():
-                    print(f"{eachKey.name}: {eachValue}")
+                    print(f"{eachKey.name}: {eachValue} ({type(eachKey)},{type(eachValue)})")
                 print("")
             elif chosen == "/credits":
                 print("")
