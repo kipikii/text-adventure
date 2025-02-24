@@ -123,7 +123,7 @@ class Item:
 
 class Entity:
     def __init__(self, name: str, HP: int, MP: int, STR: int, DEX: int, DEF: int, AGI: int, spells: list,
-     inventory: dict = {}, blessings: list = [], onTurnStart: list = [], onAttack: list = [], onCast: list = [], 
+     inventory: dict = {}, gold: int = 0, blessings: list = [], onTurnStart: list = [], onAttack: list = [], onCast: list = [], 
      onHit: list = [], onHurt: list = []
      ):
         self.level = 1
@@ -151,6 +151,8 @@ class Entity:
         self.blessings = blessings
         # items held by the entity
         self.inventory = inventory
+        # MONEYYYYY
+        self.gold = gold
         # armor held by the entity
         self.heldarmors = {}
         # equipped items
@@ -219,13 +221,14 @@ spells = {
 items = {
     # healing
     "small heal": Item("small heal", "print('you sip the small healing potion')\nplayer.HP += 10\nprint('you heal 10 HP')", 1, True),
-    "medium heal": Item("medium heal", "print('you drink the medium healing potion')\nplayer.HP += 50\nprint('you heal 50 HP')", 3, True),
+    "medium heal": Item("medium heal", "print('you drink the medium healing potion')\nplayer.HP += 50\nprint('you heal 50 HP')", 4, True),
     "large heal": Item("large heal", "print('you chug the large healing potion')\nplayer.HP += 100\nprint('you heal 100 HP')", 10, True),
     "massive heal": Item("massive heal", "print('you reluctantly gulp down the massive healing potion...')\nplayer.HP += 200\nprint('you heal 200 HP')", 20, True),
-    "panacea": Item("panacea", """print('you savor the panacea')
+    "panacea": Item("panacea", """
+    print('you savor the panacea')
     for each in player.status:
         removeStatus(each, player, True)
-    print('you are cured of all statuses') """, 2, True),
+    print('you are cured of all statuses')""", 2, True),
 
     # mana regen
     "small mana": Item("small mana", "print('you sip the small mana potion')\nplayer.MP += 5\nprint('you gain 5 MP')", 1, True),
@@ -287,7 +290,7 @@ victim.HP -= burndmg
 del burndmg""", "pass"),
 
     # other
-    "impending doom": Status("impending doom", .5, False, "pass", "applyStatus('doom', victim)"),
+    "impending doom": Status("impending doom", .05, False, "pass", "applyStatus('doom', victim)\nremoveStatus(statuses['impending doom'], victim, True)"),
     "doom": Status("doom", 0, False, "print('death calls.')\nprint('your HP drops to 0')\nvictim.HP = 0", "pass"),
 }
 
@@ -434,19 +437,21 @@ def castSpell(spell:object, caster:object, victim:object):
 def verify(question:str, allowed:list):
     index = 0
     for each in allowed:
-        allowed[index] = each.lower()
+        if isinstance(each, str): allowed[index] = each.lower()
         index += 1
     del index
     while True:
         chosen = input(question)
+        if isinstance(chosen, str) == False: chosen = str(chosen) 
         chosen = chosen.lower()
         if chosen.startswith("/"):
             if chosen == "/help":
                 print("/help - displays this menu")
                 print("/stats - displays your current stats")
-                print("/quit - quits the game")
-                print("/inventory - shows your inventory")
+                print("/inventory || /inv - shows your inventory and gold")
                 print("/spell <spellName> - gives you information regarding the spell provided")
+                print("/credits - the beautiful people who worked on this game")
+                print("/quit - quits the game")
                 print("/patchnotes - shows the patch notes :)")
             elif chosen == "/stats":
                 global player
@@ -469,10 +474,17 @@ def verify(question:str, allowed:list):
             elif chosen == "/quit":
                 print("bye!")
                 quit()
-            elif chosen == "/inventory":
-                print("your items:")
+            elif chosen == "/inventory" or chosen == "/inv":
+                print(f"your gold: {player.gold}")
+                print("\nyour items:")
                 for eachKey, eachValue in player.inventory.items():
                     print(f"{eachKey.name}: {eachValue}")
+                print("")
+            elif chosen == "/credits":
+                print("")
+                print("troy semos - main developer")
+                print("jaxon tran - one of the only people who can understand my code and resident crazy idea man")
+                print("odin simonson -  can understand my code and professional patch notes enjoyer")
                 print("")
             elif "/spell " in chosen:
                 spellName = chosen.removeprefix("/spell ")
@@ -483,7 +495,7 @@ def verify(question:str, allowed:list):
             else:
                 print("invalid command. to see all valid commands, do /help")
         for i in allowed:
-            i = i.lower()
+            if isinstance(i, str): i = i.lower()
             if chosen == i:
                 return chosen
 
@@ -642,11 +654,8 @@ def generateEquip(player:object, dropper: str, baseHealth:int, statups:int = 0, 
         exec(onWhat + ".append(" + doWhat +")")
     return Equipment(name, slot, round(bonusHP), round(bonusMP), round(bonusSTR), round(bonusDEX), round(bonusDEF), round(bonusAGI), onTurnStart, onAttack, onCast, onHit, onHurt)
     
-# for dictionaries where the key's values are only numbers
-def incrementDict(item:str=None, given:dict = {}, change:int=-1):
-    if item == None:
-        print("no item given to , returned statement")
-        return
+# for dictionaries where the key's values are only numbers *wink wink inventory*
+def incrementDict(item:object, given:dict, change:int=1):
     if item in list(given.keys()):
         given[item] = (given.get(item)) + change
     else:
@@ -656,7 +665,7 @@ def incrementDict(item:str=None, given:dict = {}, change:int=-1):
     return given
 
 # causes a combat to initate between two entities
-def doCombat(player: object, enemy: object):
+def doCombat(player: Entity, enemy: Entity):
     enemy = copy.copy(monsters[enemy])
     print("a " + enemy.name + " appeared!")
     while (player.HP > 0 and enemy.HP > 0):
@@ -701,7 +710,7 @@ def doCombat(player: object, enemy: object):
                     for each in player.onCast:
                         exec(each)
                 else:
-                    # restart loop (player chooses action again)      
+                    # player acts again 
                     print("not enough mana!")
                     print("")
                     continue
@@ -709,18 +718,28 @@ def doCombat(player: object, enemy: object):
         elif chosen == "item" or chosen == "i":
             print("your items:")
             allowed = []
+            index = 0
             for key in player.inventory:
                 value = player.inventory[key]
-                print(f"{key.name}: {value}")
+                print(f"{index}. {key.name}: {value}")
                 allowed.append(key.name)
-            allowed = allowed + ["back"]
+                index += 1
+            allowed += list(range(len(allowed)))
+            index = 0
+            for each in allowed:
+                allowed[index] = str(each)
+                index += 1
+            allowed += ["back"]
+            print(allowed)
             chosen = verify("\nchoose an item to use, or type back to go back\n> ", allowed)
-            if chosen == "back":
-                continue
+            if chosen == "back": continue
             else:
+                print(chosen)
+                print(type(chosen))
+                if chosen.isdigit(): chosen = allowed[int(chosen)]
                 usedItem = items[chosen]
                 exec(usedItem.code)
-                incrementDict(usedItem, player.inventory)
+                incrementDict(usedItem, player.inventory, -1)
                 if player.HP > player.MaxHP: player.HP = player.MaxHP
                 if player.MP > player.MaxMP: player.MP = player.MaxMP
         # proc all of the player's status effects
@@ -819,7 +838,7 @@ def doCombat(player: object, enemy: object):
         quit()
 
 # allows the player to heal, equip gear
-def restSite(player: object):
+def restSite(player: Entity):
     randchoice = random.choice(["campfire", "campsite", "clearing", "small ruin"])
     print("you come across a " + randchoice)
     print("you feel like this is a safe place for you to gather yourself.")
@@ -902,10 +921,113 @@ def restSite(player: object):
             print("you get up and get going\n")
             break
 
-player = Entity("you", 20, 5, 3, 5, 0, 0, ["doublecut", "bolt", "warcry", "protection", "bravery"], { }, [])
+def doShop(player: Entity):
+    class Buyable:
+        def __init__(self, item: Item, cost: int):
+            self.item = item
+            self.name = self.item.name
+            self.cost = cost
+    stock = []
+    stockNames = []
+    for each in items.values():
+        if each.minLevel <= player.level + 3:
+            cost = math.ceil(((each.minLevel**1.3) / (player.level)) * random.randint(10,13) + random.randint(-5, 5))
+            stock.append(Buyable(each, cost))
+            stockNames.append(each.name)
+    # ask if buying, selling, or leaving
+    print('a little kobold traveling merchant waves to you, setting their massive backpack down')
+    inquire = '\n"oh hi!" they say. "how can i help ya?" [buy, sell, leave]\n> '
+    buyInquire = '\n"...what do you want to buy?" or type back to go back\n> '
+    sellInquire = '\n"what exactly do ya wanna sell?" or back to go back\n> '
+    chosen = None
+    while chosen != "leave" and chosen != "l":
+        chosen = verify(inquire, ["buy", "sell", "leave", "b", "s", "l"])
+        # main shop menu
+        inquire = '\n"what else can i help ya with?" [buy, sell, leave]\n> '
+        if chosen == "buy" or chosen == "b":
+            # buy submenu
+            subChosen = verify('\n"sure! what do ya wanna buy?" [items, back]\n> ', ["items", "i", "back", "b"])
+            if subChosen == "back" or subChosen == "b":
+                continue
+            elif subChosen == "items" or subChosen == "i":
+                # print item stock & costs
+                print('''\n"okay! here's what i've got..."''')
+                index = 0
+                for each in stock:
+                    print(f"{index}. {each.item.name}: {each.cost} gold")
+                    index += 1
+                # compile allowed list (index and item name)
+                allowed = list(range(len(stock)))
+                index1 = 0
+                for each in allowed: 
+                    allowed[index1] = str(each)
+                    index1 += 1
+                allowed += stockNames
+                # get desired purchase
+                item = None
+                while item != "back":
+                    item = verify(buyInquire, allowed + ["back"])
+                    buyInquire = '\n"...what else do ya wanna get?" or type back to go back\n> '
+                    if item.isdigit(): item = int(item)
+                    if item == "back": continue
+                    # if input is number, get stock's name
+                    elif item not in stockNames: item = stock[int(item)]
+                    elif item in stockNames: item = stock[stockNames.index(item)]
+                    print(f'''\n"okay! that'll be {item.cost} gold, please!"''')
+                    if player.gold < item.cost:
+                        print('''"oh, you don't have enough... maybe sell me some stuff, or come back later, okay?"''')
+                    else:
+                        print('you hand over your gold')
+                        print('''"great! here ya go!"''')
+                        print(f" + {item.name}")
+                        player.gold -= item.cost
+                        incrementDict(item.item, player.inventory, 1)
+        elif chosen == "sell" or chosen == "s":
+            # buy submenu
+            subChosen = verify('\n"sure! what do ya wanna sell?" [items, back]\n> ', ["items", "i", "back", "b"])
+            if subChosen == "back" or subChosen == "b":
+                continue
+            elif subChosen == "items" or subChosen == "i":
+                # print item inventory & sell price
+                print('''\n"okay! what do ya have?"''')
+                item = None
+                while item != "back":
+                    index = 0
+                    playerSellList = []
+                    allowed = []
+                    for item in player.inventory.keys():
+                        itemSellValue = math.ceil(stock[stockNames.index(item.name)].cost / 2)
+                        print(f"{index}. {item.name}: {itemSellValue} gold ({player.inventory[item]})")
+                        # create a list (playerSellList) of all of the items the player has and their sell values
+                        playerSellList.append(Buyable(item, itemSellValue))
+                        allowed.append(item.name)
+                        index += 1
+                    for each in range(len(allowed)): allowed.append(str(each))
+                    allowed.append('back')
+                    item = verify(sellInquire, allowed)
+                    sellInquire = '\n"what else do ya wanna sell?" or back to go back\n> '
+                    if item == "back":
+                        continue
+                    # fetch item object
+                    if item.isdigit(): item = stock[stockNames.index(allowed[int(item)])]
+                    else: item = stock[stockNames.index(item)]
+                    # "item" is now saved as "Buyable" object
+                    print(f'\n"okay, your {item.name} please!"')
+                    if player.inventory[item.item] > 0:
+                        print('you hand it over to the little kobold')
+                        incrementDict(item.item, player.inventory, -1)
+                        print('"thank you... and here you go!"')
+                        print(f" + {item.cost} gold")
+                    else:
+                        print('''"oh, you're all out of those. that's okay!"\n''')
+                    print("")
+    print('''"awh... okay! i'll see you later, friend!"\nthey wave goodbye to you excitedly as you walk away\n''')
 
-# player = Entity("you", 99999, 99999, 3, 5, 0, 0, ["doublecut", "bolt", "warcry", "protection", "bravery", "bite"], { }, [])
+player = Entity("you", 20, 5, 3, 5, 0, 0, ["doublecut", "bolt", "warcry", "protection", "bravery"], { }, 30)
 
+#player = Entity("you", 999999, 999999, 3, 5, 0, 0, ["doublecut", "bolt", "warcry", "protection", "bravery", "bite", "nuke"], { }, 999999, [], ["player.MP = player.MaxMP\nprint('your MP was refilled')"])
+
+doShop(player)
 doCombat(player, "rat")
 doCombat(player, "wolf")
 doCombat(player, "wolf")
@@ -923,6 +1045,7 @@ print("")
 doCombat(player, "imp")
 doCombat(player, "imp")
 doCombat(player, "demon")
+doShop(player)
 restSite(player)
 print("your experience with fighting fiends have taught you something")
 print("you learned the spells 'flame' and 'fireball'!")
