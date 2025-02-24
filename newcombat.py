@@ -482,8 +482,11 @@ def verify(question:str, allowed:list):
                 print(f"your gold: {player.gold}")
                 print("\nyour items:")
                 for eachKey, eachValue in player.inventory.items():
-                    print(f"{eachKey.name}: {eachValue} ({type(eachKey)},{type(eachValue)})")
+                    print(f"{eachKey.name}: {eachValue}")
                 print("")
+                print("your equips:")
+                for key, value in player.heldarmors.items():
+                    print(f"{key} [{value.BonusHP}, {value.BonusMP}, {value.BonusSTR}, {value.BonusDEX}, {value.BonusDEF}, {value.BonusAGI}]")
             elif chosen == "/credits":
                 print("")
                 print("troy semos - main developer")
@@ -859,7 +862,7 @@ def restSite(player: Entity):
         elif chosen == "equip" or chosen == "e":
             print('\nyour equipment:\n')
             index = 0
-            for key, value in player.heldarmors:
+            for key, value in player.heldarmors.items():
                 print(f"{index}. {key} [{value.BonusHP}, {value.BonusMP}, {value.BonusSTR}, {value.BonusDEX}, {value.BonusDEF}, {value.BonusAGI}]")
                 index += 1
             weirdlist = list(range(len(player.heldarmors.keys())))
@@ -905,7 +908,7 @@ def restSite(player: Entity):
         elif chosen == "drop" or chosen == "d":             
             print('\nyour equipment:\n')
             index = 0
-            for key, value in player.heldarmors:
+            for key, value in player.heldarmors.items():
                 print(f"{index}. {key} [{value.BonusHP}, {value.BonusMP}, {value.BonusSTR}, {value.BonusDEX}, {value.BonusDEF}, {value.BonusAGI}]")
                 index += 1
             weirdlist = list(range(len(player.heldarmors.keys())))
