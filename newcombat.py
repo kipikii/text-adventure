@@ -734,7 +734,6 @@ def doCombat(player: Entity, enemy: Entity):
                 allowed[index] = str(each)
                 index += 1
             allowed += ["back"]
-            print(allowed)
             chosen = verify("\nchoose an item to use, or type back to go back\n> ", allowed)
             if chosen == "back": continue
             else:
@@ -860,8 +859,8 @@ def restSite(player: Entity):
         elif chosen == "equip" or chosen == "e":
             print('\nyour equipment:\n')
             index = 0
-            for each in player.heldarmors.keys():
-                print(f"{index}. {each}")
+            for key, value in player.heldarmors:
+                print(f"{index}. {key} [{value.BonusHP}, {value.BonusMP}, {value.BonusSTR}, {value.BonusDEX}, {value.BonusDEF}, {value.BonusAGI}]")
                 index += 1
             weirdlist = list(range(len(player.heldarmors.keys())))
             weirdlist = [str(each) for each in weirdlist]
@@ -891,6 +890,8 @@ def restSite(player: Entity):
                 equip(player, player.heldarmors.get(select.name), select.slot)
                 player.heldarmors.pop(select.name)
         elif chosen == "unequip" or chosen == "u":
+            for key, value in player.equip:
+                print(f"{key}: {value.name} [{value.BonusHP}, {value.BonusMP}, {value.BonusSTR}, {value.BonusDEX}, {value.BonusDEF}, {value.BonusAGI}]")
             select = verify("\nwhat slot would you like to unequip? type back to go back [weapon, helmet, chestplate, boots, charm] \n> ", ["weapon", "helmet", 'chestplate', 'boots', 'charm', 'back'])
             if select == "back":                 
                 continue            
@@ -900,12 +901,12 @@ def restSite(player: Entity):
                 unequip(player, select.slot)
                 player.heldarmors[select.name] = select
             else:
-                print("you don't have anything to unequip there! ")
+                print("you don't have anything to unequip there!")
         elif chosen == "drop" or chosen == "d":             
             print('\nyour equipment:\n')
             index = 0
-            for each in player.heldarmors.keys():
-                print(f"{index}. {each}")
+            for key, value in player.heldarmors:
+                print(f"{index}. {key} [{value.BonusHP}, {value.BonusMP}, {value.BonusSTR}, {value.BonusDEX}, {value.BonusDEF}, {value.BonusAGI}]")
                 index += 1
             weirdlist = list(range(len(player.heldarmors.keys())))
             weirdlist = [str(each) for each in weirdlist]
@@ -1008,7 +1009,7 @@ def doShop(player: Entity):
                         print('''"hey, you don't have enough money... maybe some other time?''')
         elif chosen == "sell" or chosen == "s":
             # buy submenu
-            subChosen = verify('\n"sure! what do ya wanna sell?" [items, back]\n> ', ["items", "i", "back", "b"])
+            subChosen = verify('\n"sure! what do ya wanna sell?" [items, equips, back]\n> ', ["items", "i", "back", "b", "equips", "e"])
             if subChosen == "back" or subChosen == "b":
                 continue
             elif subChosen == "items" or subChosen == "i":
@@ -1045,6 +1046,9 @@ def doShop(player: Entity):
                     else:
                         print('''"oh, you're all out of those. that's okay!"\n''')
                     print("")
+            elif subChosen == "equips" or subChosen == "e":
+                print("lemme see your equipment, then!")
+                pass
     print('''"awh... okay! i'll see you later, friend!"\nthey wave goodbye to you excitedly as you walk away\n''')
 
 player = Entity("you", 20, 5, 3, 5, 0, 0, ["doublecut", "bolt", "warcry", "protection", "bravery"], { }, 30)
