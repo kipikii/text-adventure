@@ -591,12 +591,12 @@ def unequip(equipper:object, slot:str):
     if equipper.MaxHP < 0: print("warning: your max hp is less than 0! you will die after your next turn if you don't increase your max hp and rest")
     if equipper.HP < 0: print("warning: your hp is less than 0! heal before you go into your next fight, or you'll die after your next turn")
 
-def generateEquip(player:object, dropper: str, baseHealth:int, statups:int = 0, perks:int = 0, quirks:int = 0, slot:str = 'random'):
+def generateEquip(player:Entity, dropperName: str, baseHealth:int, statups:int = 0, perks:int = 0, quirks:int = 0, slot:str = 'random'):
     if slot == 'random':
         slot = random.choice(['weapon','helmet','chestplate','boots','charm'])
-    name = random.choice(armor_adjectives) + " " + slot + " of the " + dropper
+    name = random.choice(armor_adjectives) + " " + slot + " of the " + dropperName
     while (name in player.inventory.keys() or name in player.equip.values()):
-        name = random.choice(armor_adjectives) + slot + " of the " + dropper
+        name = random.choice(armor_adjectives) + slot + " of the " + dropperName
     # bonusHP = statups/max(math.ceil(baseHealth/(10-(2*perks)+(2*quirks))), 1)
     # if bonusHP < 0:
     #     override = bonusHP
@@ -662,7 +662,7 @@ def generateEquip(player:object, dropper: str, baseHealth:int, statups:int = 0, 
     return Equipment(name, slot, round(bonusHP), round(bonusMP), round(bonusSTR), round(bonusDEX), round(bonusDEF), round(bonusAGI), onTurnStart, onAttack, onCast, onHit, onHurt)
     
 # for dictionaries where the key's values are only numbers *wink wink inventory*
-def incrementDict(item:object, given:dict, change:int=1):
+def incrementDict(item:Item, given:dict, change:int=1):
     if item in list(given.keys()):
         given[item] = (given.get(item)) + change
     else:
@@ -681,7 +681,7 @@ def doCombat(player: Entity, enemy: Entity):
         print("[Your HP: " + str(player.HP) + " / " + str(player.MaxHP) + "] [Your MP: " + str(player.MP)+ " / " + str(player.MaxMP) + "]")
         chosen = verify("what would you like to do? [attack, spell, item, pass]\n> ", ["attack", "spell", "skill", "item", "pass", "a", "s", "i", "p"])
         print("")
-        # player uses attack action
+        # player uses attack action (secretly just a free spell)
         if chosen == "attack" or chosen == "a":
             castSpell("attack", player, enemy)
             # proc on attack abilities
@@ -746,9 +746,9 @@ def doCombat(player: Entity, enemy: Entity):
                 incrementDict(usedItem, player.inventory, -1)
                 if player.HP > player.MaxHP: player.HP = player.MaxHP
                 if player.MP > player.MaxMP: player.MP = player.MaxMP
-        # proc all of the player's status effects
         elif chosen == "pass" or chosen == "p":
-            print("you wait")
+            print("you wait")    
+        # proc all of the player's status effects
         for each in player.status:
             tickStatus(each, player, (enemy.HP > 0))
         # regenerate 1 mana for each 10 max mana the player has
@@ -937,7 +937,7 @@ def doShop(player: Entity):
     stockNames = []
     for each in items.values():
         if each.minLevel <= player.level + 3:
-            cost = math.ceil(((each.minLevel**1.3) / (player.level)) * random.randint(10,13) + random.randint(-5, 5))
+            cost = math.ceil(((each.minLevel**1.3) / (player.level)) * max(min(round(random.normalvariate(12.5,1)), 15), 10) + max(min(round(random.normalvariate(0,2)), 5), -5))
             stock.append(Buyable(each, cost))
             stockNames.append(each.name)
     inquire = '\n"oh hi!" they say. "how can i help ya?" [buy, sell, leave]\n> '
