@@ -475,8 +475,8 @@ def verify(question:str, allowed:list):
                 print("")
             elif chosen == "/patchnotes":
                 print("patch notes:")
-                print("v0.1.0 - initial release")
-                print("v0.1.1 - added a working shop and a working /patchnotes command")
+                print("v1.0 - initial release")
+                print("v1.1 - added a working shop and a working /patchnotes command")
             elif chosen == "/quit":
                 print("bye!")
                 quit()
