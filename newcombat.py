@@ -474,7 +474,9 @@ def verify(question:str, allowed:list):
                 print("~~~~~~~~~~")
                 print("")
             elif chosen == "/patchnotes":
-                raise ValueError('Variable "patchnotes" is too long to print. Try separating the variable into two different print statements.')
+                print("patch notes:")
+                print("v0.1.0 - initial release")
+                print("v0.1.1 - added a working shop and a working /patchnotes command")
             elif chosen == "/quit":
                 print("bye!")
                 quit()
@@ -1082,12 +1084,11 @@ def doShop(player: Entity):
                     else:
                         print('''"well, you don't have that... uhm, maybe something else?"\n''')
                     print("")
-                
     print('''"awh... okay! i'll see you later, friend!"\nthey wave goodbye to you excitedly as you walk away\n''')
 
 player = Entity("you", 20, 5, 3, 5, 0, 0, ["doublecut", "bolt", "warcry", "protection", "bravery"], { }, 30)
 
-player = Entity("you", 999999, 999999, 3, 5, 0, 0, ["doublecut", "bolt", "warcry", "protection", "bravery", "bite", "nuke"], { }, 999999999, [], ["player.MP = player.MaxMP\nprint('your MP was refilled')"])
+# player = Entity("you", 999999, 999999, 3, 5, 0, 0, ["doublecut", "bolt", "warcry", "protection", "bravery", "bite", "nuke"], { }, 999999999, [], ["player.MP = player.MaxMP\nprint('your MP was refilled')"])
 
 doShop(player)
 doCombat(player, "rat")
