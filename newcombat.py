@@ -215,7 +215,7 @@ spells = {
     "bravery": Spell("bravery", 5, 1, "caster.DEF", "math.inf", -1, True, "pass", "pass", "Grants the caster a surge of determination, restoring health equal to the caster's DEF."),
     "courage": Spell("courage", 15, 2, "caster.DEF", "math.inf", -1.5, True, "pass", "pass", "Channels the caster's resolve into healing their wounds, restoring HP equal to 1.5 times the caster's DEF."),
     "valor": Spell("valor", 45, 3, "caster.DEF", "math.inf", -2, True, "pass", "if(random.randint(1,2) == 1): applyStatus('DEF up', caster)", "The caster steels themself with unwavering valor, healing HP equal to 2 times the caster's DEF"),
-    "cleanse": Spell("cleanse", 8, 1, "0", "math.inf", 0, True, "pass", "print('you have been cleansed of all statuses')\nfor each in caster.status: removeStatus(each, victim, True)", "Cleanses the user of all status effects, including buffs.")
+    "cleanse": Spell("cleanse", 8, 1, "0", "math.inf", 0, True, "pass", "print('you have been cleansed of all statuses')\nfor each in caster.status: removeStatus(each, caster, True)", "Cleanses the user of all status effects, including buffs.")
 }
 
 items = {
@@ -487,13 +487,17 @@ def verify(question:str, allowed:list):
                     print(f"{eachKey.name}: {eachValue}")
                 print("")
                 print("your equips:")
-                for key, value in player.heldarmors.items():
+                for key, value in player.heldarmors.items(): 
                     print(f"{key}: [{value.HP}, {value.MP}, {value.STR}, {value.DEX}, {value.DEF}, {value.AGI}]")
             elif chosen == "/credits":
                 print("")
                 print("troy semos - main developer")
-                print("jaxon tran - one of the only people who can understand my code and resident crazy idea man")
-                print("odin simonson -  can understand my code and professional patch notes enjoyer")
+                if random.randint(1,2) == 1:
+                    print("jaxon tran - one of the only people who can understand my code and resident crazy idea man")
+                    print("odin simonson - can understand my code and professional patch notes enjoyer")
+                else:
+                    print("odin simonson - can understand my code and professional patch notes enjoyer")
+                    print("jaxon tran - one of the only people who can understand my code and resident crazy man")
                 print("")
             elif "/spell " in chosen:
                 spellName = chosen.removeprefix("/spell ")
@@ -1086,7 +1090,7 @@ def doShop(player: Entity):
                     print("")
     print('''"awh... okay! i'll see you later, friend!"\nthey wave goodbye to you excitedly as you walk away\n''')
 
-player = Entity("you", 20, 5, 3, 5, 0, 0, ["doublecut", "bolt", "warcry", "protection", "bravery"], { }, 30)
+player = Entity("you", 20, 8, 3, 5, 0, 0, ["doublecut", "bolt", "warcry", "protection", "bravery"], { }, 30)
 
 # player = Entity("you", 999999, 999999, 3, 5, 0, 0, ["doublecut", "bolt", "warcry", "protection", "bravery", "bite", "nuke"], { }, 999999999, [], ["player.MP = player.MaxMP\nprint('your MP was refilled')"])
 
