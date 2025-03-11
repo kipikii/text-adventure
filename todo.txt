@@ -12,7 +12,7 @@ if the player has played before:
 ~~~
 classes:
 
-Page: Starting xp requirement is raised, but multiplier per each level is decreased.
+Page: Starting xp requirement is raised, but xp requirement multiplier per each level is decreased, and stat increases are increased.
 Warrior: Reduces incoming damage by 10% if Warrior’s health is above 75%.
 Assassin: Gains +15% critical hit chance on the first attack each turn.
 Sorcerer: Increases magic-based damage by 5% each time Sorcerer doesn’t take direct damage for a turn (stacks up to 20%).

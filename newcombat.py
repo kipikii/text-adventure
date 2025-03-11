@@ -1,6 +1,6 @@
 ### man, my old code is very SPAGHETTI and INEFFICIENT ###
 ### let's streamline this hunk of junk ###
-import random, math, copy, os
+import random, math, copy#, os
 
 armor_adjectives = [
     "durable",
@@ -67,8 +67,8 @@ armor_adjectives = [
     "repaired"
 ]
 
-# clear funky terminal code
-os.system('cls' if os.name == 'nt' else 'clear')
+# # clear funky terminal directory text
+# os.system('cls' if os.name == 'nt' else 'clear')
 
 class Spell:
     def __init__(self, name: str, cost: int, procs: int, dmgStat: str, hitStat: str, damageRecoil: float = 0, ignoreEnemyDEF: bool = False, victimEffect: str = "pass", selfEffect: str = "pass", description: str = "This is a spell."):
@@ -302,7 +302,7 @@ monsters = {
 
     # infernal wastes
     "imp": Entity('imp', 70, math.inf, 10, 15, -5, 20, ["evasion", "attack", "flame", "threaten"]),
-    "demon": Entity('demon', 100, math.inf, 25, 10, 6, 10, ["attack", "flame", "courage", "warcry", "foresee"]),
+    "demon": Entity('demon', 100, math.inf, 20, 10, 3, 10, ["attack", "flame", "warcry", "foresee"]),
     "warg": Entity('warg', 150, math.inf, 10, 20, 10, 10, ["bite", "tricut"], {}, [], ["applyStatus('STR up', enemy)"]),
 
     # what the hell
@@ -331,9 +331,9 @@ def calcHit(attackerHit: int, victimDodge: int):
         return True
     else:
         if victimDodge == 3: 
-            hitChance = round(math.log(attackerHit * (2.999999 / (victimDodge + 0.0000001))) * 40  ) + 90
+            hitChance = round(math.log(attackerHit * (2.999999 / (victimDodge + 0.0000001))) * 40  ) + 50
         else: 
-            hitChance = round(math.log((attackerHit) * (3 / (victimDodge + 0.0000001))) * 40) + 90
+            hitChance = round(math.log((attackerHit) * (3 / (victimDodge + 0.0000001))) * 40) + 50
     if hitChance < 30: hitChance = 30
     if hitChance >= random.randint(1,100): return True
     else: return False
@@ -1111,8 +1111,9 @@ player.spells += ["cleanse"]
 print("")
 doCombat(player, "imp")
 doCombat(player, "imp")
-doCombat(player, "demon")
+restSite(player)
 doShop(player)
+doCombat(player, "demon")
 restSite(player)
 print("your experience with fighting fiends have taught you something")
 print("you learned the spells 'flame' and 'fireball'!")
