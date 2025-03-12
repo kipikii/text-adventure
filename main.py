@@ -1,5 +1,5 @@
-### man, my old code is very SPAGHETTI and INEFFICIENT ###
-### let's streamline this hunk of junk ###
+### run this file please! ###
+# this is the main file that runs the game
 
 # import random, math, copy, os
 import data, events, combat
