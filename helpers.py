@@ -64,8 +64,8 @@ def verify(question:str, allowed:list):
                 print("")
             elif "/spell " in chosen:
                 spellName = chosen.removeprefix("/spell ")
-                if spellName in combat.spells.keys():
-                    print(f"\n- {combat.spells[spellName].description}\n")
+                if spellName in data.spells.keys():
+                    print(f"\n- {data.spells[spellName].description}\n")
                 else:
                     print("invalid spell name.\n")
             else:
