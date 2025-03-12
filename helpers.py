@@ -55,6 +55,7 @@ def verify(question:str, allowed:list):
             elif chosen == "/credits":
                 print("")
                 print("troy semos - main developer")
+                # don't ask, they asked for this
                 if random.randint(1,2) == 1:
                     print("jaxon tran - one of the only people who can understand my code and resident crazy idea man")
                     print("odin simonson - can understand my code and professional patch notes enjoyer")
