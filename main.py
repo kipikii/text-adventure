@@ -4,36 +4,39 @@
 # import random, math, copy, os
 import data, events, combat
 
-# # clear funky terminal directory text
+# i just don't want to have to write data.player that much, i'm sorry
+from data import player
+
+# clear funky terminal directory texts
 # os.system('cls' if os.name == 'nt' else 'clear')
 
-events.doShop(data.player)
-combat.doCombat(data.player, "rat")
-combat.doCombat(data.player, "wolf")
-combat.doCombat(data.player, "wolf")
-events.restSite(data.player)
+events.doShop(player)
+combat.doCombat(player, "rat")
+combat.doCombat(player, "wolf")
+combat.doCombat(player, "wolf")
+events.restSite(player)
 print("your experience with fighting beasts have taught you something")
 print("you learned the spell 'bite'!")
-data.player.spells += ["bite"]
+player.spells += ["bite"]
 print("")
-combat.doCombat(data.player, "spirit")
-combat.doCombat(data.player, "spirit")
+combat.doCombat(player, "spirit")
+combat.doCombat(player, "spirit")
 print("your experience with fighting spirits have taught you something")
 print("you learned the spell 'cleanse'!")
-data.player.spells += ["cleanse"]
+player.spells += ["cleanse"]
 print("")
-combat.doCombat(data.player, "imp")
-combat.doCombat(data.player, "imp")
-events.restSite(data.player)
-events.doShop(data.player)
-combat.doCombat(data.player, "demon")
-events.restSite(data.player)
+combat.doCombat(player, "imp")
+combat.doCombat(player, "imp")
+events.restSite(player)
+events.doShop(player)
+combat.doCombat(player, "demon")
+events.restSite(player)
 print("your experience with fighting fiends have taught you something")
 print("you learned the spells 'flame' and 'fireball'!")
-data.player.spells += ["flame", "fireball"]
+player.spells += ["flame", "fireball"]
 print("")
-combat.doCombat(data.player, "warg")
-events.doShop(data.player)
-events.restSite(data.player)
-combat.doCombat(data.player, "reaper")
+combat.doCombat(player, "warg")
+events.doShop(player)
+events.restSite(player)
+combat.doCombat(player, "reaper")
 print("wowie.")

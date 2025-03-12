@@ -76,7 +76,7 @@ def calcHit(attackerHit: int, victimDodge: int):
     else: return False
 
 # causes a combat to initate between two entities
-def doCombat(player: data.Entity, enemy: data.Entity):
+def doCombat(player: data.Entity, enemy: data.Entity):  
     enemy = copy.copy(data.monsters[enemy])
     print("a " + enemy.name + " appeared!")
     while (player.HP > 0 and enemy.HP > 0):

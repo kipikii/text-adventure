@@ -1,4 +1,5 @@
 import random, combat, data
+from data import player
 
 def verify(question:str, allowed:list):
     index = 0
