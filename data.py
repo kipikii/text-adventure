@@ -66,7 +66,7 @@ armor_adjectives = [
 ]
 
 class Spell:
-    def __init__(self, name: str, cost: int, procs: int, dmgStat: str, hitStat: str, damageRecoil: float = 0, ignoreEnemyDEF: bool = False, victimEffect: str = "pass", selfEffect: str = "pass", description: str = "This is a spell."):
+    def __init__(self, name: str, cost: int, procs: int, dmgStat: str, hitStat: str, damageRecoil: float = 0, ignoreEnemyDEF: bool = False, victimEffect: str = "pass", selfEffect: str = "pass", description: str = "This is a spell.", tags: list = []):
         self.name = name
         # spell's MP cost
         self.cost = cost
@@ -86,6 +86,8 @@ class Spell:
         self.selfEffect = selfEffect
         # spell description, duh
         self.description = description
+        # list of tags for future use
+        self.tags = tags
 
 class Item:
     def __init__(self, name:str, code:str, minLevel:int, usableOutsideCombat:bool = False):
@@ -377,36 +379,37 @@ class Entity:
 
 spells = {
     # melee attacks
-    "attack": Spell("attack", 0, 1, "caster.STR", "caster.DEX", 0, False, "pass", "pass", "A basic attack, known by most."),
-    "doublecut": Spell("doublecut", 5, 2, "caster.STR", "caster.DEX", 0, False, "pass", "pass", "The caster attacks twice in quick succession."),
-    "tricut": Spell("tricut", 8, 3, "caster.STR", "caster.DEX", 0, False, "pass", "pass", "The caster attacks thrice in quick succession."),
-    "bite": Spell("bite", 2, 1, "caster.STR * .5", "caster.STR", 0, False, "victim.applyStatus('poison')", "pass", "The user bites down on their opponent, inflicting poison."),
+    "attack": Spell("attack", 0, 1, "caster.STR", "caster.DEX", 0, False, "pass", "pass", "A basic attack, known by most.", ["melee", "basic"]),
+    "doublecut": Spell("doublecut", 5, 2, "caster.STR", "caster.DEX", 0, False, "pass", "pass", "The caster attacks twice in quick succession.", ['melee']),
+    "tricut": Spell("tricut", 8, 3, "caster.STR", "caster.DEX", 0, False, "pass", "pass", "The caster attacks thrice in quick succession.", ['melee']),
+    "swift strike": Spell("swift strike", 5, 1, "caster.AGI", "caster.AGI", 0, False, "pass", "pass", "The user strikes quickly at their opponent, dealing damage proportional to AGI.", ['melee']),
+    "bite": Spell("bite", 2, 1, "caster.STR * .5", "caster.STR", 0, False, "victim.applyStatus('poison')", "pass", "The user bites down on their opponent, inflicting poison.", ['melee', 'debuff']),
     
     # spells
-    "bolt": Spell("bolt", 5, 1, "caster.MP", "caster.AGI", 0, False, "pass", "pass", "Cast a small bolt of mana at the user's foe, dealing damage equal to their current MP, before MP deduction."),
-    "bolt volley": Spell("bolt volley", 15, 5, "caster.MP", "caster.AGI / 1.5", 0, False, "pass", "pass", "The user casts 'bolt' five times in quick succession with reduced accuracy."),
-    "flame": Spell("flame", 5, 1, "caster.DEF", "caster.DEX", 0, False, "victim.applyStatus('burn')", "pass", "Fire a small flame at the user's foe, dealing damage and burning them."),
-    "fireball": Spell("fireball", 15, 1, "caster.DEF * 3", "caster.DEX", .25, False, "victim.applyStatus('burn')", "pass", "Summon a large fireball, dealing damage equal to 3 times the caster's DEF and burning the user's foe, but hurts the caster in the process."),
-    "nuke": Spell("nuke", 100784, 999, "caster.MaxHP * 99999", math.inf, 0, True, "pass", "pass", "An ancient magic, long lost to time. Requires a unfeasible amount of mana to cast, but is sure to obliterate any foe that opposes its user."),
-    "doom": Spell("doom", 100, 1, "0", "math.inf", 0, False, "victim.applyStatus('impending doom')", "pass", "..."),
+    "bolt": Spell("bolt", 5, 1, "caster.MP", "caster.AGI", 0, False, "pass", "pass", "Cast a small bolt of mana at the user's foe, dealing damage equal to their current MP, before MP deduction.", ['spell']),
+    "bolt volley": Spell("bolt volley", 15, 5, "caster.MP", "caster.AGI / 1.5", 0, False, "pass", "pass", "The user casts 'bolt' five times in quick succession with reduced accuracy.", ['spell']),
+    "flame": Spell("flame", 5, 1, "caster.DEF", "caster.DEX", 0, False, "victim.applyStatus('burn')", "pass", "Fire a small flame at the user's foe, dealing damage and burning them.", ['spell', 'debuff']),
+    "fireball": Spell("fireball", 15, 1, "caster.DEF * 3", "caster.DEX", .25, False, "victim.applyStatus('burn')", "pass", "Summon a large fireball, dealing damage equal to 3 times the caster's DEF and burning the user's foe, but hurts the caster in the process.", ['spell', 'debuff', 'recoil']),
+    "nuke": Spell("nuke", 100784, 999, "caster.MaxHP * 99999", math.inf, 0, True, "pass", "pass", "An ancient magic, long lost to time. Requires a unfeasible amount of mana to cast, but is sure to obliterate any foe that opposes its user.", ['spell']),
+    "doom": Spell("doom", 100, 1, "0", "math.inf", 0, False, "victim.applyStatus('impending doom')", "pass", "...", ['spell', 'debuff']),
 
     # buffs
-    "warcry": Spell("warcry", 6, 1, "0", "math.inf", 0, True, "pass", "caster.applyStatus('STR up')", "The caster makes a loud battle cry, increasing the their STR by 20%."),
-    "foresee": Spell("foresee", 6, 1, "0", "math.inf", 0, True, "pass", "caster.applyStatus('DEX up')", "Focuses the caster's mind on their opponent's movements, increasing the user's DEX by 20%."),
-    "protection": Spell("protection", 6, 1, "0", "math.inf", 0, True, "pass", "caster.applyStatus('DEF up')", "The caster puts their guard up, increasing their DEF by 20%."),
-    "evasion": Spell("evasion", 6, 1, "0", "math.inf", 0, True, "pass", "caster.applyStatus('AGI up')", "Become ready to dodge at a moment's notice, increasing the caster's AGI by 20%."),
-    "bunny": Spell("bunny", 9, 1, "0", "math.inf", 0, True, "pass", "caster.applyStatus('bunny')", f"Magically transforms the user into a bunny, cutting their STR by 87.5% in exchange for 4 times the AGI."),
+    "warcry": Spell("warcry", 6, 1, "0", "math.inf", 0, True, "pass", "caster.applyStatus('STR up')", "The caster makes a loud battle cry, increasing the their STR by 20%.", ['buff']),
+    "foresee": Spell("foresee", 6, 1, "0", "math.inf", 0, True, "pass", "caster.applyStatus('DEX up')", "Focuses the caster's mind on their opponent's movements, increasing the user's DEX by 20%.", ['buff']),
+    "protection": Spell("protection", 6, 1, "0", "math.inf", 0, True, "pass", "caster.applyStatus('DEF up')", "The caster puts their guard up, increasing their DEF by 20%.", ['buff']),
+    "evasion": Spell("evasion", 6, 1, "0", "math.inf", 0, True, "pass", "caster.applyStatus('AGI up')", "Become ready to dodge at a moment's notice, increasing the caster's AGI by 20%.", ['buff']),
+    "bunny": Spell("bunny", 9, 1, "0", "math.inf", 0, True, "pass", "caster.applyStatus('bunny')", f"Magically transforms the user into a bunny, cutting their STR by 87.5% in exchange for 4 times the AGI.", ['buff']),
 
     # debuffs
-    "threaten": Spell("threaten", 6, 1, "0", "math.inf", 0, True, "victim.applyStatus('STR down')", "pass", "The caster threatens their opponent, decreasing the victim's STR by 20%."),
-    "slow": Spell("slow", 6, 1, "0", "math.inf", 0, True, "victim.applyStatus('DEX down')", "pass", "Slows down the caster's foe, decreasing their DEX by 20%."),
-    "exploit": Spell("exploit", 6, 1, "0", "math.inf", 0, True, "victim.applyStatus('DEF down')", "pass", "Finds a weakness in the caster's foe, decreasing their DEF by 20%."),
-    "trip": Spell("trip", 6, 1, "0", "math.inf", 0, True, "victim.applyStatus('AGI down')", "pass", "Trips up the user's foe, lowering their AGI by 20%."),
+    "threaten": Spell("threaten", 6, 1, "0", "math.inf", 0, True, "victim.applyStatus('STR down')", "pass", "The caster threatens their opponent, decreasing the victim's STR by 20%.", ['debuff']),
+    "slow": Spell("slow", 6, 1, "0", "math.inf", 0, True, "victim.applyStatus('DEX down')", "pass", "Slows down the caster's foe, decreasing their DEX by 20%.", ['debuff']),
+    "exploit": Spell("exploit", 6, 1, "0", "math.inf", 0, True, "victim.applyStatus('DEF down')", "pass", "Finds a weakness in the caster's foe, decreasing their DEF by 20%.", ['debuff']),
+    "trip": Spell("trip", 6, 1, "0", "math.inf", 0, True, "victim.applyStatus('AGI down')", "pass", "Trips up the user's foe, lowering their AGI by 20%.", ['debuff']),
 
     # healing & other
-    "bravery": Spell("bravery", 5, 1, "caster.DEF", "math.inf", -1, True, "pass", "pass", "Grants the caster a surge of determination, restoring health equal to the caster's DEF."),
-    "courage": Spell("courage", 15, 2, "caster.DEF", "math.inf", -1.5, True, "pass", "pass", "Channels the caster's resolve into healing their wounds, restoring HP equal to 1.5 times the caster's DEF."),
-    "valor": Spell("valor", 45, 3, "caster.DEF", "math.inf", -2, True, "pass", "if(random.randint(1,2) == 1): caster.applyStatus('DEF up')", "The caster steels themself with unwavering valor, healing HP equal to 2 times the caster's DEF"),
+    "bravery": Spell("bravery", 5, 1, "caster.DEF", "math.inf", -1, True, "pass", "pass", "Grants the caster a surge of determination, restoring health equal to the caster's DEF.", ['heal']),
+    "courage": Spell("courage", 15, 2, "caster.DEF", "math.inf", -1.5, True, "pass", "pass", "Channels the caster's resolve into healing their wounds, restoring HP equal to 1.5 times the caster's DEF.", ['heal']),
+    "valor": Spell("valor", 45, 3, "caster.DEF", "math.inf", -2, True, "pass", "if(random.randint(1,2) == 1): caster.applyStatus('DEF up')", "The caster steels themself with unwavering valor, healing HP equal to 2 times the caster's DEF.", ['heal']),
     "cleanse": Spell("cleanse", 8, 1, "0", "math.inf", 0, True, "pass", "print('you have been cleansed of all statuses')\nfor each in caster.status: caster.removeStatus(each, True)", "Cleanses the user of all status effects, including buffs.")
 }
 
