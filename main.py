@@ -2,7 +2,7 @@
 # this is the main file that runs the game
 
 # import random, math, copy, os
-import data, events, combat
+import events, combat
 
 # i just don't want to have to write data.player that much, i'm sorry
 from data import player
