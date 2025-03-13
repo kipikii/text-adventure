@@ -1,4 +1,4 @@
-import random, combat, data
+import random, data
 from data import player
 
 def verify(question:str, allowed:list):
