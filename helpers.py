@@ -19,7 +19,7 @@ def verify(question:str, allowed:list):
                 print("/spell <spellName> - gives you information regarding the spell provided")
                 print("/credits - the beautiful people who worked on this game")
                 print("/quit - quits the game")
-                print("/patchnotes - shows the patch notes :)")
+                print("/patchnotes - shows the patch notes")
             elif chosen == "/stats":
                 global player
                 print("")

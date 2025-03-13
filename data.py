@@ -448,50 +448,50 @@ quirks = {
 
 statuses = {
     # stat buffs
-    "STR up": Status("STR up", 0, True, "victim.STR *= 6/5", "victim.STR /= 6/5"),
-    "DEX up": Status("DEX up", 0, True, "victim.DEX *= 6/5", "victim.DEX /= 6/5"),
-    "DEF up": Status("DEF up", 0, True, "victim.DEF *= 6/5", "victim.DEF /= 6/5"),
-    "AGI up": Status("AGI up", 0, True, "victim.AGI *= 6/5", "victim.AGI /= 6/5"),
-    "bunny": Status("bunny", .10, True, "victim.AGI *= 4\nvictim.STR /= 8", "victim.AGI /= 4\nvictim.STR *= 8"),
+    "STR up": Status("STR up", 0, True, "self.STR *= 6/5\nself.STR = math.ceil(self.STR)", "self.STR /= 6/5\nself.STR = math.floor(self.STR)"),
+    "DEX up": Status("DEX up", 0, True, "self.DEX *= 6/5\nself.DEX = math.ceil(self.DEX)", "self.DEX /= 6/5\nself.DEX = math.floor(self.DEX)"),
+    "DEF up": Status("DEF up", 0, True, "self.DEF *= 6/5\nself.DEF = math.ceil(self.DEF)", "self.DEF /= 6/5\nself.DEF = math.floor(self.DEF)"),
+    "AGI up": Status("AGI up", 0, True, "self.AGI *= 6/5\nself.AGI = math.ceil(self.AGI)", "self.AGI /= 6/5\nself.AGI = math.floor(self.AGI)"),
+    "bunny": Status("bunny", .10, True, "self.AGI *= 4\nself.AGI = math.ceil(self.AGI)\nself.STR /= 8\nself.STR = math.floor(self.STR)", "self.AGI /= 4\nself.AGI = math.floor(self.AGI)\nself.STR *= 8\nself.STR = math.ceil(self.STR)"),
 
-    "STR up 1": Status("STR up 1", 0, True, "victim.STR += 1", "victim.STR -= 1"),
-    "DEX up 1": Status("DEX up 1", 0, True, "victim.DEX += 1", "victim.DEX -= 1"),
-    "DEF up 1": Status("DEF up 1", 0, True, "victim.DEF += 1", "victim.DEF -= 1"),
-    "AGI up 1": Status("AGI up 1", 0, True, "victim.AGI += 1", "victim.AGI -= 1"),
+    "STR up 1": Status("STR up 1", 0, True, "self.STR += 1", "self.STR -= 1"),
+    "DEX up 1": Status("DEX up 1", 0, True, "self.DEX += 1", "self.DEX -= 1"),
+    "DEF up 1": Status("DEF up 1", 0, True, "self.DEF += 1", "self.DEF -= 1"),
+    "AGI up 1": Status("AGI up 1", 0, True, "self.AGI += 1", "self.AGI -= 1"),
 
     # stat debuffs
-    "STR down": Status("STR down", 0, True, "victim.STR /= 6/5", "victim.STR *= 6/5"),
-    "DEX down": Status("DEX down", 0, True, "victim.DEX /= 6/5", "victim.DEX *= 6/5"),
-    "DEF down": Status("DEF down", 0, True, "victim.DEF /= 6/5", "victim.DEF *= 6/5"),
-    "AGI down": Status("AGI down", 0, True, "victim.AGI /= 6/5", "victim.AGI *= 6/5"),
+    "STR down": Status("STR down", 0, True, "self.STR /= 6/5\nself.STR = math.floor(self.STR)", "self.STR *= 6/5\nself.STR = math.ceil(self.STR)"),
+    "DEX down": Status("DEX down", 0, True, "self.DEX /= 6/5\nself.DEX = math.floor(self.DEX)", "self.DEX *= 6/5\nself.DEX = math.ceil(self.DEX)"),
+    "DEF down": Status("DEF down", 0, True, "self.DEF /= 6/5\nself.DEF = math.floor(self.DEF)", "self.DEF *= 6/5\nself.DEF = math.ceil(self.DEF)"),
+    "AGI down": Status("AGI down", 0, True, "self.AGI /= 6/5\nself.AGI = math.floor(self.AGI)", "self.AGI *= 6/5\nself.AGI = math.ceil(self.AGI)"),
 
-    "STR down 1": Status("STR down 1", 0, True, "victim.STR -= 1", "victim.STR += 1"),
-    "DEX down 1": Status("DEX down 1", 0, True, "victim.DEX -= 1", "victim.DEX += 1"),
-    "DEF down 1": Status("DEF down 1", 0, True, "victim.DEF -= 1", "victim.DEF += 1"),
-    "AGI down 1": Status("AGI down 1", 0, True, "victim.AGI -= 1", "victim.AGI += 1"),
+    "STR down 1": Status("STR down 1", 0, True, "self.STR -= 1", "self.STR += 1"),
+    "DEX down 1": Status("DEX down 1", 0, True, "self.DEX -= 1", "self.DEX += 1"),
+    "DEF down 1": Status("DEF down 1", 0, True, "self.DEF -= 1", "self.DEF += 1"),
+    "AGI down 1": Status("AGI down 1", 0, True, "self.AGI -= 1", "self.AGI += 1"),
 
     # DOT effects
     "burn": Status("burn", .25, False, """
-burndmg = math.ceil(victim.MaxHP / 18)
-if victim.name == "you":
+burndmg = math.ceil(self.MaxHP / 18)
+if self.name == "you":
     print('you took ' + str(burndmg) + ' damage from burn')
 else:
-    print('the ' + victim.name + ' took ' + str(burndmg) + ' damage from burn')
-victim.HP -= burndmg
+    print('the ' + self.name + ' took ' + str(burndmg) + ' damage from burn')
+self.HP -= burndmg
 del burndmg""", "pass"),
 
     "poison": Status("poison", .1, False, """
-burndmg = math.ceil(victim.MaxHP / 20)
-if victim.name == "you":
+burndmg = math.ceil(self.MaxHP / 20)
+if self.name == "you":
     print('you took ' + str(burndmg) + ' damage from poison')
 else:
-    print('the ' + victim.name + ' took ' + str(burndmg) + ' damage from poison')
-victim.HP -= burndmg
+    print('the ' + self.name + ' took ' + str(burndmg) + ' damage from poison')
+self.HP -= burndmg
 del burndmg""", "pass"),
 
     # other
-    "impending doom": Status("impending doom", .05, False, "pass", "victim.applyStatus('doom')\nvictim.removeStatus(statuses['impending doom'], True)"),
-    "doom": Status("doom", 0, False, "print('death calls.')\nprint('your HP drops to 0')\nvictim.HP = 0", "pass"),
+    "impending doom": Status("impending doom", .05, False, "pass", "self.applyStatus('doom')\nself.stauses.remove('impending doom')"),
+    "doom": Status("doom", 0, False, "print('death calls.')\nprint('your HP drops to 0')\nself.HP = 0", "pass"),
 }
 
 monsters = {
