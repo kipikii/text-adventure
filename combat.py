@@ -81,7 +81,10 @@ def doCombat(player: data.Entity, enemy: data.Entity):
     print("a " + enemy.name + " appeared!")
     while (player.HP > 0 and enemy.HP > 0):
         for each in player.onTurnStart:
+            each = "player." + each
             exec(each)
+        for each in player.blessings: print(f"player: {each}")
+        for each in enemy.blessings: print(f"enemy: {each}")
         print("[Your HP: " + str(player.HP) + " / " + str(player.MaxHP) + "] [Your MP: " + str(player.MP)+ " / " + str(player.MaxMP) + "]")
         chosen = helpers.verify("what would you like to do? [attack, spell, item, pass]\n> ", ["attack", "spell", "skill", "item", "pass", "a", "s", "i", "p"])
         print("")
@@ -162,6 +165,7 @@ def doCombat(player: data.Entity, enemy: data.Entity):
         if enemy.HP > 0:
             # proc enemy's turn start abilities
             for each in enemy.onTurnStart:
+                each = "enemy." + each
                 exec(each)
             print("")
             # enemy casts a random spell from their spell list

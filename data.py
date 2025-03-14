@@ -118,6 +118,11 @@ class Equipment:
         self.onHit = onHit
         self.onHurt = onHurt
 
+class Blessing:
+    def __init__(self, name: str, code: str):
+        self.name = name
+        self.code = code
+
 class Status:
     def __init__(self, name: str, fadeChance: float, affectOnApply: bool, effect: str, reverseEffect: str):
         # status effect's name
@@ -377,6 +382,10 @@ class Entity:
             if doFadeChance and status.fadeChance >= random.uniform(0,1):
                 self.removeStatus(status)
 
+    def addBlessing(self, blessing: Blessing):
+        self.blessings += [blessing]
+        exec(blessing.code)
+
 spells = {
     # melee attacks
     "attack": Spell("attack", 0, 1, "caster.STR", "caster.DEX", 0, False, "pass", "pass", "A basic attack, known by most.", ["melee", "basic"]),
@@ -449,6 +458,14 @@ quirks = {
 
 }
 
+blessings = {
+    # on turn start
+    "enraged": Blessing("enraged", """self.onTurnStart.append("applyStatus('STR up')")""", ), # "player." / "enemy." will be concat. with string before execution
+    "focused": Blessing("focused", """self.onTurnStart.append("applyStatus('DEX up')")"""),
+    "fortified": Blessing("fortified", """self.onTurnStart.append("applyStatus('DEF up')")"""),
+    "nimble": Blessing("nimble", """self.onTurnStart.append("applyStatus('AGI up')")"""),
+}
+
 statuses = {
     # stat buffs
     "STR up": Status("STR up", 0, True, "self.STR *= 6/5\nself.STR = math.ceil(self.STR)", "self.STR /= 6/5\nself.STR = math.floor(self.STR)"),
@@ -506,7 +523,7 @@ monsters = {
     # infernal wastes
     "imp": Entity('imp', 70, math.inf, 10, 15, -5, 20, ["evasion", "attack", "flame", "threaten"]),
     "demon": Entity('demon', 100, math.inf, 20, 10, 3, 10, ["attack", "flame", "warcry", "foresee"]),
-    "warg": Entity('warg', 150, math.inf, 10, 20, 10, 10, ["bite", "tricut"], {}, [], ["applyStatus('STR up', enemy)"]),
+    "warg": Entity('warg', 150, math.inf, 10, 20, 10, 10, ["bite", "tricut"], {}, [], [blessings["enraged"]]),
 
     # what the hell
     "reaper": Entity("reaper", 666, math.inf, 100, 200, 50, 100, ["doom", "bunny", "evasion", "trip"]),

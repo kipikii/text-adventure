@@ -10,6 +10,7 @@ from data import player
 # clear funky terminal directory texts
 # os.system('cls' if os.name == 'nt' else 'clear')
 
+events.shrineEvent(player)
 events.doShop(player)
 combat.doCombat(player, "rat")
 combat.doCombat(player, "wolf")

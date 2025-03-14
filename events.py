@@ -243,3 +243,27 @@ def doShop(player: data.Entity):
                         print('''"well, you don't have that... uhm, maybe something else?"\n''')
                     print("")
     print('''"awh... okay! i'll see you later, friend!"\nthey wave goodbye to you excitedly as you walk away\n''')
+
+# shrine for gaining blessings
+def shrineEvent(player: data.Entity):
+    print("you come across a shrine")
+    print("")
+    chosen = None
+    prayed = False
+    while (True):
+        chosen = helpers.verify("what will you do? [pray, leave]\n> ", ["pray", "leave", "p", "l"])
+        if chosen in ["pray", "p"] and prayed == False:
+            prayed = True
+            sampled = random.sample(list(data.blessings.keys()), 2)
+            print("you pray to the shrine")
+            print("you feel a strange energy surround you\n")
+            print("choose a blessing: " + sampled[0] + " or " + sampled[1])
+            chosen = helpers.verify("which will you choose?\n> ", sampled)
+            player.addBlessing(data.blessings[chosen])
+            print('you have been blessed with ' + chosen)
+        elif chosen in ["pray", "p"] and prayed == True:
+            print("you've already prayed to the shrine, it'd be pretty rude to ask for more")
+        elif chosen in ["leave", "l"]:
+            print("you get up and get going\n")
+            break
+        print("")
