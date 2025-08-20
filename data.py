@@ -90,11 +90,12 @@ class Spell:
         self.tags = tags
 
 class Item:
-    def __init__(self, name:str, code:str, minLevel:int, usableOutsideCombat:bool = False):
+    def __init__(self, name:str, code:str, minLevel:int, usableOutsideCombat:bool = False, description: str = "This is an item."):
         self.name = name
         self.code = code
         self.minLevel = minLevel
         self.usableOutsideCombat = usableOutsideCombat
+        self.description = description
 
 class Modifier:
     def __init__ (self, name:str, code:str):
@@ -444,30 +445,30 @@ spells = {
 
 items = {
     # healing
-    "small heal": Item("small heal", "print('you sip the small healing potion')\nplayer.HP += 10\nprint('you heal 10 HP')", 1, True),
-    "medium heal": Item("medium heal", "print('you drink the medium healing potion')\nplayer.HP += 50\nprint('you heal 50 HP')", 4, True),
-    "large heal": Item("large heal", "print('you chug the large healing potion')\nplayer.HP += 100\nprint('you heal 100 HP')", 10, True),
-    "massive heal": Item("massive heal", "print('you reluctantly gulp down the massive healing potion...')\nplayer.HP += 200\nprint('you heal 200 HP')", 20, True),
+    "small heal": Item("small heal", "print('you sip the small healing potion')\nplayer.HP += 10\nprint('you heal 10 HP')", 1, True, "A small healing potion that restores 10 HP."),
+    "medium heal": Item("medium heal", "print('you drink the medium healing potion')\nplayer.HP += 50\nprint('you heal 50 HP')", 4, True, "A medium healing potion that restores 50 HP."),
+    "large heal": Item("large heal", "print('you chug the large healing potion')\nplayer.HP += 100\nprint('you heal 100 HP')", 10, True, "A large healing potion that restores 100 HP."),
+    "massive heal": Item("massive heal", "print('you reluctantly gulp down the massive healing potion...')\nplayer.HP += 200\nprint('you heal 200 HP')", 20, True, "A massive healing potion that restores 200 HP."),
     "panacea": Item("panacea", """
 print('you savor the panacea')
 for each in player.status:
     removeStatus(each, player, True)
-print('you are cured of all statuses')""", 2, True),
+print('you are cured of all statuses')""", 2, True, "A panacea that cures all status effects, including buffs and debuffs."),
 
     # mana regen
-    "small mana": Item("small mana", "print('you sip the small mana potion')\nplayer.MP += 5\nprint('you gain 5 MP')", 1, True),
-    "medium mana": Item("medium mana", "print('you drink the medium mana potion')\nplayer.MP += 20\nprint('you gain 20 MP')", 5, True),
-    "large mana": Item("large mana", "print('you chug the large mana potion')\nplayer.MP += 50\nprint('you gain 50 MP')", 10, True),
-    "massive mana": Item("massive mana", "print('you reluctantly gulp down the massive mana potion...')\nplayer.MP += 100\nprint('you gain 100 MP')", 20, True),
+    "small mana": Item("small mana", "print('you sip the small mana potion')\nplayer.MP += 5\nprint('you gain 5 MP')", 1, True, "A small mana potion that restores 5 MP."),
+    "medium mana": Item("medium mana", "print('you drink the medium mana potion')\nplayer.MP += 20\nprint('you gain 20 MP')", 5, True, "A medium mana potion that restores 20 MP."),
+    "large mana": Item("large mana", "print('you chug the large mana potion')\nplayer.MP += 50\nprint('you gain 50 MP')", 10, True, "A large mana potion that restores 50 MP."),
+    "massive mana": Item("massive mana", "print('you reluctantly gulp down the massive mana potion...')\nplayer.MP += 100\nprint('you gain 100 MP')", 20, True, "A massive mana potion that restores 100 MP."),
     
     # tonics
-    "pepper tonic": Item("pepper tonic", "print('you drink the pepper tonic... spicy!')\napplyStatus('STR up', player, False)", 1),
-    "carrot tonic": Item("carrot tonic", "print('you drink the carrot tonic... tastes like carrots.')\napplyStatus('DEX up', player, False)", 1),
-    "ginger tonic": Item("ginger tonic", "print('you drink the ginger tonic... so bitter!')\napplyStatus('DEF up', player, False)", 1),
-    "wind tonic": Item("wind tonic", """print("you drink the wind tonic... it's empty..?")\napplyStatus('AGI up', player, False)""", 1),
+    "pepper tonic": Item("pepper tonic", "print('you drink the pepper tonic... spicy!')\napplyStatus('STR up', player, False)", 1, False, "A spicy tonic that increases STR by 20%% in combat."),
+    "carrot tonic": Item("carrot tonic", "print('you drink the carrot tonic... tastes like carrots.')\napplyStatus('DEX up', player, False)", 1, False, "A tonic that increases DEX by 20%% in combat."),
+    "ginger tonic": Item("ginger tonic", "print('you drink the ginger tonic... so bitter!')\napplyStatus('DEF up', player, False)", 1, False, "A bitter tonic that increases DEF by 20%% in combat."),
+    "wind tonic": Item("wind tonic", """print("you drink the wind tonic... it's empty..?")\napplyStatus('AGI up', player, False)""", 1, False, "A tonic that increases AGI by 20%% in combat."),
 
     # weapons
-    "throwing knife": Item("throwing knife", "ouch = max(round((player.STR+player.DEX)/2), 1)\nenemy.HP -= ouch\nprint(f'you huck the throwing knife at the {enemy.name} for {ouch} damage')",2)
+    "throwing knife": Item("throwing knife", "ouch = max(round((player.STR+player.DEX)/2), 1)\nenemy.HP -= ouch\nprint(f'you huck the throwing knife at the {{enemy.name}} for {{ouch}} damage')",2, True, "A sharp throwing knife that deals damage based on the average of user's STR and DEX."),
 }
 
 perks = {

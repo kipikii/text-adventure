@@ -17,6 +17,7 @@ def verify(question:str, allowed:list):
                 print("/stats - displays your current stats")
                 print("/inventory || /inv - shows your inventory and gold")
                 print("/spell <spellName> - gives you information regarding the spell provided")
+                print("/item <itemName> - gives you information regarding the item provided")
                 print("/credits - the beautiful people who worked on this game")
                 print("/quit - quits the game")
                 print("/patchnotes - shows the patch notes")
@@ -69,6 +70,12 @@ def verify(question:str, allowed:list):
                     print(f"\n- {data.spells[spellName].description}\n")
                 else:
                     print("invalid spell name.\n")
+            elif "/item " in chosen:
+                itemName = chosen.removeprefix("/item ")
+                if itemName in data.items.keys():
+                    print(f"\n- {data.items[itemName].description}\n")
+                else:
+                    print("invalid item name.\n")
             else:
                 print("invalid command. to see all valid commands, do /help")
         for i in allowed:
