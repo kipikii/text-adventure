@@ -81,7 +81,7 @@ def doCombat(player: data.Entity, enemy: data.Entity):
     print("a " + enemy.name + " appeared!")
     while (player.HP > 0 and enemy.HP > 0):
         for each in player.onTurnStart:
-            each = "player." + each
+            each = "data.player." + each
             exec(each)
         print("[Your HP: " + str(player.HP) + " / " + str(player.MaxHP) + "] [Your MP: " + str(player.MP)+ " / " + str(player.MaxMP) + "]")
         chosen = helpers.verify("what would you like to do? [attack, spell, item, pass]\n> ", ["attack", "spell", "skill", "item", "pass", "a", "s", "i", "p"])
