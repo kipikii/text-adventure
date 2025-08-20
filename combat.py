@@ -76,7 +76,10 @@ def calcHit(attackerHit: int, victimDodge: int):
     else: return False
 
 # causes a combat to initate between two entities
-def doCombat(player: data.Entity, enemy: data.Entity):  
+def doCombat(player: data.Entity, enemy: data.Entity):
+    # debug text to ensure stat preservation
+    origPlayer = copy.deepcopy(player)
+
     enemy = copy.copy(data.monsters[enemy])
     print("a " + enemy.name + " appeared!")
     while (player.HP > 0 and enemy.HP > 0):
@@ -176,11 +179,16 @@ def doCombat(player: data.Entity, enemy: data.Entity):
                 enemy.tickStatus(each)
     if player.HP > 0:
         # remove statuses from player in reverse order
-        (player.status).reverse()
-        for each in player.status:
+        statusesToRemove = player.status[:]
+        for each in statusesToRemove:
             player.removeStatus(each, True)
         print("")
         print("victory!")
+        # DEBUG LINES
+        if player.STR != origPlayer.STR: print(f"value diff: {player.STR-origPlayer.STR}"); raise ValueError("str diff")
+        if player.DEX != origPlayer.DEX: print(f"value diff: {player.DEX-origPlayer.DEX}"); raise ValueError("dex diff")
+        if player.DEF != origPlayer.DEF: print(f"value diff: {player.DEF-origPlayer.DEF}"); raise ValueError("def diff")
+        if player.AGI != origPlayer.AGI: print(f"value diff: {player.AGI-origPlayer.AGI}"); raise ValueError("agi diff")
         # give the player xp points
         xpGain = round(enemy.MaxHP / 2 * random.uniform(1, 1.4))
         print("you gained " + str(xpGain) + " xp")
@@ -216,25 +224,34 @@ def doCombat(player: data.Entity, enemy: data.Entity):
             print("<<< level up! >>>")
             print("max HP increased by 5, max MP increased by 2, and all stats increased by 1!")
             player.MaxHP += 5
+            player.base_HP += 5
             player.MaxMP += 2
+            player.base_MP += 2
             player.STR += 1
+            player.base_STR += 1
             player.DEX += 1
+            player.base_DEX += 1
             player.DEF += 1
+            player.base_DEF += 1
             player.AGI += 1
+            player.base_AGI += 1
             chosen = helpers.verify("pick a stat to increase [HP, MP, STR, DEX, DEF, AGI]\n> ", ["HP", "MP", "STR", "DEX", "DEF", "AGI"])
             chosen = chosen.upper()
             if chosen == "HP":
                 player.MaxHP += 3
+                player.base_HP
                 player.HP = player.MaxHP
                 print("max HP increased by 3")
                 print("HP fully restored!")
             elif chosen == "MP":
                 player.MaxMP += 2
+                player.base_MP += 2
                 player.MP = player.MaxMP
-                print("max MP increased by 3")
+                print("max MP increased by 2")
                 print("MP fully restored!")
             else:
-                exec(f"player.{chosen} += {1}")
+                exec(f"player.{chosen} += 1")
+                exec(f"player.base_{chosen} += 1")
                 print(f"{chosen} increased by 1")
             player.XP -= player.MaxXP
             player.MaxXP = round(player.MaxXP * 1.5)

@@ -148,14 +148,23 @@ class Entity:
         # health points
         self.HP = HP
         self.MaxHP = HP
+            # base hp for stability
+        self.base_HP = HP
         # mana points
         self.MP = MP
         self.MaxMP = MP
+            # base mp for stability
+        self.base_MP = MP
         # strength, dexterity, defense, agility
         self.STR = STR
         self.DEX = DEX
         self.DEF = DEF
         self.AGI = AGI
+            # base stats for stability
+        self.base_STR = STR
+        self.base_DEX = DEX
+        self.base_DEF = DEF
+        self.base_AGI = AGI
         # spells the entity has
         self.spells = spells
         # status effects currently applied to the entity
@@ -350,30 +359,40 @@ class Entity:
             else:
                 print(self.name + " now has " + status.name)
         self.status += [status]
+        self.resetStatsToBase()
+        self.reapplyStatuses()
         if status.affectOnApply:
             exec(status.effect)
 
     # removes a status effect from an entity
     def removeStatus(self, status: Status, silent:bool = False):
         if status in self.status: 
-            statusIndex = self.status.index(status)
-            if len(self.status) > 1: firstHalf = self.status[:statusIndex]
-            else: firstHalf = []
-            secondHalf = self.status[statusIndex:]
-            secondHalf.reverse()
-            for each in secondHalf: exec(each.reverseEffect)
-            secondHalf.reverse()    
-            removed = secondHalf.pop(0)
-            exec(removed.reverseEffect)
-            if silent == False:
+            self.status.remove(status)
+            self.resetStatsToBase()
+            self.reapplyStatuses()
+            if not silent:
                 if self.name == "you":
                     print("you no longer have " + status.name)
                 else:
                     print(status.name + " faded from the " + self.name)
-            for each in secondHalf:
-                self.applyStatus(each.name, True)
-                firstHalf.append(each)
-            self.status = firstHalf
+
+    def resetStatsToBase(self):
+        self.MaxHP = self.base_HP
+        self.MaxMP = self.base_MP
+        # reset health and mana if overflowing
+        if self.HP > self.MaxHP: self.HP = self.MaxHP
+        if self.MP > self.MaxMP: self.MP = self.MaxMP
+
+        self.STR = self.base_STR
+        self.DEX = self.base_DEX
+        self.DEF = self.base_DEF
+        self.AGI = self.base_AGI
+
+    # reapply all status effects to the entity, used after removing a status effect to ensure that the entity's stats are correct
+    def reapplyStatuses(self):
+        for status in self.status:
+            if status.affectOnApply:
+                exec(status.effect)
 
     # causes a status effect to execute it's effect
     def tickStatus(self, status: Status, doFadeChance:bool = True):
@@ -540,4 +559,4 @@ monsters = {
 
 player = Entity("you", 20, 8, 3, 5, 0, 0, ["doublecut", "bolt", "warcry", "protection", "bravery"], { }, 30)
 
-player = Entity("you", 999999, 999999, 3, 5, 0, 0, ["doublecut", "bolt", "warcry", "protection", "bravery", "bite", "nuke"], { }, 999999999, [], ["MP = data.player.MaxMP\nprint('your MP was refilled')"])
+# player = Entity("you", 999999, 999999, 3, 5, 0, 0, ["doublecut", "bolt", "warcry", "protection", "bravery", "bite", "nuke"], { }, 999999999, [], ["MP = data.player.MaxMP\nprint('your MP was refilled')"])
