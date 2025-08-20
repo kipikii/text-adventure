@@ -1,4 +1,4 @@
-import random, math, helpers, data
+import random, math, helpers, data, copy
 
 # allows the player to heal, equip gear
 def restSite(player: data.Entity):
@@ -259,7 +259,8 @@ def shrineEvent(player: data.Entity):
             print("you feel a strange energy surround you\n")
             print("choose a blessing: " + sampled[0] + " or " + sampled[1])
             chosen = helpers.verify("which will you choose?\n> ", sampled)
-            player.addBlessing(data.blessings[chosen])
+            blessingToAdd = copy.deepcopy(data.blessings[chosen])
+            player.addBlessing(blessingToAdd)
             print('you have been blessed with ' + chosen)
         elif chosen in ["pray", "p"] and prayed == True:
             print("you've already prayed to the shrine, it'd be pretty rude to ask for more")

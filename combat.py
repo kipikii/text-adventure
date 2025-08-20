@@ -83,8 +83,6 @@ def doCombat(player: data.Entity, enemy: data.Entity):
         for each in player.onTurnStart:
             each = "player." + each
             exec(each)
-        for each in player.blessings: print(f"player: {each}")
-        for each in enemy.blessings: print(f"enemy: {each}")
         print("[Your HP: " + str(player.HP) + " / " + str(player.MaxHP) + "] [Your MP: " + str(player.MP)+ " / " + str(player.MaxMP) + "]")
         chosen = helpers.verify("what would you like to do? [attack, spell, item, pass]\n> ", ["attack", "spell", "skill", "item", "pass", "a", "s", "i", "p"])
         print("")

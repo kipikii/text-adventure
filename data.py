@@ -1,4 +1,4 @@
-import math, random
+import math, random, copy
 
 armor_adjectives = [
     "durable",
@@ -136,8 +136,8 @@ class Status:
 
 class Entity:
     def __init__(self, name: str, HP: int, MP: int, STR: int, DEX: int, DEF: int, AGI: int, spells: list,
-     inventory: dict = {}, gold: int = 0, blessings: list = [], onTurnStart: list = [], onAttack: list = [], 
-     onCast: list = [], onHit: list = [], onHurt: list = []
+     inventory: dict = None, gold: int = 0, blessings: list = None, onTurnStart: list = None, onAttack: list = None, 
+     onCast: list = None, onHit: list = None, onHurt: list = None
      ):
         self.level = 1
         # experience points
@@ -161,9 +161,9 @@ class Entity:
         # status effects currently applied to the entity
         self.status = [ ]
         # passive effects
-        self.blessings = blessings
+        self.blessings = blessings if blessings is not None else []
         # items held by the entity
-        self.inventory = inventory
+        self.inventory = inventory if inventory is not None else {}
         # MONEYYYYY
         self.gold = gold
         # armor held by the entity
@@ -177,13 +177,13 @@ class Entity:
             "charm": None
         }
         # combat conditionals, default blank, all will be exec()'d
-        self.onTurnStart = onTurnStart
-        self.onAttack = onAttack
+        self.onTurnStart = onTurnStart if onTurnStart is not None else []
+        self.onAttack = onAttack if onAttack is not None else []
             # for enemies, onCast is NEVER used, use onAttack instead
-        self.onCast = onCast
+        self.onCast = onCast if onCast is not None else []
             # note: onHit and onHurt are executed in castSpell, when about the other target use "victim" and for self, use "caster"
-        self.onHit = onHit
-        self.onHurt = onHurt
+        self.onHit = onHit if onHit is not None else []
+        self.onHurt = onHurt if onHurt is not None else []
     
     def equip(self, armor:Equipment, slot:str):
         subtract = lambda x, y: x - y
@@ -383,7 +383,8 @@ class Entity:
                 self.removeStatus(status)
 
     def addBlessing(self, blessing: Blessing):
-        self.blessings += [blessing]
+        blessingToAdd = copy.deepcopy(blessing)
+        self.blessings += [blessingToAdd]
         exec(blessing.code)
 
 spells = {
