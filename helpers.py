@@ -12,7 +12,9 @@ def verify(question:str, allowed:list):
         if isinstance(chosen, str) == False: chosen = str(chosen) 
         chosen = chosen.lower()
         if chosen.startswith("/"):
+            print("~~~~~~~~~~")
             if chosen == "/help":
+                print("valid commands:")
                 print("/help - displays this menu")
                 print("/stats - displays your current stats")
                 print("/inventory || /inv - shows your inventory and gold")
@@ -23,8 +25,6 @@ def verify(question:str, allowed:list):
                 print("/patchnotes - shows the patch notes")
             elif chosen == "/stats":
                 global player
-                print("")
-                print("~~~~~~~~~~")
                 print("level: " + str(player.level))
                 print("XP: " + str(player.XP) + "/" + str(player.MaxXP))
                 print("")
@@ -35,8 +35,6 @@ def verify(question:str, allowed:list):
                 print("DEX: " + str (player.DEX))
                 print("DEF: " + str (player.DEF))
                 print("AGI: " + str (player.AGI))
-                print("~~~~~~~~~~")
-                print("")
             elif chosen == "/patchnotes":
                 print("patch notes:")
                 print("v1.0 - initial release")
@@ -55,7 +53,7 @@ def verify(question:str, allowed:list):
                     print(f"{key}: [{value.HP}, {value.MP}, {value.STR}, {value.DEX}, {value.DEF}, {value.AGI}]")
             elif chosen == "/credits":
                 print("")
-                print("troy semos - main developer")
+                print("kip semos - main developer")
                 # don't ask, they asked for this
                 if random.randint(1,2) == 1:
                     print("jaxon tran - one of the only people who can understand my code and resident crazy idea man")
@@ -67,17 +65,18 @@ def verify(question:str, allowed:list):
             elif "/spell " in chosen:
                 spellName = chosen.removeprefix("/spell ")
                 if spellName in data.spells.keys():
-                    print(f"\n- {data.spells[spellName].description}\n")
+                    print(f"\n{spellName.capitalize()}:\n- {data.spells[spellName].description}\n")
                 else:
-                    print("invalid spell name.\n")
+                    print("invalid spell name.")
             elif "/item " in chosen:
                 itemName = chosen.removeprefix("/item ")
                 if itemName in data.items.keys():
-                    print(f"\n- {data.items[itemName].description}\n")
+                    print(f"\n{itemName.capitalize()}:\n- {data.items[itemName].description}\n")
                 else:
-                    print("invalid item name.\n")
+                    print("invalid item name.")
             else:
                 print("invalid command. to see all valid commands, do /help")
+            print("~~~~~~~~~~")
         for i in allowed:
             if isinstance(i, str): i = i.lower()
             if chosen == i:
