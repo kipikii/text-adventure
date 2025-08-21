@@ -218,18 +218,27 @@ class Entity:
         self.DEF += armor.DEF
         self.DEF += armor.AGI
 
+        # base stats for stability
+        self.Base_HP += armor.HP
+        self.Base_MP += armor.MP
+        self.base_STR += armor.STR
+        self.base_DEX += armor.DEX
+        self.base_DEF += armor.DEF
+        self.base_AGI += armor.AGI
+
         self.onTurnStart += armor.onTurnStart
         self.onAttack += armor.onAttack
         self.onCast += armor.onCast
         self.onHit += armor.onHit
         self.onHurt += armor.onHurt
 
-        print("\nHP: " + diff(self.MaxHP, savedMaxHP))
-        print("MP: " + diff(self.MaxMP, savedMaxMP))
-        print("STR: " + diff(self.STR,savedSTR))
-        print("DEX: " + diff(self.DEX,savedDEX))
-        print("DEF: " + diff(self.DEF,savedDEF))
-        print("AGI: " + diff(self.AGI,savedAGI))
+        print(f"\nHP: {"+" if armor.HP > 0 else ""}" + diff(self.MaxHP, savedMaxHP))
+        print(f"MP: {"+" if armor.MP > 0 else ""}" + diff(self.MaxMP, savedMaxMP))
+        print(f"STR: {"+" if armor.STR > 0 else ""}" + diff(self.STR,savedSTR))
+        print(f"DEX: {"+" if armor.DEX > 0 else ""}" + diff(self.DEX,savedDEX))
+        print(f"DEF: {"+" if armor.DEF > 0 else ""}" + diff(self.DEF,savedDEF))
+        print(f"AGI: {"+" if armor.AGI > 0 else ""}" + diff(self.AGI,savedAGI))
+        print("")
 
         if self.HP > self.MaxHP: self.HP = self.MaxHP
         if self.MaxHP < 0: print("warning: your max hp is less than 0! increase your max hp and heal, or you'll die after your next turn")
@@ -258,6 +267,14 @@ class Entity:
         self.DEF -= armor.DEF
         self.DEF -= armor.AGI
 
+        # base stats for stability
+        self.base_HP -= armor.HP
+        self.base_MP -= armor.MP
+        self.base_STR -= armor.STR
+        self.base_DEX -= armor.DEX
+        self.base_DEF -= armor.DEF
+        self.base_AGI -= armor.AGI
+
         for code in armor.onTurnStart:
             self.onTurnStart.remove(code)
         for code in armor.onAttack:
@@ -269,12 +286,13 @@ class Entity:
         for code in armor.onHurt:
             self.onHurt.remove(code)
 
-        print("\nHP: " + diff(self.MaxHP, savedMaxHP))
-        print("MP: " + diff(self.MaxMP, savedMaxMP))
-        print("STR: " + diff(self.STR,savedSTR))
-        print("DEX: " + diff(self.DEX,savedDEX))
-        print("DEF: " + diff(self.DEF,savedDEF))
-        print("AGI: " + diff(self.AGI,savedAGI))
+        print(f"\nHP: {"+" if armor.HP > 0 else ""}" + diff(self.MaxHP, savedMaxHP))
+        print(f"MP: {"+" if armor.MP > 0 else ""}" + diff(self.MaxMP, savedMaxMP))
+        print(f"STR: {"+" if armor.STR > 0 else ""}" + diff(self.STR,savedSTR))
+        print(f"DEX: {"+" if armor.DEX > 0 else ""}" + diff(self.DEX,savedDEX))
+        print(f"DEF: {"+" if armor.DEF > 0 else ""}" + diff(self.DEF,savedDEF))
+        print(f"AGI: {"+" if armor.AGI > 0 else ""}" + diff(self.AGI,savedAGI))
+        print("")
 
         if self.HP > self.MaxHP: self.HP = self.MaxHP
         if self.MaxHP < 0: print("warning: your max hp is less than 0! you will die after your next turn if you don't increase your max hp and rest")
