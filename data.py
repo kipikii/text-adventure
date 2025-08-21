@@ -219,8 +219,8 @@ class Entity:
         self.DEF += armor.AGI
 
         # base stats for stability
-        self.Base_HP += armor.HP
-        self.Base_MP += armor.MP
+        self.base_HP += armor.HP
+        self.base_MP += armor.MP
         self.base_STR += armor.STR
         self.base_DEX += armor.DEX
         self.base_DEF += armor.DEF
