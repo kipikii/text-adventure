@@ -23,6 +23,7 @@ combat.doCombat(player, "spirit")
 print("your experience with fighting spirits have taught you something")
 print("you learned the spell 'cleanse'!")
 player.spells += ["cleanse"]
+print("")
 events.shrineEvent(player)
 print("")
 combat.doCombat(player, "imp")

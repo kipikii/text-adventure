@@ -480,10 +480,10 @@ print('you are cured of all statuses')""", 2, True, "A panacea that cures all st
     "massive mana": Item("massive mana", "print('you reluctantly gulp down the massive mana potion...')\nplayer.MP += 100\nprint('you gain 100 MP')", 20, True, "A massive mana potion that restores 100 MP."),
     
     # tonics
-    "pepper tonic": Item("pepper tonic", "print('you drink the pepper tonic... spicy!')\napplyStatus('STR up', player, False)", 1, False, "A spicy tonic that increases STR by 20%% in combat."),
-    "carrot tonic": Item("carrot tonic", "print('you drink the carrot tonic... tastes like carrots.')\napplyStatus('DEX up', player, False)", 1, False, "A tonic that increases DEX by 20%% in combat."),
-    "ginger tonic": Item("ginger tonic", "print('you drink the ginger tonic... so bitter!')\napplyStatus('DEF up', player, False)", 1, False, "A bitter tonic that increases DEF by 20%% in combat."),
-    "wind tonic": Item("wind tonic", """print("you drink the wind tonic... it's empty..?")\napplyStatus('AGI up', player, False)""", 1, False, "A tonic that increases AGI by 20%% in combat."),
+    "pepper tonic": Item("pepper tonic", "print('you drink the pepper tonic... spicy!')\nplayer.applyStatus('STR up', False)", 1, False, "A spicy tonic that increases STR by 20% in combat."),
+    "carrot tonic": Item("carrot tonic", "print('you drink the carrot tonic... tastes like carrots.')\nplayer.applyStatus('DEX up', False)", 1, False, "A tonic that increases DEX by 20% in combat."),
+    "ginger tonic": Item("ginger tonic", "print('you drink the ginger tonic... so bitter!')\nplayer.applyStatus('DEF up', False)", 1, False, "A bitter tonic that increases DEF by 20% in combat."),
+    "wind tonic": Item("wind tonic", """print("you drink the wind tonic... it's empty..?")\nplayer.applyStatus('AGI up', False)""", 1, False, "A tonic that increases AGI by 20% in combat."),
 
     # weapons
     "throwing knife": Item("throwing knife", "ouch = max(round((player.STR+player.DEX)/2), 1)\nenemy.HP -= ouch\nprint(f'you huck the throwing knife at the {{enemy.name}} for {{ouch}} damage')",2, True, "A sharp throwing knife that deals damage based on the average of user's STR and DEX."),
@@ -576,6 +576,6 @@ monsters = {
     "test dummy": Entity('test dummy', 99999, math.inf, 0, 99999, 0, 0, ['bite'])
 }
 
-player = Entity("you", 20, 8, 3, 5, 0, 0, ["doublecut", "bolt", "warcry", "protection", "bravery"], { }, 30)
+player = Entity("you", 20, 8, 3, 5, 0, 0, ["doublecut", "bolt", "warcry", "protection", "bravery"], { }, 50)
 
 # player = Entity("you", 999999, 999999, 3, 5, 0, 0, ["doublecut", "bolt", "warcry", "protection", "bravery", "bite", "nuke"], { }, 999999999, [], ["MP = data.player.MaxMP\nprint('your MP was refilled')"])
