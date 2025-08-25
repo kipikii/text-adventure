@@ -185,6 +185,8 @@ def doCombat(player: data.Entity, enemy: data.Entity):
         print("")
         print("victory!")
         # DEBUG LINES
+        if player.MaxHP != origPlayer.MaxHP: print(f"value diff: {player.MaxHP-origPlayer.MaxHP}"); raise ValueError("hp diff")
+        if player.MaxMP != origPlayer.MaxMP: print(f"value diff: {player.MaxMP-origPlayer.MaxMP}"); raise ValueError("mp diff")
         if player.STR != origPlayer.STR: print(f"value diff: {player.STR-origPlayer.STR}"); raise ValueError("str diff")
         if player.DEX != origPlayer.DEX: print(f"value diff: {player.DEX-origPlayer.DEX}"); raise ValueError("dex diff")
         if player.DEF != origPlayer.DEF: print(f"value diff: {player.DEF-origPlayer.DEF}"); raise ValueError("def diff")

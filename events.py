@@ -175,12 +175,16 @@ def doShop(player: data.Entity):
                 continue
             elif subChosen in ["items", "i"]:
                 # print item inventory & sell price
-                print('''\n"okay! what do ya have?"''')
+                print('\n"okay! what do ya have?"')
                 item = None
                 while item != "back":
                     index = 0
                     playerSellList = []
                     allowed = []
+                    if not player.inventory:
+                        print('"..."')
+                        print('"do... do you even have any items? i guess not."')
+                        break
                     for item in player.inventory.keys():
                         itemSellValue = math.ceil(stock[stockNames.index(item.name)].cost / 2)
                         print(f"{index}. {item.name}: {itemSellValue} gold ({player.inventory[item]})")
@@ -188,6 +192,9 @@ def doShop(player: data.Entity):
                         playerSellList.append(Buyable(item, itemSellValue))
                         allowed.append(item.name)
                         index += 1
+                        if not player.inventory:
+                            print("looks like that's everything! hope you didn't need any of those.")
+                            break
                     for each in range(len(allowed)): allowed.append(str(each))
                     allowed.append('back')
                     item = helpers.verify(sellInquire, allowed)
@@ -214,6 +221,10 @@ def doShop(player: data.Entity):
                     index = 0
                     playerSellList = []
                     allowed = []
+                    if not player.heldarmors:
+                        print('"..."')
+                        print('"do... do you even have any equipment? i guess not."')
+                        break
                     for item in player.heldarmors.keys():
                         armor = player.heldarmors[item]
                         itemSellValue = math.ceil((armor.HP + armor.MP + armor.STR + armor.DEX + armor.DEF + armor.AGI) * 1.5)
@@ -222,6 +233,9 @@ def doShop(player: data.Entity):
                         playerSellList.append(Buyable(armor, itemSellValue))
                         allowed.append(item)
                         index += 1
+                        if not player.heldarmors:
+                            print("looks like that's it! hope you didn't need any of those.")
+                            break
                     for each in range(len(allowed)): allowed.append(str(each))
                     allowed.append('back')
                     item = helpers.verify(sellInquire, allowed)
@@ -255,8 +269,8 @@ def shrineEvent(player: data.Entity):
         if chosen in ["pray", "p"] and prayed == False:
             prayed = True
             sampled = random.sample(list(data.blessings.keys()), 2)
-            print("you pray to the shrine")
-            print("you feel a strange energy surround you\n")
+            print("you kneel and pray to the shrine")
+            print("... you soon feel a strange energy surround you\n")
             print("choose a blessing: " + sampled[0] + " or " + sampled[1])
             chosen = helpers.verify("which will you choose?\n> ", sampled)
             blessingToAdd = copy.deepcopy(data.blessings[chosen])
@@ -268,3 +282,4 @@ def shrineEvent(player: data.Entity):
             print("you get up and get going\n")
             break
         print("")
+

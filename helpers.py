@@ -44,13 +44,25 @@ def verify(question:str, allowed:list):
                 quit()
             elif chosen == "/inventory" or chosen == "/inv":
                 print(f"your gold: {player.gold}")
+                print ("\nequipped:")
+                for eachKey, val in player.equipped.items():
+                    if val is None:
+                        print(f"{eachKey}: none")
+                        continue
+                    print(f"{eachKey}: {val.HP} HP, {val.MP} MP, {val.STR} STR, {val.DEX} DEX, {val.DEF} DEF, {val.AGI} AGI")
                 print("\nyour items:")
-                for eachKey, eachValue in player.inventory.items():
-                    print(f"{eachKey.name}: {eachValue}")
+                if not player.inventory:
+                    print("none")
+                else:
+                    for eachKey, eachValue in player.inventory.items():
+                        print(f"{eachKey.name}: {eachValue}")
                 print("")
                 print("your equips:")
-                for key, value in player.heldarmors.items(): 
-                    print(f"{key}: [{value.HP}, {value.MP}, {value.STR}, {value.DEX}, {value.DEF}, {value.AGI}]")
+                if not player.heldarmors:
+                    print("none")
+                else:
+                    for key, value in player.heldarmors.items(): 
+                        print(f"{key}: [{value.HP} HP, {value.MP} MP, {value.STR} STR, {value.DEX} DEX, {value.DEF} DEF, {value.AGI} AGI]")
             elif chosen == "/credits":
                 print("")
                 print("kip semos - main developer")
