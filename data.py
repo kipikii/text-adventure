@@ -470,7 +470,7 @@ items = {
     "panacea": Item("panacea", """
 print('you savor the panacea')
 for each in player.status:
-    removeStatus(each, player, True)
+    player.removeStatus(each, True)
 print('you are cured of all statuses')""", 2, True, "A panacea that cures all status effects, including buffs and debuffs."),
 
     # mana regen
