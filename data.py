@@ -103,15 +103,15 @@ class Modifier:
         self.code = code
 
 class Equipment:
-    def __init__(self, name:str, slot: str, BonusHP: int, BonusMP: int, BonusSTR: int, BonusDEX: int, BonusDEF: int, BonusAGI: int, onTurnStart: list, onAttack: list, onCast: list, onHit: list, onHurt: list):
+    def __init__(self, name:str, slot: str, HP: int, MP: int, STR: int, DEX: int, DEF: int, AGI: int, onTurnStart: list, onAttack: list, onCast: list, onHit: list, onHurt: list):
         self.name = name
         self.slot = slot
-        self.HP = BonusHP
-        self.MP = BonusMP
-        self.STR = BonusSTR
-        self.DEX = BonusDEX
-        self.DEF = BonusDEF
-        self.AGI = BonusAGI
+        self.HP = HP
+        self.MP = MP
+        self.STR = STR
+        self.DEX = DEX
+        self.DEF = DEF
+        self.AGI = AGI
         
         self.onTurnStart = onTurnStart
         self.onAttack = onAttack
@@ -196,16 +196,12 @@ class Entity:
         self.onHurt = onHurt if onHurt is not None else []
     
     def equip(self, armor:Equipment, slot:str):
-        subtract = lambda x, y: x - y
-        def diff(input1, input2):
-            return str(subtract(input1, input2))
-        
-        savedMaxHP = self.MaxHP
-        savedMaxMP = self.MaxMP
-        savedSTR = self.STR
-        savedDEX = self.DEX
-        savedDEF = self.DEF
-        savedAGI = self.AGI
+        prevMaxHP = self.MaxHP
+        prevMaxMP = self.MaxMP
+        prevSTR = self.STR
+        prevDEX = self.DEX
+        prevDEF = self.DEF
+        prevAGI = self.AGI
 
         self.equipped[slot] = armor
 
@@ -216,7 +212,7 @@ class Entity:
         self.STR += armor.STR
         self.DEX += armor.DEX
         self.DEF += armor.DEF
-        self.DEF += armor.AGI
+        self.AGI += armor.AGI
 
         # base stats for stability
         self.base_HP += armor.HP
@@ -232,13 +228,12 @@ class Entity:
         self.onHit += armor.onHit
         self.onHurt += armor.onHurt
 
-        print(f"\nHP: {"+" if armor.HP > 0 else ""}" + diff(self.MaxHP, savedMaxHP))
-        print(f"MP: {"+" if armor.MP > 0 else ""}" + diff(self.MaxMP, savedMaxMP))
-        print(f"STR: {"+" if armor.STR > 0 else ""}" + diff(self.STR,savedSTR))
-        print(f"DEX: {"+" if armor.DEX > 0 else ""}" + diff(self.DEX,savedDEX))
-        print(f"DEF: {"+" if armor.DEF > 0 else ""}" + diff(self.DEF,savedDEF))
-        print(f"AGI: {"+" if armor.AGI > 0 else ""}" + diff(self.AGI,savedAGI))
-        print("")
+        print(f"\nHP: {'+' if armor.HP > 0 else ''}{self.MaxHP-prevMaxHP}")
+        print(f"MP: {'+' if armor.MP > 0 else ''}{self.MaxMP-prevMaxMP}")
+        print(f"STR: {'+' if armor.STR > 0 else ''}{self.STR-prevSTR}")
+        print(f"DEX: {'+' if armor.DEX > 0 else ''}{self.DEX-prevDEX}")
+        print(f"DEF: {'+' if armor.DEF > 0 else ''}{self.DEF-prevDEF}")
+        print(f"AGI: {'+' if armor.AGI > 0 else ''}{self.AGI-prevAGI}\n")
 
         if self.HP > self.MaxHP: self.HP = self.MaxHP
         if self.MaxHP < 0: print("warning: your max hp is less than 0! increase your max hp and heal, or you'll die after your next turn")
@@ -427,17 +422,18 @@ class Entity:
 
 spells = {
     # melee attacks
-    "attack": Spell("attack", 0, 1, "caster.STR", "caster.DEX", 0, False, "pass", "pass", "A basic attack, known by most.", ["melee", "basic"]),
-    "doublecut": Spell("doublecut", 5, 2, "caster.STR", "caster.DEX", 0, False, "pass", "pass", "The caster attacks twice in quick succession.", ['melee']),
-    "tricut": Spell("tricut", 8, 3, "caster.STR", "caster.DEX", 0, False, "pass", "pass", "The caster attacks thrice in quick succession.", ['melee']),
-    "swift strike": Spell("swift strike", 5, 1, "caster.AGI", "caster.AGI", 0, False, "pass", "pass", "The user strikes quickly at their opponent, dealing damage proportional to AGI.", ['melee']),
+    "attack": Spell("attack", 0, 1, "caster.STR", "caster.DEX", 0, False, "pass", "pass", "A basic attack, known by most.", ['melee', 'basic']),
+    "doublecut": Spell("doublecut", 5, 2, "caster.STR", "caster.DEX", 0, False, "pass", "pass", "The caster attacks twice in quick succession.", ['melee', 'flurry']),
+    "tricut": Spell("tricut", 8, 3, "caster.STR", "caster.DEX", 0, False, "pass", "pass", "The caster attacks thrice in quick succession.", ['melee', 'flurry']),
+    "swift strike": Spell("swift strike", 5, 1, "caster.AGI * 2", "caster.AGI", 0, False, "pass", "pass", "The user strikes quickly at their opponent, dealing damage proportional to AGI.", ['melee']),
     "bite": Spell("bite", 2, 1, "caster.STR * .5", "caster.STR", 0, False, "victim.applyStatus('poison')", "pass", "The user bites down on their opponent, inflicting poison.", ['melee', 'debuff']),
+    "crunch": Spell("crunch", 4, 1, "caster.STR", "caster.STR", 0, False, "victim.applyStatus('poison')\nvictim.applyStatus('poison')", "pass", "The user bites down hard on their opponent, inflicting poison twice.", ['melee', 'debuff']),
     
     # spells
-    "bolt": Spell("bolt", 5, 1, "caster.MP", "caster.AGI", 0, False, "pass", "pass", "Cast a small bolt of mana at the user's foe, dealing damage equal to their current MP, before MP deduction.", ['spell']),
-    "bolt volley": Spell("bolt volley", 15, 5, "caster.MP", "caster.AGI / 1.5", 0, False, "pass", "pass", "The user casts 'bolt' five times in quick succession with reduced accuracy.", ['spell']),
-    "flame": Spell("flame", 5, 1, "caster.DEF", "caster.DEX", 0, False, "victim.applyStatus('burn')", "pass", "Fire a small flame at the user's foe, dealing damage and burning them.", ['spell', 'debuff']),
-    "fireball": Spell("fireball", 15, 1, "caster.DEF * 3", "caster.DEX", .25, False, "victim.applyStatus('burn')", "pass", "Summon a large fireball, dealing damage equal to 3 times the caster's DEF and burning the user's foe, but hurts the caster in the process.", ['spell', 'debuff', 'recoil']),
+    "bolt": Spell("bolt", 5, 1, "caster.MP * 2", "caster.AGI", 0, False, "pass", "pass", "Cast a small bolt of mana at the user's foe, dealing damage proportional to their current MP, before MP deduction.", ['spell']),
+    "bolt volley": Spell("bolt volley", 15, 5, "caster.MP * 2", "caster.AGI / 1.1", 0, False, "pass", "pass", "The user casts 'bolt' five times in quick succession with reduced accuracy.", ['spell', 'flurry']),
+    "flame": Spell("flame", 5, 1, "caster.DEF * 2", "caster.DEX", 0, False, "victim.applyStatus('burn')", "pass", "Fire a small flame at the user's foe, burning them and dealing damage proportional to the caster's DEF.", ['spell', 'debuff']),
+    "fireball": Spell("fireball", 15, 1, "math.ceil(caster.DEF * 3.5)", "caster.DEX", .25, False, "victim.applyStatus('burn')", "pass", "Summon a large fireball, dealing damage equal to 3 times the caster's DEF and burning the user's foe, but hurts the caster in the process.", ['spell', 'debuff', 'recoil']),
     "nuke": Spell("nuke", 100784, 999, "caster.MaxHP * 99999", math.inf, 0, True, "pass", "pass", "An ancient magic, long lost to time. Requires a unfeasible amount of mana to cast, but is sure to obliterate any foe that opposes its user.", ['spell']),
     "doom": Spell("doom", 100, 1, "0", "math.inf", 0, False, "victim.applyStatus('impending doom')", "pass", "...", ['spell', 'debuff']),
 
@@ -503,6 +499,8 @@ blessings = {
     "focused": Blessing("focused", """self.onTurnStart.append("applyStatus('DEX up')")"""),
     "fortified": Blessing("fortified", """self.onTurnStart.append("applyStatus('DEF up')")"""),
     "nimble": Blessing("nimble", """self.onTurnStart.append("applyStatus('AGI up')")"""),
+    "saboteur": Blessing("saboteur", ""), # multicast debuffs
+    "supporting": Blessing("supporting", ""), # multicast buffs
 }
 
 statuses = {
@@ -531,7 +529,7 @@ statuses = {
 
     # DOT effects
     "burn": Status("burn", .25, False, """
-burndmg = math.ceil(self.MaxHP / 18)
+burndmg = math.ceil(self.MaxHP / 25)
 if self.name == "you":
     print('you took ' + str(burndmg) + ' damage from burn')
 else:
@@ -540,7 +538,7 @@ self.HP -= burndmg
 del burndmg""", "pass"),
 
     "poison": Status("poison", .1, False, """
-burndmg = math.ceil(self.MaxHP / 20)
+burndmg = math.ceil(self.MaxHP / 30)
 if self.name == "you":
     print('you took ' + str(burndmg) + ' damage from poison')
 else:
@@ -549,7 +547,7 @@ self.HP -= burndmg
 del burndmg""", "pass"),
 
     # other
-    "impending doom": Status("impending doom", .05, False, "pass", "self.applyStatus('doom')\nself.stauses.remove('impending doom')"),
+    "impending doom": Status("impending doom", .05, False, "pass", "self.applyStatus('doom')\nself.statuses.remove('impending doom')"),
     "doom": Status("doom", 0, False, "print('death calls.')\nprint('your HP drops to 0')\nself.HP = 0", "pass"),
 }
 
@@ -565,12 +563,12 @@ monsters = {
     "warg": Entity('warg', 150, math.inf, 10, 20, 10, 10, ["bite", "tricut"], {}, [], [blessings["enraged"]]),
 
     # what the hell
-    "reaper": Entity("reaper", 666, math.inf, 100, 200, 50, 100, ["doom", "bunny", "evasion", "trip"], onTurnStart="""
-                     dotHeal = self.MaxHP / 20\n
+    "reaper": Entity("reaper", 666, math.inf, 30, 200, 15, 20, ["doom", "bunny", "evasion", "trip"], onTurnStart=""".HP\n
+                     dotHeal = math.floor(self.MaxHP / 50)\n
                      print(f"necrotic essences coalesce around the reaper...\\nthe reaper healed {{dotHeal}} HP")\n
                      self.MaxHP += dotHeal\n
                      if self.HP > self.MaxHP: self.HP = self.MaxHP"""),
-    "minor deity": Entity("minor deity", 7777, math.inf, 100, 1000, 50, 50, ["evasion"]),
+    "minor deity": Entity("minor deity", 7777, math.inf, 100, 1000, 50, 50, ["nuke"]),
 
     # other
     "test dummy": Entity('test dummy', 99999, math.inf, 0, 99999, 0, 0, ['bite'])

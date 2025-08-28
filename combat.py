@@ -1,7 +1,7 @@
 import math, random, copy, helpers, data
 
 def castSpell(spell:data.Spell, caster:data.Entity, victim:data.Entity):
-    spell = data.spells[spell]
+    spell = copy.deepcopy(data.spells[spell])
     if caster.name != "you":
         if spell.name == "attack":
             print("the " + caster.name + " attacks")
@@ -15,22 +15,28 @@ def castSpell(spell:data.Spell, caster:data.Entity, victim:data.Entity):
     if spell.hitStat == math.inf: bypassHit = True
     else: bypassHit = False
     spellHit = False
+    blessingNames = [each.name for each in caster.blessings]
+    if "supporting" in blessingNames and "buff" in spell.tags:
+        spell.procs *= 2
+    if "saboteur" in blessingNames and "debuff" in spell.tags:
+        spell.procs *= 2
     for each in range(spell.procs):
         if bypassHit or calcHit(eval(spell.hitStat), victim.AGI):
             spellHit = True
             if spell.ignoreEnemyDEF:
                 damage = math.ceil((eval(spell.dmgStat)) * (random.randint(100, 115)/100))
             else:
-                damage = math.ceil((eval(spell.dmgStat) * (random.randint(100, 115)/100)) - victim.DEF)
-            if damage <= 0 and (spell.hitStat != math.inf or spell.hitStat != 0):
+                damage = math.ceil((eval(spell.dmgStat) * random.uniform(1, 1.15)) - victim.DEF)
+            if eval(spell.dmgStat) < 0 and (eval(spell.hitStat) != math.inf or eval(spell.hitStat) != 0):
                 print("0 damage")
-            elif spell.hitStat != 0:
-                print(str(math.ceil(damage)) + " damage")
-                victim.HP -= math.ceil(damage)
-                for each in caster.onHit:
-                    exec(each)
-                for each in victim.onHurt:
-                    exec(each)
+            elif eval(spell.hitStat) != 0:
+                if damage > 0:
+                    print(str(math.ceil(damage)) + " damage")
+                    victim.HP -= math.ceil(damage)
+            for each in caster.onHit:
+                exec(each)
+            for each in victim.onHurt:
+                exec(each)
         else:
             print("miss")
             damage = 0
@@ -78,8 +84,6 @@ def calcHit(attackerHit: int, victimDodge: int):
 # causes a combat to initate between two entities
 def doCombat(player: data.Entity, enemy: data.Entity):
     # debug text to ensure stat preservation
-    origPlayer = copy.deepcopy(player)
-
     enemy = copy.copy(data.monsters[enemy])
     print("a " + enemy.name + " appeared!")
     while (player.HP > 0 and enemy.HP > 0):
@@ -185,12 +189,12 @@ def doCombat(player: data.Entity, enemy: data.Entity):
         print("")
         print("victory!")
         # DEBUG LINES
-        if player.MaxHP != origPlayer.MaxHP: print(f"value diff: {player.MaxHP-origPlayer.MaxHP}"); raise ValueError("hp diff")
-        if player.MaxMP != origPlayer.MaxMP: print(f"value diff: {player.MaxMP-origPlayer.MaxMP}"); raise ValueError("mp diff")
-        if player.STR != origPlayer.STR: print(f"value diff: {player.STR-origPlayer.STR}"); raise ValueError("str diff")
-        if player.DEX != origPlayer.DEX: print(f"value diff: {player.DEX-origPlayer.DEX}"); raise ValueError("dex diff")
-        if player.DEF != origPlayer.DEF: print(f"value diff: {player.DEF-origPlayer.DEF}"); raise ValueError("def diff")
-        if player.AGI != origPlayer.AGI: print(f"value diff: {player.AGI-origPlayer.AGI}"); raise ValueError("agi diff")
+        if player.MaxHP != player.base_HP: print(f"value diff: {player.MaxHP-player.base_HP}"); raise ValueError("max hp diff")
+        if player.MaxMP != player.base_MP: print(f"value diff: {player.MaxMP-player.base_MP}"); raise ValueError("max mp diff")
+        if player.STR != player.base_STR: print(f"value diff: {player.STR-player.base_STR}"); raise ValueError("str diff")
+        if player.DEX != player.base_DEX: print(f"value diff: {player.DEX-player.base_DEX}"); raise ValueError("dex diff")
+        if player.DEF != player.base_DEF: print(f"value diff: {player.DEF-player.base_DEF}"); raise ValueError("def diff")
+        if player.AGI != player.base_AGI: print(f"value diff: {player.AGI-player.base_AGI}"); raise ValueError("agi diff")
         # give the player xp points
         xpGain = round(enemy.MaxHP / 2 * random.uniform(1, 1.4))
         print("you gained " + str(xpGain) + " xp")
@@ -200,12 +204,16 @@ def doCombat(player: data.Entity, enemy: data.Entity):
         # do the same with consumables
         dropchance = math.floor(max(random.normalvariate(.4, 1), 0))
         itemDropchance = math.floor(max(random.normalvariate(1, 1), 0))
+        goldAmount = math.floor(max(random.normalvariate(enemy.MaxHP / 2, enemy.MaxHP / 15), 0))
         numEquipped = 0
         for each in player.equipped.values():
             if each != None:
                 numEquipped += 1
         if dropchance < 1 and numEquipped <= 1: dropchance = 1
-        if dropchance > 0 or itemDropchance > 0: print("\nhere's what you found:\n")
+        if dropchance > 0 or itemDropchance > 0 or goldAmount > 0: print("\nhere's what you found:\n")
+        if goldAmount > 0:
+            print(" + " + str(goldAmount) + " gold")
+            player.gold += goldAmount
         if dropchance > 0:
             for _ in range(dropchance):
                 dropped = enemy.generateEquip(player)
@@ -241,7 +249,7 @@ def doCombat(player: data.Entity, enemy: data.Entity):
             chosen = chosen.upper()
             if chosen == "HP":
                 player.MaxHP += 3
-                player.base_HP
+                player.base_HP += 3
                 player.HP = player.MaxHP
                 print("max HP increased by 3")
                 print("HP fully restored!")

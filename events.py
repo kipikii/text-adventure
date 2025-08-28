@@ -19,8 +19,8 @@ def restSite(player: data.Entity):
         elif chosen in ["equip", "e"]:
             print('\nyour equipment:\n')
             index = 0
-            for key, value in player.heldarmors.items():
-                print(f"{index}. {key} [{value.HP}, {value.MP}, {value.STR}, {value.DEX}, {value.DEF}, {value.AGI}]")
+            for key, val in player.heldarmors.items():
+                print(f"{index}. {key} [{val.HP} HP, {val.MP} MP, {val.STR} STR, {val.DEX} DEX, {val.DEF} DEF, {val.AGI} AGI]")
                 index += 1
             weirdlist = list(range(len(player.heldarmors.keys())))
             weirdlist = [str(each) for each in weirdlist]
@@ -50,8 +50,8 @@ def restSite(player: data.Entity):
                 player.equip(player.heldarmors.get(select.name), select.slot)
                 player.heldarmors.pop(select.name)
         elif chosen in ["unequip", "u"]:
-            for key, value in player.equip:
-                print(f"{key}: {value.name} [{value.HP}, {value.MP}, {value.STR}, {value.DEX}, {value.DEF}, {value.AGI}]")
+            for key, value in player.equipped.items():
+                print(f"{key}: {val.name} [[{val.HP} HP, {val.MP} MP, {val.STR} STR, {val.DEX} DEX, {val.DEF} DEF, {val.AGI} AGI]]")
             select = helpers.verify("\nwhat slot would you like to unequip? type back to go back [weapon, helmet, chestplate, boots, charm] \n> ", ["weapon", "helmet", 'chestplate', 'boots', 'charm', 'back'])
             if select == "back":                 
                 continue            
@@ -282,4 +282,123 @@ def shrineEvent(player: data.Entity):
             print("you get up and get going\n")
             break
         print("")
+
+def spellTomeEvent(player: data.Entity):
+    print("you come across an abandoned spell tome")
+    read = False
+    chosen = helpers.verify("what will you do? [read, leave]\n> ", ["read", "leave", "r", "l"])
+    if chosen in ["read", "r"]:
+        read = True
+        availableSpells = ["bolt volley", "bunny", "slow", "nuke"]
+        for each in player.spells:
+            if each in availableSpells:
+                availableSpells.remove(each)
+        try:
+            sampled = random.sample(availableSpells, 2)
+        except:
+            if len(availableSpells) == 1:
+                sampled = [availableSpells[0], availableSpells[0]]
+            else:
+                print("you've already learned all the spells in this tome, but you feel a sense of accomplishment for being more knowledgeable")
+                player.MP += math.floor(player.MaxMP * 0.2)
+                player.base_MP += math.floor(player.MaxMP * 0.2)
+                if player.MP > player.MaxMP: player.MP = player.MaxMP
+                print(" + " + str(math.floor(player.MaxMP * 0.2)) + " MP")
+        else:
+            print("you open the tome and begin reading")
+            print("... you soon feel a strange energy surround you\n")
+            print("choose a spell: " + sampled[0] + " or " + sampled[1])
+            chosen = helpers.verify("which will you choose?\n> ", sampled)
+            player.spells += [chosen]
+            print('you have learned the spell ' + chosen)
+    if read == True:
+        print("you close the tome and get going\n")
+    else:
+        print("you didn't need to read the stupid book, anyway.")
+        player.STR += 2
+        player.DEX += 2
+        player.base_STR += 2
+        player.base_DEX += 2
+        print("+ 2 STR")
+        print("+ 2 DEX")
+        print("")
+
+def trainingManualEvent(player: data.Entity):
+    print("you come across a lost manual")
+    read = False
+    chosen = helpers.verify("what will you do? [read, leave]\n> ", ["read", "leave", "r", "l"])
+    if chosen in ["read", "r"]:
+        read = True
+        availableSpells = ["swift strike", "tricut", "courage", "foresee"]
+        for each in player.spells:
+            if each in availableSpells:
+                availableSpells.remove(each)
+        try:
+            sampled = random.sample(availableSpells, 2)
+        except:
+            if len(availableSpells) == 1:
+                sampled = [availableSpells[0], availableSpells[0]]
+            else:
+                print("you've already learned all the spells in this tome, but you feel a sense of accomplishment for being more knowledgeable")
+                player.DEX += 2
+                player.AGI += 2
+                player.base_DEX += 2
+                player.base_AGI += 2
+                print("+ 2 DEX")
+                print("+ 2 AGI")
+        else:
+            print("you open the tome and begin reading")
+            print("... you soon feel a strange energy surround you\n")
+            print("choose a spell: " + sampled[0] + " or " + sampled[1])
+            chosen = helpers.verify("which will you choose?\n> ", sampled)
+            player.spells += [chosen]
+            print('you have learned the spell ' + chosen)
+    if read == True:
+        print("you close the tome and get going\n")
+    else:
+        print("you didn't need to read the stupid book, anyway.")
+        player.STR += 2
+        player.DEX += 2
+        player.base_STR += 2
+        player.base_DEX += 2
+        print("+ 2 STR")
+        print("+ 2 DEX")
+        print("")
+
+def cubTrapEvent(player: data.Entity):
+    print("you come across a wolf cub caught in a bear trap, struggling to get free")
+    chosen = helpers.verify("what will you do? [free, end misery, leave]\n> ", ["free", "leave", "f", "l", "end misery", "e"])
+    if chosen in ["free", "f"]:
+        print("you carefully free the cub from the trap, exerting yourself in the process")
+        print("it looks at you with grateful eyes before running off into the woods")
+        print("the forest itself seems to thank you as energy surges through you")
+        player.HP -= math.ceil(player.MaxHP * 0.1)
+        print(" - " + str(math.ceil(player.MaxHP * 0.1)) + " HP")
+        if "crunch" not in player.spells:
+            print("you learned the spell 'crunch'!")
+            player.spells += ["crunch"]
+        else:
+            player.HP += math.floor(player.MaxHP * 0.2)
+    elif chosen in ["end misery", "e"]:
+        print("it's a quick and painless death. life in the wild is cruel")
+        print("you got stronger, but at what cost?")
+        player.STR += 5
+        player.DEX += 5
+        player.base_STR += 5
+        player.base_DEX += 5
+        player.MP -= math.ceil(player.MaxMP * 0.1)
+        if player.MP < 0: player.MP = 0
+        print("+ 5 STR")
+        print("+ 5 DEX")
+        print(" - " + str(math.ceil(player.MaxMP * 0.1)) + " MP")
+    elif chosen in ["leave", "l"]:
+        print("you leave the cub to its fate, walking away as it continues to struggle")
+        print("you feel a pang of guilt, but you know you did what you had to do to survive")
+        player.DEF += 2
+        player.AGI += 2
+        player.base_DEF += 2
+        player.base_AGI += 2
+        print("+ 2 DEF")
+        print("+ 2 AGI")
+    print("")
 

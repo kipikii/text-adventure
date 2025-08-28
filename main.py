@@ -18,6 +18,8 @@ print("your experience with fighting beasts have taught you something")
 print("you learned the spell 'bite'!")
 player.spells += ["bite"]
 print("")
+events.shrineEvent(player)
+print("")
 combat.doCombat(player, "spirit")
 combat.doCombat(player, "spirit")
 print("your experience with fighting spirits have taught you something")
