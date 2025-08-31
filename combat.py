@@ -16,10 +16,11 @@ def castSpell(spell:data.Spell, caster:data.Entity, victim:data.Entity):
     else: bypassHit = False
     spellHit = False
     blessingNames = [each.name for each in caster.blessings]
-    if "supporting" in blessingNames and "buff" in spell.tags:
-        spell.procs *= 2
-    if "saboteur" in blessingNames and "debuff" in spell.tags:
-        spell.procs *= 2
+    for each in blessingNames:
+        if each == "supporting" and "buff" in spell.tags:
+            spell.procs *= 2
+        if each == "saboteur" and "debuff" in spell.tags:
+            spell.procs *= 2
     for each in range(spell.procs):
         if bypassHit or calcHit(eval(spell.hitStat), victim.AGI):
             spellHit = True
@@ -27,12 +28,19 @@ def castSpell(spell:data.Spell, caster:data.Entity, victim:data.Entity):
                 damage = math.ceil((eval(spell.dmgStat)) * (random.randint(100, 115)/100))
             else:
                 damage = math.ceil((eval(spell.dmgStat) * random.uniform(1, 1.15)) - victim.DEF)
+            if caster.DEX > victim.DEX: critChance = caster.DEX - victim.DEX
+            else: critChance = 0
+            if critChance > random.randint(1,100) and eval(spell.dmgStat) > 0:
+                damage *= 2
+                print("crit!")
             if eval(spell.dmgStat) < 0 and (eval(spell.hitStat) != math.inf or eval(spell.hitStat) != 0):
                 print("0 damage")
             elif eval(spell.hitStat) != 0:
                 if damage > 0:
                     print(str(math.ceil(damage)) + " damage")
                     victim.HP -= math.ceil(damage)
+                else:
+                    if eval(spell.dmgStat) > 0: print("0 damage")
             for each in caster.onHit:
                 exec(each)
             for each in victim.onHurt:
@@ -82,8 +90,7 @@ def calcHit(attackerHit: int, victimDodge: int):
     else: return False
 
 # causes a combat to initate between two entities
-def doCombat(player: data.Entity, enemy: data.Entity):
-    # debug text to ensure stat preservation
+def doCombat(player: data.Entity, enemy: str):
     enemy = copy.copy(data.monsters[enemy])
     print("a " + enemy.name + " appeared!")
     while (player.HP > 0 and enemy.HP > 0):
@@ -188,32 +195,31 @@ def doCombat(player: data.Entity, enemy: data.Entity):
             player.removeStatus(each, True)
         print("")
         print("victory!")
-        # DEBUG LINES
-        if player.MaxHP != player.base_HP: print(f"value diff: {player.MaxHP-player.base_HP}"); raise ValueError("max hp diff")
-        if player.MaxMP != player.base_MP: print(f"value diff: {player.MaxMP-player.base_MP}"); raise ValueError("max mp diff")
-        if player.STR != player.base_STR: print(f"value diff: {player.STR-player.base_STR}"); raise ValueError("str diff")
-        if player.DEX != player.base_DEX: print(f"value diff: {player.DEX-player.base_DEX}"); raise ValueError("dex diff")
-        if player.DEF != player.base_DEF: print(f"value diff: {player.DEF-player.base_DEF}"); raise ValueError("def diff")
-        if player.AGI != player.base_AGI: print(f"value diff: {player.AGI-player.base_AGI}"); raise ValueError("agi diff")
+        # insurance against stat bugs
+        if player.MaxHP != player.base_HP: print(f"value diff: {player.MaxHP-player.base_HP}"); player.MaxHP = player.base_HP
+        if player.MaxMP != player.base_MP: print(f"value diff: {player.MaxMP-player.base_MP}"); player.MaxMP = player.base_MP
+        if player.STR != player.base_STR: print(f"value diff: {player.STR-player.base_STR}"); player.STR = player.base_STR
+        if player.DEX != player.base_DEX: print(f"value diff: {player.DEX-player.base_DEX}"); player.DEX = player.base_DEX
+        if player.DEF != player.base_DEF: print(f"value diff: {player.DEF-player.base_DEF}"); player.DEF = player.base_DEF
+        if player.AGI != player.base_AGI: print(f"value diff: {player.AGI-player.base_AGI}"); player.AGI = player.base_AGI
         # give the player xp points
-        xpGain = round(enemy.MaxHP / 2 * random.uniform(1, 1.4))
-        print("you gained " + str(xpGain) + " xp")
+        xpGain = max(min(math.ceil(random.normalvariate(enemy.MaxHP, enemy.MaxHP / 10)), enemy.MaxHP), 1)
+        print(" + " + str(xpGain) + " xp")
         player.XP += xpGain
-        del xpGain
+        goldAmount = math.floor(max(random.normalvariate(enemy.MaxHP / 2, enemy.MaxHP / 15), 0))
+        if goldAmount > 0:
+            print(" + " + str(goldAmount) + " gold")
+            player.gold += goldAmount
         # enemy has a chance to drop equipment
         # do the same with consumables
-        dropchance = math.floor(max(random.normalvariate(.4, 1), 0))
+        dropchance = math.floor(max(random.normalvariate(.6, 1), 0))
         itemDropchance = math.floor(max(random.normalvariate(1, 1), 0))
-        goldAmount = math.floor(max(random.normalvariate(enemy.MaxHP / 2, enemy.MaxHP / 15), 0))
         numEquipped = 0
         for each in player.equipped.values():
             if each != None:
                 numEquipped += 1
-        if dropchance < 1 and numEquipped <= 1: dropchance = 1
-        if dropchance > 0 or itemDropchance > 0 or goldAmount > 0: print("\nhere's what you found:\n")
-        if goldAmount > 0:
-            print(" + " + str(goldAmount) + " gold")
-            player.gold += goldAmount
+        if dropchance < 1 and numEquipped <= 2: dropchance = 1
+        if dropchance > 0 or itemDropchance > 0: print("\nyou also found:\n")
         if dropchance > 0:
             for _ in range(dropchance):
                 dropped = enemy.generateEquip(player)
@@ -247,29 +253,24 @@ def doCombat(player: data.Entity, enemy: data.Entity):
             player.base_AGI += 1
             chosen = helpers.verify("pick a stat to increase [HP, MP, STR, DEX, DEF, AGI]\n> ", ["HP", "MP", "STR", "DEX", "DEF", "AGI"])
             chosen = chosen.upper()
+            levelScaling = player.level // 2
             if chosen == "HP":
-                player.MaxHP += 3
-                player.base_HP += 3
-                player.HP = player.MaxHP
-                print("max HP increased by 3")
-                print("HP fully restored!")
+                player.MaxHP += 3 * levelScaling
+                player.base_HP += 3 * levelScaling
+                print(f"max HP increased by {3 * levelScaling}")
             elif chosen == "MP":
-                player.MaxMP += 2
-                player.base_MP += 2
-                player.MP = player.MaxMP
-                print("max MP increased by 2")
-                print("MP fully restored!")
+                player.MaxMP += 2 * levelScaling
+                player.base_MP += 2 * levelScaling
+                print(f"max MP increased by {2 * levelScaling}")
             else:
-                exec(f"player.{chosen} += 1")
-                exec(f"player.base_{chosen} += 1")
-                print(f"{chosen} increased by 1")
+                exec(f"player.{chosen} += {levelScaling}")
+                exec(f"player.base_{chosen} += {levelScaling}")
+                print(f"{chosen} increased by {levelScaling}")
             player.XP -= player.MaxXP
             player.MaxXP = round(player.MaxXP * 1.5)
             player.level += 1
         print("")  
     else:
         print("you were slain...")
-        end = None
-        while (end != "quit"):
-            end = input("type 'quit' to quit the app\n> ")        
+        end = helpers.verify("type /quit to exit the game\n> ", ["/quit"])      
         quit()

@@ -98,12 +98,13 @@ def doShop(player: data.Entity):
     for each in data.items.values():
         if each.minLevel <= player.level + 3:
             cost = math.ceil(((each.minLevel**1.3) / (player.level)) * max(min(round(random.normalvariate(12.5,1)), 15), 10) + max(min(round(random.normalvariate(0,2)), 5), -5))
+            if cost < 1: cost = 1
             stock.append(Buyable(each, cost))
             stockNames.append(each.name)
     inquire = '\n"oh hi!" they say. "how can i help ya?" [buy, sell, leave]\n> '
     buyInquire = '\n"...what do you want to buy?" or type back to go back\n> '
     sellInquire = '\n"what exactly do ya wanna sell?" or back to go back\n> '
-    armorCost = round(player.level * 20 * max(min(round(random.normalvariate(12.5, 2)), 15), 10))
+    armorCost = round(player.level * 15 * max(min(round(random.normalvariate(12.5, 1)), 15), 10))
     print('a little kobold traveling merchant waves to you, setting their massive backpack down')
     chosen = None
     while chosen != "leave" and chosen != "l":
@@ -289,7 +290,7 @@ def spellTomeEvent(player: data.Entity):
     chosen = helpers.verify("what will you do? [read, leave]\n> ", ["read", "leave", "r", "l"])
     if chosen in ["read", "r"]:
         read = True
-        availableSpells = ["bolt volley", "bunny", "slow", "nuke"]
+        availableSpells = ["bolt volley", "bunny", "slow", "flame"]
         for each in player.spells:
             if each in availableSpells:
                 availableSpells.remove(each)

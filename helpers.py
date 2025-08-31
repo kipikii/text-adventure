@@ -1,4 +1,4 @@
-import random, data
+import random, data, sys, os
 from data import player
 
 def verify(question:str, allowed:list):
@@ -21,6 +21,7 @@ def verify(question:str, allowed:list):
                 print("/spell <spellName> - gives you information regarding the spell provided")
                 print("/item <itemName> - gives you information regarding the item provided")
                 print("/credits - the beautiful people who worked on this game")
+                print("/restart - restarts the game (may not work on some systems)")
                 print("/quit - quits the game")
                 print("/patchnotes - shows the patch notes")
             elif chosen == "/stats":
@@ -35,6 +36,8 @@ def verify(question:str, allowed:list):
                 print("DEX: " + str(player.DEX))
                 print("DEF: " + str(player.DEF))
                 print("AGI: " + str(player.AGI))
+                print("")
+                print("statuses: " + (", ".join(player.statuses) if player.statuses else "none"))
             elif chosen == "/patchnotes":
                 print("patch notes:")
                 print("v1.0 - initial release")
@@ -49,7 +52,7 @@ def verify(question:str, allowed:list):
                     if val is None:
                         print(f"{eachKey}: none")
                         continue
-                    print(f"{eachKey}: {val.HP} HP, {val.MP} MP, {val.STR} STR, {val.DEX} DEX, {val.DEF} DEF, {val.AGI} AGI")
+                    print(f"{eachKey}: {val.name} [{val.HP} HP, {val.MP} MP, {val.STR} STR, {val.DEX} DEX, {val.DEF} DEF, {val.AGI} AGI]")
                 print("\nyour items:")
                 if not player.inventory:
                     print("none")
@@ -86,6 +89,15 @@ def verify(question:str, allowed:list):
                     print(f"\n{itemName.capitalize()}:\n- {data.items[itemName].description}\n")
                 else:
                     print("invalid item name.")
+            elif "/restart" in chosen:
+                print('restarting...')
+                try:
+                    python = sys.executable
+                    script = os.path.abspath(os.path.join(os.path.dirname(__file__), "main.py"))
+                    os.execv(python, [python, script])
+                except:
+                    print("unable to restart, please restart the app manually")
+                    quit()
             else:
                 print("invalid command. to see all valid commands, do /help")
             print("~~~~~~~~~~")
