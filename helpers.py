@@ -42,6 +42,7 @@ def verify(question:str, allowed:list):
                 print("patch notes:")
                 print("v1.0 - initial release")
                 print("v1.1 - added a working shop and a working /patchnotes command")
+                print("v1.2 - added events, blessings, and a ton of debugging")
             elif chosen == "/quit":
                 print("bye!")
                 quit()
