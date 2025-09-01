@@ -207,7 +207,7 @@ class Entity:
 
         self.HP += armor.HP
         self.MaxHP += armor.HP
-        self.HP += armor.MP
+        self.MP += armor.MP
         self.MaxMP += armor.MP
         self.STR += armor.STR
         self.DEX += armor.DEX
@@ -228,28 +228,24 @@ class Entity:
         self.onHit += armor.onHit
         self.onHurt += armor.onHurt
 
-        print(f"\nHP: {'+' if armor.HP > 0 else ''}{self.MaxHP-prevMaxHP}")
-        print(f"MP: {'+' if armor.MP > 0 else ''}{self.MaxMP-prevMaxMP}")
-        print(f"STR: {'+' if armor.STR > 0 else ''}{self.STR-prevSTR}")
-        print(f"DEX: {'+' if armor.DEX > 0 else ''}{self.DEX-prevDEX}")
-        print(f"DEF: {'+' if armor.DEF > 0 else ''}{self.DEF-prevDEF}")
-        print(f"AGI: {'+' if armor.AGI > 0 else ''}{self.AGI-prevAGI}\n")
+        print(f"\nHP: {'+' if self.MaxHP-prevMaxHP > 0 else ''}{self.MaxHP-prevMaxHP}")
+        print(f"MP: {'+' if self.MaxMP-prevMaxMP > 0 else ''}{self.MaxMP-prevMaxMP}")
+        print(f"STR: {'+' if self.STR-prevSTR > 0 else ''}{self.STR-prevSTR}")
+        print(f"DEX: {'+' if self.DEX-prevDEX > 0 else ''}{self.DEX-prevDEX}")
+        print(f"DEF: {'+' if self.DEF-prevDEF > 0 else ''}{self.DEF-prevDEF}")
+        print(f"AGI: {'+' if self.AGI-prevAGI > 0 else ''}{self.AGI-prevAGI}\n")
 
         if self.HP > self.MaxHP: self.HP = self.MaxHP
         if self.MaxHP < 0: print("warning: your max hp is less than 0! increase your max hp and heal, or you'll die after your next turn")
         if self.HP < 0: print("warning: your hp is less than 0! heal before you go into your next fight, or you'll die after your next turn")
 
     def unequip(self, slot:str):
-        subtract = lambda x, y: x - y
-        def diff(input1, input2):
-            return str(subtract(input1, input2))
-
-        savedMaxHP = self.MaxHP
-        savedMaxMP = self.MaxMP
-        savedSTR = self.STR
-        savedDEX = self.DEX
-        savedDEF = self.DEF
-        savedAGI = self.AGI
+        prevMaxHP = self.MaxHP
+        prevMaxMP = self.MaxMP
+        prevSTR = self.STR
+        prevDEX = self.DEX
+        prevDEF = self.DEF
+        prevAGI = self.AGI
 
         armor = self.equipped[slot]
 
@@ -260,7 +256,7 @@ class Entity:
         self.STR -= armor.STR
         self.DEX -= armor.DEX
         self.DEF -= armor.DEF
-        self.DEF -= armor.AGI
+        self.AGI -= armor.AGI
 
         # base stats for stability
         self.base_HP -= armor.HP
@@ -274,20 +270,19 @@ class Entity:
             self.onTurnStart.remove(code)
         for code in armor.onAttack:
             self.onAttack.remove(code)
-        for code in armor.onTurnStart:
+        for code in armor.onCast:
             self.onCast.remove(code)
         for code in armor.onHit:
             self.onHit.remove(code)
         for code in armor.onHurt:
             self.onHurt.remove(code)
 
-        print(f"\nHP: {"+" if armor.HP > 0 else ""}" + diff(self.MaxHP, savedMaxHP))
-        print(f"MP: {"+" if armor.MP > 0 else ""}" + diff(self.MaxMP, savedMaxMP))
-        print(f"STR: {"+" if armor.STR > 0 else ""}" + diff(self.STR,savedSTR))
-        print(f"DEX: {"+" if armor.DEX > 0 else ""}" + diff(self.DEX,savedDEX))
-        print(f"DEF: {"+" if armor.DEF > 0 else ""}" + diff(self.DEF,savedDEF))
-        print(f"AGI: {"+" if armor.AGI > 0 else ""}" + diff(self.AGI,savedAGI))
-        print("")
+        print(f"\nHP: {'+' if self.MaxHP-prevMaxHP > 0 else ''}{self.MaxHP-prevMaxHP}")
+        print(f"MP: {'+' if self.MaxMP-prevMaxMP > 0 else ''}{self.MaxMP-prevMaxMP}")
+        print(f"STR: {'+' if self.STR-prevSTR > 0 else ''}{self.STR-prevSTR}")
+        print(f"DEX: {'+' if self.DEX-prevDEX > 0 else ''}{self.DEX-prevDEX}")
+        print(f"DEF: {'+' if self.DEF-prevDEF > 0 else ''}{self.DEF-prevDEF}")
+        print(f"AGI: {'+' if self.AGI-prevAGI > 0 else ''}{self.AGI-prevAGI}\n")
 
         if self.HP > self.MaxHP: self.HP = self.MaxHP
         if self.MaxHP < 0: print("warning: your max hp is less than 0! you will die after your next turn if you don't increase your max hp and rest")
@@ -495,18 +490,21 @@ quirks = {
 
 blessings = {
     # on turn start
-    "enraged": Blessing("enraged", """self.onTurnStart.append("applyStatus('STR up')")""", ), # "player." / "enemy." will be concat. with string before execution
-    "focused": Blessing("focused", """self.onTurnStart.append("applyStatus('DEX up')")"""),
-    "fortified": Blessing("fortified", """self.onTurnStart.append("applyStatus('DEF up')")"""),
-    "nimble": Blessing("nimble", """self.onTurnStart.append("applyStatus('AGI up')")"""),
+    "enraged": Blessing("enraged", """self.onTurnStart.append("self.applyStatus('STR up')")""", ), # "player." / "enemy." will be concat. with string before execution
+    "focused": Blessing("focused", """self.onTurnStart.append("self.applyStatus('DEX up')")"""),
+    "fortified": Blessing("fortified", """self.onTurnStart.append("self.applyStatus('DEF up')")"""),
+    "nimble": Blessing("nimble", """self.onTurnStart.append("self.applyStatus('AGI up')")"""),
     "saboteur": Blessing("saboteur", ""), # multicast debuffs
     "supporting": Blessing("supporting", ""), # multicast buffs
-    "regenerative": Blessing("regenerative", """self.onTurnStart.append('self.HP += math.ceil(self.MaxHP / 20)')
-                             if self.HP > self.MaxHP: self.HP = self.MaxHP
-                             if self.name == 'you':
-                                print('you healed ' + str(math.ceil(self.MaxHP / 20)) + ' HP')")
-                             else:
-                                print('the ' + self.name + ' healed ' + str(math.ceil(self.MaxHP / 20)) + ' HP')")""")
+    "regenerative": Blessing("regenerative", """
+self.onTurnStart.append('''if self.HP < self.MaxHP:
+    self.HP += math.ceil(self.MaxHP / 30)
+    if self.HP > self.MaxHP: self.HP = self.MaxHP
+    if self.name == 'you':
+        print('you healed ' + str(math.ceil(self.MaxHP / 30)) + ' HP')
+    else:
+        print('the ' + self.name + ' healed ' + str(math.ceil(self.MaxHP / 30)) + ' HP')''')
+""")
 }
 
 statuses = {

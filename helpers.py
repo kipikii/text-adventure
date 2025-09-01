@@ -1,4 +1,4 @@
-import random, data, sys, os
+import random, data, sys, os, time
 from data import player
 
 def verify(question:str, allowed:list):
@@ -37,14 +37,16 @@ def verify(question:str, allowed:list):
                 print("DEF: " + str(player.DEF))
                 print("AGI: " + str(player.AGI))
                 print("")
-                print("statuses: " + (", ".join(player.statuses) if player.statuses else "none"))
+                print("statuses: " + (", ".join([each.name for each in player.status]) if player.status else "none"))
             elif chosen == "/patchnotes":
                 print("patch notes:")
                 print("v1.0 - initial release")
                 print("v1.1 - added a working shop and a working /patchnotes command")
                 print("v1.2 - added events, blessings, and a ton of debugging")
+                print("v1.2.1 - various bug fixes")
             elif chosen == "/quit":
                 print("bye!")
+                time.sleep(2)
                 quit()
             elif chosen == "/inventory" or chosen == "/inv":
                 print(f"your gold: {player.gold}")

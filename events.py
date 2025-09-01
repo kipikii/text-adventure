@@ -50,7 +50,10 @@ def restSite(player: data.Entity):
                 player.equip(player.heldarmors.get(select.name), select.slot)
                 player.heldarmors.pop(select.name)
         elif chosen in ["unequip", "u"]:
-            for key, value in player.equipped.items():
+            for key, val in player.equipped.items():
+                if val is None:
+                    print(f"{key}: none")
+                    continue
                 print(f"{key}: {val.name} [[{val.HP} HP, {val.MP} MP, {val.STR} STR, {val.DEX} DEX, {val.DEF} DEF, {val.AGI} AGI]]")
             select = helpers.verify("\nwhat slot would you like to unequip? type back to go back [weapon, helmet, chestplate, boots, charm] \n> ", ["weapon", "helmet", 'chestplate', 'boots', 'charm', 'back'])
             if select == "back":                 

@@ -93,10 +93,12 @@ def calcHit(attackerHit: int, victimDodge: int):
 def doCombat(player: data.Entity, enemy: str):
     enemy = copy.copy(data.monsters[enemy])
     print("a " + enemy.name + " appeared!")
+    playerStartTurnProc = False
     while (player.HP > 0 and enemy.HP > 0):
-        for each in player.onTurnStart:
-            each = "data.player." + each
-            exec(each)
+        if not playerStartTurnProc:
+            for each in player.onTurnStart:
+                exec(each, globals(), {"self": player})
+        playerStartTurnProc = True
         print("[Your HP: " + str(player.HP) + " / " + str(player.MaxHP) + "] [Your MP: " + str(player.MP)+ " / " + str(player.MaxMP) + "]")
         chosen = helpers.verify("what would you like to do? [attack, spell, item, pass]\n> ", ["attack", "spell", "skill", "item", "pass", "a", "s", "i", "p"])
         print("")
@@ -105,7 +107,7 @@ def doCombat(player: data.Entity, enemy: str):
             castSpell("attack", player, enemy)
             # proc on attack abilities
             for each in player.onAttack:
-                exec(each)
+                exec(each, globals(), {"self": player})
         # player casts spell
         elif chosen in ["spell", "skill", "s"]:
             # list player's spells
@@ -134,7 +136,7 @@ def doCombat(player: data.Entity, enemy: str):
                     castSpell(chosen, player, enemy)
                     # proc on cast abilities
                     for each in player.onCast:
-                        exec(each)
+                        exec(each, globals(), {"self": player})
                 else:
                     # player acts again 
                     print("not enough mana!")
@@ -167,6 +169,7 @@ def doCombat(player: data.Entity, enemy: str):
                 if player.MP > player.MaxMP: player.MP = player.MaxMP
         elif chosen == "pass" or chosen == "p":
             print("you wait")    
+        playerStartTurnProc = False
         # proc all of the player's status effects
         for each in player.status:
             player.tickStatus(each, enemy.HP > 0)
@@ -178,13 +181,13 @@ def doCombat(player: data.Entity, enemy: str):
             # proc enemy's turn start abilities
             for each in enemy.onTurnStart:
                 each = "enemy." + each
-                exec(each)
+                exec(each, globals(), {"self": enemy})
             print("")
             # enemy casts a random spell from their spell list
             castSpell(random.choice(enemy.spells), enemy, player)
             # proc enemy's on attack abilities
             for each in enemy.onAttack:
-                exec(each)
+                exec(each, globals(), {"self": enemy})
             # proc all of its status effects
             for each in enemy.status:
                 enemy.tickStatus(each)
@@ -253,7 +256,7 @@ def doCombat(player: data.Entity, enemy: str):
             player.base_AGI += 1
             chosen = helpers.verify("pick a stat to increase [HP, MP, STR, DEX, DEF, AGI]\n> ", ["HP", "MP", "STR", "DEX", "DEF", "AGI"])
             chosen = chosen.upper()
-            levelScaling = player.level // 2
+            levelScaling = math.ceil(player.level / 2)
             if chosen == "HP":
                 player.MaxHP += 3 * levelScaling
                 player.base_HP += 3 * levelScaling

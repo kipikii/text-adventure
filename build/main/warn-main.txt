@@ -22,6 +22,5 @@ missing module named posix - imported by os (conditional, optional), posixpath (
 missing module named resource - imported by posix (top-level)
 missing module named grp - imported by shutil (delayed, optional), tarfile (optional), pathlib (delayed, optional), subprocess (delayed, conditional, optional)
 missing module named pwd - imported by posixpath (delayed, conditional, optional), shutil (delayed, optional), tarfile (optional), pathlib (delayed, optional), subprocess (delayed, conditional, optional)
-invalid module named data - imported by helpers (top-level), events (top-level), combat (top-level), C:\Users\epic1\OneDrive\Documents\coding\text-adventure\main.py (top-level)
 missing module named _posixsubprocess - imported by subprocess (conditional)
 missing module named fcntl - imported by subprocess (optional)
