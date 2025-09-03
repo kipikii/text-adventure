@@ -185,6 +185,7 @@ def doCombat(player: data.Entity, enemy: str):
         if enemy.HP > 0:
             if turnCount > 10: 
                 print("the " + enemy.name + " is enraged!")
+                print("the " + enemy.name + " got stronger!")
                 enemy.STR *= 1.3
                 enemy.DEX *= 1.3
                 enemy.DEF *= 1.3

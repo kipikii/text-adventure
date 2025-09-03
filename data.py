@@ -568,7 +568,7 @@ monsters = {
     "warg": Entity('warg', 150, math.inf, 10, 20, 10, 10, ["bite", "tricut"], {}, [], [blessings["enraged"]]),
 
     # what the hell
-    "reaper": Entity("reaper", 666, math.inf, 30, 200, 15, 20, ["doom", "bunny", "evasion", "trip"], ),
+    "reaper": Entity("reaper", 666, math.inf, 30, 200, 15, 20, ["doom", "bunny", "evasion", "trip"], blessings=[blessings["regenerative"]]),
     "minor deity": Entity("minor deity", 7777, math.inf, 100, 1000, 50, 50, ["nuke"]),
 
     # other
