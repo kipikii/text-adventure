@@ -9,7 +9,8 @@ from data import player
 # clear funky terminal directory texts
 os.system('cls' if os.name == 'nt' else 'clear')
 
-input("many helpful commands are available at any time by using /help (press enter to continue)\n> ")
+input("many helpful commands are available at any time by using /help (press enter to continue) ")
+os.system('cls' if os.name == 'nt' else 'clear')
 events.doShop(player)
 combat.doCombat(player, "rat")
 combat.doCombat(player, "wolf")

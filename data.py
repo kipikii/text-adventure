@@ -504,7 +504,8 @@ self.onTurnStart.append('''if self.HP < self.MaxHP:
         print('you healed ' + str(math.ceil(self.MaxHP / 30)) + ' HP')
     else:
         print('the ' + self.name + ' healed ' + str(math.ceil(self.MaxHP / 30)) + ' HP')''')
-""")
+"""),
+    "frenzied": Blessing("frenzied", "") # add a proc to multi-proc attacks
 }
 
 statuses = {

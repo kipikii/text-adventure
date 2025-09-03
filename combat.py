@@ -21,6 +21,8 @@ def castSpell(spell:data.Spell, caster:data.Entity, victim:data.Entity):
             spell.procs *= 2
         if each == "saboteur" and "debuff" in spell.tags:
             spell.procs *= 2
+        if each == "frenzied" and spell.procs > 1:
+            spell.procs += 1
     for each in range(spell.procs):
         if bypassHit or calcHit(eval(spell.hitStat), victim.AGI):
             spellHit = True
@@ -94,8 +96,11 @@ def doCombat(player: data.Entity, enemy: str):
     enemy = copy.copy(data.monsters[enemy])
     print("a " + enemy.name + " appeared!")
     playerStartTurnProc = False
+    turnCount = 0
     while (player.HP > 0 and enemy.HP > 0):
         if not playerStartTurnProc:
+            turnCount += 1
+            print(f"\n--- turn {turnCount} ---")
             for each in player.onTurnStart:
                 exec(each, globals(), {"self": player})
         playerStartTurnProc = True
@@ -178,6 +183,12 @@ def doCombat(player: data.Entity, enemy: str):
         if player.MP > player.MaxMP: player.MP = player.MaxMP
         # if the enemy is alive:    
         if enemy.HP > 0:
+            if turnCount > 10: 
+                print("the " + enemy.name + " is enraged!")
+                enemy.STR *= 1.3
+                enemy.DEX *= 1.3
+                enemy.DEF *= 1.3
+                enemy.AGI *= 1.3
             # proc enemy's turn start abilities
             for each in enemy.onTurnStart:
                 each = "enemy." + each

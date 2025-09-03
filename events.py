@@ -107,7 +107,7 @@ def doShop(player: data.Entity):
     inquire = '\n"oh hi!" they say. "how can i help ya?" [buy, sell, leave]\n> '
     buyInquire = '\n"...what do you want to buy?" or type back to go back\n> '
     sellInquire = '\n"what exactly do ya wanna sell?" or back to go back\n> '
-    armorCost = round(player.level * 15 * max(min(round(random.normalvariate(12.5, 1)), 15), 10))
+    armorCost = round(player.level * 10 * max(min(round(random.normalvariate(12.5, 1)), 15), 10))
     print('a little kobold traveling merchant waves to you, setting their massive backpack down')
     chosen = None
     while chosen != "leave" and chosen != "l":
@@ -196,9 +196,9 @@ def doShop(player: data.Entity):
                         playerSellList.append(Buyable(item, itemSellValue))
                         allowed.append(item.name)
                         index += 1
-                        if not player.inventory:
-                            print("looks like that's everything! hope you didn't need any of those.")
-                            break
+                    if not player.inventory:
+                        print("looks like that's everything! hope you didn't need any of those.")
+                        break
                     for each in range(len(allowed)): allowed.append(str(each))
                     allowed.append('back')
                     item = helpers.verify(sellInquire, allowed)
@@ -237,9 +237,9 @@ def doShop(player: data.Entity):
                         playerSellList.append(Buyable(armor, itemSellValue))
                         allowed.append(item)
                         index += 1
-                        if not player.heldarmors:
-                            print("looks like that's it! hope you didn't need any of those.")
-                            break
+                    if not player.heldarmors:
+                        print("looks like that's it! hope you didn't need any of those.")
+                        break
                     for each in range(len(allowed)): allowed.append(str(each))
                     allowed.append('back')
                     item = helpers.verify(sellInquire, allowed)
@@ -376,13 +376,14 @@ def cubTrapEvent(player: data.Entity):
         print("you carefully free the cub from the trap, exerting yourself in the process")
         print("it looks at you with grateful eyes before running off into the woods")
         print("the forest itself seems to thank you as energy surges through you")
-        player.HP -= math.ceil(player.MaxHP * 0.1)
-        print(" - " + str(math.ceil(player.MaxHP * 0.1)) + " HP")
+        player.HP -= math.ceil(player.MaxHP * 0.3)
+        print(" - " + str(math.ceil(player.MaxHP * 0.3)) + " HP")
         if "crunch" not in player.spells:
             print("you learned the spell 'crunch'!")
             player.spells += ["crunch"]
         else:
             player.HP += math.floor(player.MaxHP * 0.2)
+            print(" + " + str(math.floor(player.MaxHP * 0.2)) + " Max HP")
     elif chosen in ["end misery", "e"]:
         print("it's a quick and painless death. life in the wild is cruel")
         print("you got stronger, but at what cost?")
